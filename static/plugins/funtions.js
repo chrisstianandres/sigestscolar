@@ -122,23 +122,27 @@ function save_estado(title, url, content, parametros, callback) {
                 size: 'small',
                 centerVertical: true,
                 closeButton: false,
-            });
-            $.ajax({
-                dataType: 'JSON',
-                type: 'POST',
-                url: url,
-                data: parametros,
-            }).done(function (data) {
-                if (!data.hasOwnProperty('error')) {
-                        dialog.modal('hide');
-                        callback(data);
-                    return false;
-                }
-                menssaje_error(data.error, data.content, 'fa fa-times-circle');
             })
-                .fail(function (jqXHR, textStatus, errorThrown) {
-                    alert(textStatus + ': ' + errorThrown);
-                });
+                 .on('shown.bs.modal', function(){
+                     $.ajax({
+                         dataType: 'JSON',
+                         type: 'POST',
+                         url: url,
+                         data: parametros,
+                     }).done(function (data) {
+                         dialog.modal('hide');
+                         if (!data.hasOwnProperty('error')) {
+                             callback(data);
+                             return false;
+                         }
+                         menssaje_error(data.error, data.content, 'fa fa-times-circle');
+                     })
+                         .fail(function (jqXHR, textStatus, errorThrown) {
+                             dialog.modal('hide');
+                             alert(textStatus + ': ' + errorThrown);
+                         });
+                 });
+
         }
     })
 }
@@ -280,25 +284,27 @@ function save_with_ajax2(title, url, content, parametros, callback) {
                 size: 'small',
                 centerVertical: true,
                 closeButton: false,
-            });
-            $.ajax({
-                dataType: 'JSON',
-                type: 'POST',
-                url: url,
-                processData: false,
-                contentType: false,
-                data: parametros,
-            }).done(function (data) {
-                if (!data.hasOwnProperty('error')) {
+            })
+                .on('shown.bs.modal', function(){
+                    $.ajax({
+                        dataType: 'JSON',
+                        type: 'POST',
+                        url: url,
+                        processData: false,
+                        contentType: false,
+                        data: parametros,
+                    }).done(function (data) {
+                         dialog.modal('hide');
+                        if (!data.hasOwnProperty('error')) {
+                            callback(data);
+                            return false;
+                        }
+                        menssaje_error_form('Error', data.error, 'fa fa-ban');
+                    }).fail(function (jqXHR, textStatus, errorThrown) {
                         dialog.modal('hide');
-                        callback(data);
-                    return false;
-                }
-                menssaje_error_form('Error', data.error, 'fa fa-ban');
-
-            }).fail(function (jqXHR, textStatus, errorThrown) {
-                alert(textStatus + ': ' + errorThrown);
-            });
+                        alert(textStatus + ': ' + errorThrown);
+                    });
+                });
         }
     })
 }
@@ -316,10 +322,10 @@ function reset_form(formulario) {
 function menssaje_error_form(title, content, icon, callback) {
     var html = '<ul>';
     if(typeof content==='string'){
-         html += '<li>' + content + '</li>'
+         html += key + ': ' + value+'<br>';
     }else {
         $.each(content, function (key, value) {
-            html += '<li>' + key + ': ' + value + '</li>'
+            html += key + ': ' + value+'<br>';
         });
     }
     html += '</ul>';
