@@ -24,4 +24,5 @@ urlpatterns = [
     path('dashborad/', login_required(backEnd.DashboardView.as_view()), name='dashborad'),
     path('change_profile/<int:pk>', login_required(backEnd.UserChangeGroup.as_view()), name='changeprofile'),
     path('cursos/', include('apps.curso.urls', namespace='cursos')),
+    path('paralelos/', include('apps.paralelo.urls', namespace='paralelos')),
 ]

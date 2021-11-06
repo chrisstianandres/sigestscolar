@@ -39,8 +39,7 @@ class Listview(TemplateView):
                     data['error'] = form.errors
             elif action == 'delete':
                 objeto = self.model.objects.get(pk=request.POST['pk'])
-                objeto.status = False
-                objeto.save()
+                objeto.delete()
             else:
                 data['error'] = 'No ha seleccionado una opcion'
         except Exception as e:
@@ -91,7 +90,6 @@ class Listview(TemplateView):
         data['icono'] = 'fa fa-user-lock'
         data['boton'] = 'Guardar'
         data['titulo'] = 'Lista de Cursos'
-        data['nuevo'] = '/grupos/crear'
         data['titulo_tabla'] = 'Lista de Cursos'
         data['empresa'] = nombre_empresa()
         data['entidad'] = 'Cursos'
