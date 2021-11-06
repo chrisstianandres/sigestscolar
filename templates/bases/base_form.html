@@ -1,4 +1,5 @@
 {% extends 'bases/base.html' %}
+{% load static %}
 {% block content %}
     <section class="content">
       <div class="container-fluid">
@@ -6,20 +7,23 @@
           <div class="col-md-12">
             <div class="card card-primary">
               <div class="card-header">
-                <h3 class="card-title">{{ titulo }}</h3>
+                <h3 class="card-title"><i class="fa fa-plus"></i> {{ titulo_form }}</h3>
               </div>
               <!-- /.card-header -->
               <!-- form start -->
-              <form>
+              <form id="form">
                 <div class="card-body">
                   <div class="form-group">
+                      <input type="hidden" name="action" value="{{ action }}">
+                      <input type="hidden" name="pk" value="{{ pk }}">
                    {{form.as_p}}
                   </div>
                 </div>
                 <!-- /.card-body -->
 
                 <div class="card-footer">
-                  <button type="submit" class="btn btn-primary">Submit</button>
+                  <button type="submit" class="btn btn-primary">Guardar</button>
+                  <button type="button" class="btn btn-danger" onclick="window.location.href = {{ request.path }};">Cancelar</button>
                 </div>
               </form>
             </div>
@@ -30,4 +34,78 @@
         <!-- /.row -->
       </div><!-- /.container-fluid -->
     </section>
+{% endblock %}
+{% block extra_scripts %}
+   <script src="{% static 'adminlte/plugins/jquery-validation/jquery.validate.min.js'%}"></script>
+ <script>
+    $(function () {
+        $('[data-toggle="tooltip"]').tooltip();
+        $('#form').on('submit', function (e) {
+            e.preventDefault();
+            if ($(this).valid()){
+               var parametros = new FormData(this);
+            save_with_ajax2('Estas seguro?', window.location.pathname, 'Desea guardar esta informacion?',  parametros,
+                function (e) {
+                menssaje_ok('Todo correcto!', 'Informacion guardada corectamente!', 'success', function (e) {
+                    window.location.replace('{{ request.path }}');
+                })
+
+            })
+            }
+
+        });
+    })
+    </script>
+{% endblock %}
+{% block validate_form %}
+    <script>
+   $(function() {
+       validador();
+       $("#form").validate({
+           rules: {
+               nombre: {
+                   required: true,
+                   minlength: 3,
+                   maxlength: 50,
+                   lettersonly: true,
+               },
+               descripcion: {
+                   required: true,
+                   minlength: 5,
+                   maxlength: 50
+               },
+               {% block rules_form %}
+               {% endblock %}
+           },
+           messages: {
+               nombre: {
+                   required: "Por favor ingresa un nombre",
+                   minlength: "Debe ingresar al menos 3 letras",
+                   lettersonly: "Debe ingresar unicamente letras y espacios",
+                   maxlength: "La descripcion debe tener maximo 50 caracteres",
+               },
+               descripcion: {
+                   required: "Por favor ingresa una descripcion",
+                   minlength: "Ingresa al menos 5 letras",
+                   maxlength: "La descripcion debe tener maximo 50 caracteres",
+               },
+               {% block menssages_fom %}
+               {% endblock %}
+           },
+       });
+       $('input[name="nombre"]').keypress(function (e) {
+           if (e.which >= 48 && e.which <= 57) {
+               return false;
+           }
+       });
+       $('input[name="codigo"]')
+           .keypress(function (e) {
+               if (e.which !== 8 && e.which !== 0 && (e.which < 48 || e.which > 57)) {
+                   return false;
+               }
+           });//Para solo numeros;
+       {% block extra_validate %}
+       {% endblock %}
+   });
+    </script>
 {% endblock %}

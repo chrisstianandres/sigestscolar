@@ -1,0 +1,26 @@
+{% extends 'bases/base_form.html' %}
+{% block rules_form %}
+ codigo: {
+    required: true,
+    minlength: 5,
+    maxlength: 50
+    },
+    alias: {
+    required: true,
+    minlength: 5,
+    maxlength: 50
+    },
+{% endblock %}
+{% block menssages_fom %}
+    codigo: {
+    required: "Por favor ingresa un codigo unico",
+    minlength: "Ingresa al menos 5 caracteres",
+    maxlength: "El codigo unico debe tener maximo 50 caracteres",
+    },
+    alias: {
+    required: "Por favor ingresa un alias para el producto",
+    minlength: "Ingresa al menos 5 caracteres",
+    maxlength: "El alias unico debe tener maximo 50 caracteres",
+    },
+{% endblock %}
+

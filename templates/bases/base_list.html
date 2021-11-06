@@ -29,9 +29,8 @@
                       </form>
               </div>&nbsp;&nbsp;
                   <div class="form-group">
-                      <button href="{{ url_add }}" type="button" class="btn btn-block btn-primary btn-sm"
-                              {% if modal_form %}
-                              data-toggle="modal" data-target="#modal_form"{% endif %}
+                      <button {% if not modal_form %}onclick="window.location.href ={{ url_add }};" {% endif %}type="button" class="btn btn-block btn-primary btn-sm"
+                              {% if modal_form %} data-toggle="modal" data-target="#modal_form"{% endif %}
                               style="margin-right: 2px;"><i class="fa fa-plus-circle"></i> Agregar
                       </button>
                   </div>
@@ -116,7 +115,7 @@
                             <li class="page-item"><a class="page-link" href="?{% if search %}search={{ search }}&{% endif %}page={{ page_obj.next_page_number }}">&raquo;</a></li>
                         {% endif %}
                       {% else %}
-                        <li class="page-item"><a disabled="disabled">1</a></li>
+                        <li class="page-item active"><a class="page-link" disabled="disabled">1</a></li>
                       {% endif %} 
 
                 </ul>
@@ -189,6 +188,7 @@
             }
 
         });
+        {% if modal_form %}
         $('.editar').on('click', function (e) {
             e.preventDefault();
             var parametros = {'action': 'edit', 'pk': $(this).attr('pk')};
@@ -202,6 +202,11 @@
                 $('#modal_form').modal('show');
             });
         });
+        $('#modal_form').on('hidden.bs.modal', function () {
+            $('#titulo_form').html('<i class="fa fa-plus"></i> {{ titulo_form}}');
+            reset_form('#form');
+        });
+        {% endif %}
         $('.eliminar').on('click', function (e) {
             e.preventDefault();
             var parametros = {'action': 'delete', 'pk': $(this).attr('pk')};
@@ -211,10 +216,6 @@
                 })
             });
         });
-        $('#modal_form').on('hidden.bs.modal', function () {
-            $('#titulo_form').html('<i class="fa fa-plus"></i> {{ titulo_form}}');
-            reset_form('#form');
-        })
     })
     </script>
 {% endblock %}
@@ -234,7 +235,9 @@
                    required: true,
                    minlength: 5,
                    maxlength: 50
-               }
+               },
+               {% block rules_fom %}
+               {% endblock %}
            },
            messages: {
                nombre: {
@@ -248,9 +251,22 @@
                    minlength: "Ingresa al menos 5 letras",
                    maxlength: "La descripcion debe tener maximo 50 caracteres",
                },
+               {% block menssages_fom %}
+               {% endblock %}
            },
        });
    });
+   $('input[name="nombre"]').keypress(function (e) {
+       if (e.which >= 48 && e.which <= 57) {
+           return false;
+       }
+   });
+   $('input[name="codigo"]')
+       .keypress(function (e) {
+           if (e.which !== 8 && e.which !== 0 && (e.which < 48 || e.which > 57)) {
+               return false;
+           }
+       });//Para solo numeros;
     </script>
 
 {% endblock %}

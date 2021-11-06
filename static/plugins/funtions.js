@@ -322,7 +322,7 @@ function reset_form(formulario) {
 function menssaje_error_form(title, content, icon, callback) {
     var html = '<ul>';
     if(typeof content==='string'){
-         html += key + ': ' + value+'<br>';
+         html +=content;
     }else {
         $.each(content, function (key, value) {
             html += key + ': ' + value+'<br>';

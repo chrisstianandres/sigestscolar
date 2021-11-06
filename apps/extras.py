@@ -3,6 +3,11 @@ from datetime import datetime
 from django.db import models
 
 from sigestscolar.settings import ADMINISTRADOR_ID
+from cryptography.hazmat.primitives.ciphers.algorithms import AES as Algorithm
+from cryptography.hazmat.primitives.ciphers.modes import ECB as Mode
+from cryptography.hazmat.backends import default_backend
+from cryptography.hazmat.primitives.ciphers import Cipher
+from os import urandom
 
 
 class ModeloBase(models.Model):
@@ -34,3 +39,54 @@ def null_to_numeric(valor, decimales=None):
     if decimales:
         return round((valor if valor else 0), decimales)
     return valor if valor else 0
+
+
+class PrimaryKeyEncryptor:
+    def __init__(self, secret: str):
+        secret_bytes = bytes.fromhex(secret)
+
+        if len(secret_bytes) != 16:
+            raise ValueError('The secret for the PrimaryKeyEncryptor must be 16 bytes in hexadecimal format')
+
+        algorithm = Algorithm(secret_bytes)
+        mode = Mode()
+
+        self.cipher = Cipher(algorithm, mode, backend=default_backend())
+
+    @staticmethod
+    def generate_secret() -> str:
+        return urandom(16).hex()
+
+    def encrypt(self, primary_key: int) -> str:
+        primary_key_bytes = primary_key.to_bytes(8, byteorder='big')
+
+        encryptor = self.cipher.encryptor()
+
+        cipher_bytes = encryptor.update(primary_key_bytes * 2) + encryptor.finalize()
+
+        return cipher_bytes.hex()
+
+    def decrypt(self, encrypted_primary_key: str) -> int:
+        cipher_bytes = bytes.fromhex(encrypted_primary_key)
+
+        if len(cipher_bytes) != 16:
+            raise ValueError('The encrypted primary key must be 16 bytes in hexadecimal format')
+
+        decryptor = self.cipher.decryptor()
+
+        plain_bytes = decryptor.update(cipher_bytes) + decryptor.finalize()
+
+        if plain_bytes[:8] != plain_bytes[8:]:
+            raise ValueError('The encrypted primary key is invalid')
+
+        return int.from_bytes(plain_bytes[:8], byteorder='big')
+
+
+class Item:
+    def encoded_id(self, id):
+        import base64
+        return base64.b64encode(str(id))
+
+    def decode_id(self, id):
+        import base64
+        return base64.b64decode(id)

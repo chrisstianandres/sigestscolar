@@ -25,4 +25,6 @@ urlpatterns = [
     path('change_profile/<int:pk>', login_required(backEnd.UserChangeGroup.as_view()), name='changeprofile'),
     path('cursos/', include('apps.curso.urls', namespace='cursos')),
     path('paralelos/', include('apps.paralelo.urls', namespace='paralelos')),
+    path('materias/', include('apps.materia.urls', namespace='materias')),
+    path('producto/', include('apps.producto.urls', namespace='producto')),
 ]

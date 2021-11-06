@@ -4,13 +4,14 @@ from apps.extras import ModeloBase
 
 
 class Materia(ModeloBase):
-    identificacion = models.CharField(default='', max_length=30, verbose_name=u'Codigo')
+    identificacion = models.CharField(default='', max_length=30, verbose_name=u'Codigo', unique=True)
     alias = models.CharField(default='', blank=True, null=True, max_length=100, verbose_name=u'Alias')
-    nombre = models.CharField(default='', blank=True, null=True, max_length=30, verbose_name=u'Paralelo')
+    nombre = models.CharField(default='', blank=True, null=True, max_length=30, verbose_name=u'Nombre')
 
     def __str__(self):
-        return u'%s - %s - %s' % (
-        self.nombre_completo(), self.profesor_principal() if self.profesor_principal() else '', self.nombre)
+        return self.nombre
+        # return u'%s - %s - %s' % (
+        # self.nombre_completo(), self.profesor_principal() if self.profesor_principal() else '', self.nombre)
 
     class Meta:
         verbose_name = u"Materia"
@@ -563,9 +564,9 @@ class Materia(ModeloBase):
     def save(self, *args, **kwargs):
         self.identificacion = self.identificacion.upper().strip()
         self.alias = self.alias.upper().strip() if self.alias else ''
-        self.paralelo = self.paralelo.upper().strip() if self.paralelo else ''
-        if self.inicio < self.nivel.inicio:
-            self.inicio = self.nivel.inicio
-        if not self.id:
-            self.fechafinasistencias = self.fin
+        self.nombre = self.nombre.upper().strip() if self.nombre else ''
+        # if self.inicio < self.nivel.inicio:
+        #     self.inicio = self.nivel.inicio
+        # if not self.id:
+        #     self.fechafinasistencias = self.fin
         super(Materia, self).save(*args, **kwargs)
