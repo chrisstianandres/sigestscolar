@@ -15,7 +15,8 @@
         <td  class="dt-center">{{ elemento.descripcion }}</td>
         <td style="text-align:center; width: 10%"  class="dt-center">
             <a type="button" class="btn btn-warning btn-xs editar" pk="{{ elemento.pk }}" style="color: white"
-                    {% if not modal_form %} href="{{ request.path }}?action=edit&pk={{ elemento.encoded_id }}"{% endif %}><i class="fa fa-edit"></i></a>
+                    {% if not modal_form %}
+               href="{{ request.path }}?action=edit&pk={{ elemento.encoded_id }}"{% endif %}><i class="fa fa-edit"></i></a>
             <a type="button" class="btn btn-danger btn-xs eliminar" pk="{{ elemento.pk }}"><i class="fa fa-trash"></i></a>
         </td>
     </tr>

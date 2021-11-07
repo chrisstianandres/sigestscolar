@@ -49,6 +49,6 @@ class Inscripcion(ModeloBase):
         super(Inscripcion, self).save(*args, **kwargs)
 
 
-class CursoInscripcion(ModeloBase):
-    curso = models.ForeignKey(CursoParalelo, on_delete=models.PROTECT)
-    alumno = models.ForeignKey(Alumno, on_delete=models.PROTECT)
+# class CursoInscripcion(ModeloBase):
+#     curso = models.ForeignKey(CursoParalelo, on_delete=models.PROTECT)
+#     alumno = models.ForeignKey(Alumno, on_delete=models.PROTECT)

@@ -1,9 +1,11 @@
 from django.db import models
+from django.forms import model_to_dict
 
-from apps.extras import ModeloBase
+from apps.extras import ModeloBase, PrimaryKeyEncryptor
 from apps.materia.models import Materia
 from apps.paralelo.models import Paralelo
 from apps.periodo.models import PeriodoLectivo
+from sigestscolar.settings import SECRET_KEY_ENCRIPT
 
 
 class Curso(ModeloBase):
@@ -19,6 +21,10 @@ class Curso(ModeloBase):
         ordering = ['nombre']
         unique_together = ('nombre',)
 
+    def to_JSON(self):
+        item = model_to_dict(self)
+        return item
+
     def save(self, *args, **kwargs):
         self.nombre = self.nombre.upper().strip()
         super(Curso, self).save(*args, **kwargs)
@@ -29,8 +35,47 @@ class CursoParalelo(ModeloBase):
     paralelo = models.ForeignKey(Paralelo, on_delete=models.PROTECT)
     periodo = models.ForeignKey(PeriodoLectivo, on_delete=models.PROTECT)
 
+    def __str__(self):
+        return '{} - {}  {}'.format(self.periodo.nombre, self.curso.nombre, self.paralelo.nombre)
+
+    def to_JSON(self):
+        item = model_to_dict(self)
+        item['curso'] = self.curso.to_JSON()
+        return item
+
+    def tiene_inscripciones(self):
+        return self.inscripcion_set.all().exists()
+
+    def total_inscritos(self):
+        return self.inscripcion_set.all().count()
+
+    def total_materias(self):
+        return self.cursomateria_set.all().count()
+
+    def encoded_id(self):
+        return PrimaryKeyEncryptor(SECRET_KEY_ENCRIPT).encrypt(self.id)
+
+    class Meta:
+        verbose_name = u"Curso Paralelo"
+        verbose_name_plural = u"Cursos Paralelos"
+        ordering = ['periodo']
+
 
 class CursoMateria(ModeloBase):
     curso = models.ForeignKey(CursoParalelo, on_delete=models.PROTECT)
     materia = models.ForeignKey(Materia, on_delete=models.PROTECT)
+
+    def __str__(self):
+        return '{} - {} '.format(self.curso.curso.nombre, self.materia.nombre)
+
+    def to_JSON(self):
+        item = model_to_dict(self)
+        item['curso'] = self.curso.to_JSON()
+        item['materia'] = model_to_dict(self.materia)
+        return item
+
+    class Meta:
+        verbose_name = u"Curso Materia"
+        verbose_name_plural = u"Cursos Materias"
+        ordering = ['materia']
 

@@ -2,135 +2,160 @@
 {% load static %}
 {% block extra_head %}
     <link rel="stylesheet" href="{% static 'adminlte/plugins/daterangepicker/daterangepicker.css' %}">
-    <link rel="stylesheet" href="{% static 'adminlte/plugins/tempusdominus-bootstrap-4/css/tempusdominus-bootstrap-4.min.css' %}">
+    <link rel="stylesheet"
+          href="{% static 'adminlte/plugins/tempusdominus-bootstrap-4/css/tempusdominus-bootstrap-4.min.css' %}">
+    <link rel="stylesheet" href="{% static 'adminlte/plugins/select2/css/select2.min.css' %}">
+    <link rel="stylesheet" href="{% static 'adminlte/plugins/select2-bootstrap4-theme/select2-bootstrap4.min.css' %}">
+    <!-- DataTables -->
+    <link rel="stylesheet" href="{% static 'adminlte/plugins/datatables-bs4/css/dataTables.bootstrap4.min.css' %}">
+    <link rel="stylesheet"
+          href="{% static 'adminlte/plugins/datatables-responsive/css/responsive.bootstrap4.min.css' %}">
+    <link rel="stylesheet" href="{% static 'adminlte/plugins/datatables-buttons/css/buttons.bootstrap4.min.css' %}">
 {% endblock %}
 {% block content %}
     <section class="content">
-      <div class="container-fluid">
-        <div class="row">
-          <div class="col-md-12">
-            <div class="card">
-              <div class="card-header">
-                <h3 class="card-title"><b><i class="fa fa-list-alt"></i> {{titulo_tabla}}</b></h3>
-              </div>
-              <!-- /.card-header -->
-              <div class="card-body">
-              <div class="row float-right">
+        <div class="container-fluid">
+            <div class="row">
+                <div class="col-md-12">
+                    <div class="card">
+                        <div class="card-header">
+                            <h3 class="card-title"><b><i class="fa fa-list-alt"></i> {{ titulo_tabla }}</b></h3>
+                        </div>
+                        <!-- /.card-header -->
+                        <div class="card-body">
+                            <div class="row float-right">
 
-              <div class="form-group">
-                      <form action="{{ request.path }}">
-                          <div class="input-group">
-                              <input type="text" class="form-control input-sm" style="height: 10%" placeholder="Buscar...." autocomplete="off"
-                                     aria-label="Buscar..." aria-describedby="basic-addon2" name="search" value="{{ search }}">
-                              <div class="input-group-append">
-                                  <button class="btn btn-outline-success btn-sm" type="submit" data-toggle="tooltip" data-placement="bottom" title="Buscar..."><i class="fa fa-search"></i></button>
-                                  {% if search %}
-                                      <button class="btn btn-outline-danger btn-sm" type="button" data-toggle="tooltip" data-placement="bottom" title="Mostrar todos" onclick="window.location.href ='{{ request.path }}'"><i class="fas fa-redo-alt"></i></button>
-                                  {% endif %}
+                                <div class="form-group">
+                                    <form action="{{ request.path }}">
+                                        <div class="input-group">
+                                            <input type="text" class="form-control input-sm" style="height: 10%"
+                                                   placeholder="Buscar...." autocomplete="off"
+                                                   aria-label="Buscar..." aria-describedby="basic-addon2" name="search"
+                                                   value="{{ search }}">
+                                            <div class="input-group-append">
+                                                <button class="btn btn-outline-success btn-sm" type="submit"
+                                                        data-toggle="tooltip" data-placement="bottom" title="Buscar...">
+                                                    <i class="fa fa-search"></i></button>
+                                                {% if search %}
+                                                    <button class="btn btn-outline-danger btn-sm" type="button"
+                                                            data-toggle="tooltip" data-placement="bottom"
+                                                            title="Mostrar todos"
+                                                            onclick="window.location.href ='{{ request.path }}'"><i
+                                                            class="fas fa-redo-alt"></i></button>
+                                                {% endif %}
 
-                              </div>
-                          </div>
-                      </form>
-              </div>&nbsp;&nbsp;
-                  <div class="form-group">
-                      <button {% if not modal_form %}onclick="window.location.href ={{ url_add }};" {% endif %}type="button" class="btn btn-block btn-primary btn-sm"
-                              {% if modal_form %} data-toggle="modal" data-target="#modal_form"{% endif %}
-                              style="margin-right: 2px;"><i class="fa fa-plus-circle"></i> Agregar
-                      </button>
-                  </div>
-              </div>
-                <table class="table table-bordered">
-                  <thead>
-                    <tr>
-                        {% block header_tabla %}
-                            <th style="width: 10px">#</th>
-                            <th>Task</th>
-                            <th>Progress</th>
-                            <th style="width: 40px">Label</th>
-                        {% endblock %}
+                                            </div>
+                                        </div>
+                                    </form>
+                                </div>&nbsp;&nbsp;
+                                <div class="form-group">
+                                    <button {% if not modal_form %}onclick="window.location.href ={{ url_add }};" {% endif %}type="button"
+                                            class="btn btn-block btn-primary btn-sm"
+                                            {% if modal_form %} data-toggle="modal" data-target="#modal_form"{% endif %}
+                                            style="margin-right: 2px;"><i class="fa fa-plus-circle"></i> Agregar
+                                    </button>
+                                </div>
+                            </div>
+                            <table class="table table-bordered">
+                                <thead>
+                                <tr>
+                                    {% block header_tabla %}
+                                        <th style="width: 10px">#</th>
+                                        <th>Task</th>
+                                        <th>Progress</th>
+                                        <th style="width: 40px">Label</th>
+                                    {% endblock %}
 
-                    </tr>
-                  </thead>
-                  <tbody>
-                  {% block body_tabla %}
-                    <tr>
-                      <td>1.</td>
-                      <td>Update software</td>
-                      <td>
-                        <div class="progress progress-xs">
-                          <div class="progress-bar progress-bar-danger" style="width: 55%"></div>
+                                </tr>
+                                </thead>
+                                <tbody>
+                                {% block body_tabla %}
+                                    <tr>
+                                        <td>1.</td>
+                                        <td>Update software</td>
+                                        <td>
+                                            <div class="progress progress-xs">
+                                                <div class="progress-bar progress-bar-danger" style="width: 55%"></div>
+                                            </div>
+                                        </td>
+                                        <td><span class="badge bg-danger">55%</span></td>
+                                    </tr>
+                                    <tr>
+                                        <td>2.</td>
+                                        <td>Clean database</td>
+                                        <td>
+                                            <div class="progress progress-xs">
+                                                <div class="progress-bar bg-warning" style="width: 70%"></div>
+                                            </div>
+                                        </td>
+                                        <td><span class="badge bg-warning">70%</span></td>
+                                    </tr>
+                                    <tr>
+                                        <td>3.</td>
+                                        <td>Cron job running</td>
+                                        <td>
+                                            <div class="progress progress-xs progress-striped active">
+                                                <div class="progress-bar bg-primary" style="width: 30%"></div>
+                                            </div>
+                                        </td>
+                                        <td><span class="badge bg-primary">30%</span></td>
+                                    </tr>
+                                    <tr>
+                                        <td>4.</td>
+                                        <td>Fix and squish bugs</td>
+                                        <td>
+                                            <div class="progress progress-xs progress-striped active">
+                                                <div class="progress-bar bg-success" style="width: 90%"></div>
+                                            </div>
+                                        </td>
+                                        <td><span class="badge bg-success">90%</span></td>
+                                    </tr>
+                                {% endblock %}
+                                </tbody>
+                            </table>
                         </div>
-                      </td>
-                      <td><span class="badge bg-danger">55%</span></td>
-                    </tr>
-                    <tr>
-                      <td>2.</td>
-                      <td>Clean database</td>
-                      <td>
-                        <div class="progress progress-xs">
-                          <div class="progress-bar bg-warning" style="width: 70%"></div>
-                        </div>
-                      </td>
-                      <td><span class="badge bg-warning">70%</span></td>
-                    </tr>
-                    <tr>
-                      <td>3.</td>
-                      <td>Cron job running</td>
-                      <td>
-                        <div class="progress progress-xs progress-striped active">
-                          <div class="progress-bar bg-primary" style="width: 30%"></div>
-                        </div>
-                      </td>
-                      <td><span class="badge bg-primary">30%</span></td>
-                    </tr>
-                    <tr>
-                      <td>4.</td>
-                      <td>Fix and squish bugs</td>
-                      <td>
-                        <div class="progress progress-xs progress-striped active">
-                          <div class="progress-bar bg-success" style="width: 90%"></div>
-                        </div>
-                      </td>
-                      <td><span class="badge bg-success">90%</span></td>
-                    </tr>
-                  {% endblock %}
-                  </tbody>
-                </table>
-              </div>
-              <!-- /.card-body -->
-              <div class="card-footer clearfix">
-                  <ul class="pagination pagination-sm m-0 float-right">
-                    {% if page_obj.has_other_pages %}
-                        {% if page_obj.has_previous %}
-                            <li class="page-item"><a class="page-link" href="?{% if search %}search={{ search }}&{% endif %}page={{ page_obj.previous_page_number }}">&laquo;</a></li>
-                        {% endif %}
-                        {% for i in page_range|default_if_none:page_obj.paginator.get_elided_page_range %}
-                            {% if page_obj.number == i %}
-                                <li class="page-item active"><a class="page-link" href="{% if search %}?search={{ search }}&{% endif %}#">{{ i }}</a></li>
-                            {% else %}
-                                {% if i == page_obj.paginator.ELLIPSIS %}
-                                    <li class="page-item"><span class="page-link">{{ i }}</span></li>
+                        <!-- /.card-body -->
+                        <div class="card-footer clearfix">
+                            <ul class="pagination pagination-sm m-0 float-right">
+                                {% if page_obj.has_other_pages %}
+                                    {% if page_obj.has_previous %}
+                                        <li class="page-item"><a class="page-link"
+                                                                 href="?{% if search %}search={{ search }}&{% endif %}page={{ page_obj.previous_page_number }}">&laquo;</a>
+                                        </li>
+                                    {% endif %}
+                                    {% for i in page_range|default_if_none:page_obj.paginator.get_elided_page_range %}
+                                        {% if page_obj.number == i %}
+                                            <li class="page-item active"><a class="page-link"
+                                                                            href="{% if search %}?search={{ search }}&{% endif %}#">{{ i }}</a>
+                                            </li>
+                                        {% else %}
+                                            {% if i == page_obj.paginator.ELLIPSIS %}
+                                                <li class="page-item"><span class="page-link">{{ i }}</span></li>
+                                            {% else %}
+                                                <li class="page-item"><a class="page-link"
+                                                                         href="?{% if search %}search={{ search }}&{% endif %}page={{ i }}">{{ i }}</a>
+                                                </li>
+                                            {% endif %}
+                                        {% endif %}
+                                    {% endfor %}
+                                    {% if page_obj.has_next %}
+                                        <li class="page-item"><a class="page-link"
+                                                                 href="?{% if search %}search={{ search }}&{% endif %}page={{ page_obj.next_page_number }}">&raquo;</a>
+                                        </li>
+                                    {% endif %}
                                 {% else %}
-                                    <li class="page-item"><a class="page-link" href="?{% if search %}search={{ search }}&{% endif %}page={{ i }}">{{ i }}</a></li>
+                                    <li class="page-item active"><a class="page-link" disabled="disabled">1</a></li>
                                 {% endif %}
-                            {% endif %}
-                        {% endfor %}
-                        {% if page_obj.has_next %}
-                            <li class="page-item"><a class="page-link" href="?{% if search %}search={{ search }}&{% endif %}page={{ page_obj.next_page_number }}">&raquo;</a></li>
-                        {% endif %}
-                      {% else %}
-                        <li class="page-item active"><a class="page-link" disabled="disabled">1</a></li>
-                      {% endif %} 
 
-                </ul>
-              </div>
+                            </ul>
+                        </div>
+                    </div>
+                    <!-- /.card -->
+                </div>
+                <!-- /.col -->
             </div>
-            <!-- /.card -->
-          </div>
-          <!-- /.col -->
-        </div>
-        <!-- /.row -->
-      </div><!-- /.container-fluid -->
+            <!-- /.row -->
+        </div><!-- /.container-fluid -->
     </section>
     {% block modal %}
         <div class="row">
@@ -161,7 +186,7 @@
                                 </div>
                                 <div class="modal-footer">
                                     <button type="button" class="btn btn-danger" data-dismiss="modal">Cancelar</button>
-                                    <button type="submit" class="btn btn-primary">{{boton}}</button>
+                                    <button type="submit" class="btn btn-primary">{{ boton }}</button>
                                 </div>
                             </div>
                         </form>
@@ -173,113 +198,125 @@
 
 {% endblock %}
 {% block extra_scripts %}
-   <script src="{% static 'adminlte/plugins/jquery-validation/jquery.validate.min.js'%}"></script>
-    <script src="{% static 'adminlte/plugins/moment/moment.min.js'%}"></script>
-    <script src="{% static 'adminlte/plugins/daterangepicker/daterangepicker.js'%}"></script>
-    <script src="{% static 'adminlte/plugins/tempusdominus-bootstrap-4/js/tempusdominus-bootstrap-4.min.js'%}"></script>
- <script>
-    $(function () {
-        $('[data-toggle="tooltip"]').tooltip();
-        $('#form').on('submit', function (e) {
-            e.preventDefault();
-            if ($(this).valid()){
-               var parametros = new FormData(this);
-            save_with_ajax2('Estas seguro?', window.location.pathname, 'Desea guardar esta informacion?',  parametros,
-                function (e) {
-                $('.modal_form').modal('hide');
-                menssaje_ok('Todo correcto!', 'Informacion guardada corectamente!', 'success', function (e) {
-                    window.location.reload();
-                })
-
-            })
-            }
-
-        });
-        {% if modal_form %}
-            {% block editar %}
-                $('.editar').on('click', function (e) {
+    <script src="{% static 'adminlte/plugins/jquery-validation/jquery.validate.min.js' %}"></script>
+    <script src="{% static 'adminlte/plugins/moment/moment.min.js' %}"></script>
+    <script src="{% static 'adminlte/plugins/daterangepicker/daterangepicker.js' %}"></script>
+    <script src="{% static 'adminlte/plugins/tempusdominus-bootstrap-4/js/tempusdominus-bootstrap-4.min.js' %}"></script>
+    <script src="{% static 'adminlte/plugins/select2/js/select2.full.min.js' %}"></script>
+    <script src="{% static 'adminlte/plugins/datatables/jquery.dataTables.min.js' %}"></script>
+    <script src="{% static 'adminlte/plugins/datatables-bs4/js/dataTables.bootstrap4.min.js' %}"></script>
+    <script src="{% static 'adminlte/plugins/datatables-responsive/js/dataTables.responsive.min.js' %}"></script>
+    <script src="{% static 'adminlte/plugins/datatables-responsive/js/responsive.bootstrap4.min.js' %}"></script>
+    {% if modal_form %}
+        <script>
+            $(function () {
+                $('[data-toggle="tooltip"]').tooltip();
+                $('#form').on('submit', function (e) {
                     e.preventDefault();
-                    var parametros = {'action': 'edit', 'pk': $(this).attr('pk')};
-                    ajax_sin_confirmar(window.location.pathname, parametros, function (data) {
-                        $('#titulo_form').html('<i class="fa fa-edit"></i> Editar Registro');
-                        $.each($('#form')[0], function (key, value) {
-                            if (value.name) {
-                                $('#id_' + value.name).val(data[value.name]).change();
-                            }
+                    if ($(this).valid()) {
+                        var parametros = new FormData(this);
+                        save_with_ajax2('Estas seguro?', window.location.pathname, 'Desea guardar esta informacion?', parametros,
+                            function (e) {
+                                $('.modal_form').modal('hide');
+                                menssaje_ok('Todo correcto!', 'Informacion guardada corectamente!', 'success', function (e) {
+                                    window.location.reload();
+                                })
+
+                            })
+                    }
+
+                });
+
+                {% block editar %}
+                    $('.editar').on('click', function (e) {
+                        e.preventDefault();
+                        var parametros = {'action': 'edit', 'pk': $(this).attr('pk')};
+                        ajax_sin_confirmar(window.location.pathname, parametros, function (data) {
+                            $('#titulo_form').html('<i class="fa fa-edit"></i> Editar Registro');
+                            $.each($('#form')[0], function (key, value) {
+                                if (value.name) {
+                                    $('#id_' + value.name).val(data[value.name]).change();
+                                }
+                            });
+                            $('#modal_form').modal('show');
                         });
-                        $('#modal_form').modal('show');
+                    });
+                {% endblock %}
+                $('#modal_form').on('hidden.bs.modal', function () {
+                    $('#titulo_form').html('<i class="fa fa-plus"></i> {{ titulo_form}}');
+                    reset_form('#form');
+                });
+            })
+        </script>
+    {% else %}
+        <script>
+            $(function () {
+                $('[data-toggle="tooltip"]').tooltip();
+                $('.eliminar').on('click', function (e) {
+                    e.preventDefault();
+                    var parametros = {'action': 'delete', 'pk': $(this).attr('pk')};
+                    save_estado('Estas seguro?', window.location.pathname, 'Desea eliminar este registro?', parametros, function (data) {
+                        menssaje_ok('Todo correcto!', 'Registro eliminado corectamente!', 'success', function (e) {
+                            window.location.reload();
+                        })
                     });
                 });
-            {% endblock %}
-            $('#modal_form').on('hidden.bs.modal', function () {
-                $('#titulo_form').html('<i class="fa fa-plus"></i> {{ titulo_form}}');
-                reset_form('#form');
             });
-        {% endif %}
-        $('.eliminar').on('click', function (e) {
-            e.preventDefault();
-            var parametros = {'action': 'delete', 'pk': $(this).attr('pk')};
-            save_estado('Estas seguro?', window.location.pathname,'Desea eliminar este registro?', parametros, function (data) {
-                menssaje_ok('Todo correcto!', 'Registro eliminado corectamente!', 'success', function (e) {
-                    window.location.reload();
-                })
-            });
-        });
-    })
-    </script>
+        </script>
+    {% endif %}
+
 {% endblock %}
 {% block validate_form %}
-
     <script>
-   $(function() {
-       validador();
-       $("#form").validate({
-           rules: {
-               nombre: {
-                   required: true,
-                   minlength: 3,
-                   maxlength: 50,
-               },
-               descripcion: {
-                   required: true,
-                   minlength: 5,
-                   maxlength: 50
-               },
-               {% block rules_fom %}
-               {% endblock %}
-           },
-           messages: {
-               nombre: {
-                   required: "Por favor ingresa un nombre",
-                   minlength: "Debe ingresar al menos 3 letras",
-                   maxlength: "La descripcion debe tener maximo 50 caracteres",
-               },
-               descripcion: {
-                   required: "Por favor ingresa una descripcion",
-                   minlength: "Ingresa al menos 5 letras",
-                   maxlength: "La descripcion debe tener maximo 50 caracteres",
-               },
-               {% block menssages_fom %}
-               {% endblock %}
-           },
-       });
-   });
-   {% block nombre_validate %}
-   $('#id_nombre').keypress(function (e) {
-       if (e.which >= 48 && e.which <= 57) {
-           return false;
-       }
-   });
-   {% endblock %}
-   $('input[name="codigo"]')
-       .keypress(function (e) {
-           if (e.which !== 8 && e.which !== 0 && (e.which < 48 || e.which > 57)) {
-               return false;
-           }
-       });//Para solo numeros;
+        $(function () {
+            validador();
+            $("#form").validate({
+                rules: {
+                    nombre: {
+                        required: true,
+                        minlength: 3,
+                        maxlength: 50,
+                    },
+                    descripcion: {
+                        required: true,
+                        minlength: 5,
+                        maxlength: 50
+                    },
+                    {% block rules_fom %}
+                    {% endblock %}
+                },
+                messages: {
+                    nombre: {
+                        required: "Por favor ingresa un nombre",
+                        minlength: "Debe ingresar al menos 3 letras",
+                        maxlength: "La descripcion debe tener maximo 50 caracteres",
+                    },
+                    descripcion: {
+                        required: "Por favor ingresa una descripcion",
+                        minlength: "Ingresa al menos 5 letras",
+                        maxlength: "La descripcion debe tener maximo 50 caracteres",
+                    },
+                    {% block menssages_fom %}
+                    {% endblock %}
+                },
+            });
+        });
+        {% block nombre_validate %}
+            $('#id_nombre').keypress(function (e) {
+                if (e.which >= 48 && e.which <= 57) {
+                    return false;
+                }
+            });
+        {% endblock %}
+        $('input[name="codigo"]')
+            .keypress(function (e) {
+                if (e.which !== 8 && e.which !== 0 && (e.which < 48 || e.which > 57)) {
+                    return false;
+                }
+            });//Para solo numeros;
 
-   {% block extra_validate %}
-   {% endblock %}
+        {% block extra_validate %}
+        {% endblock %}
     </script>
 
 {% endblock %}

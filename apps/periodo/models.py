@@ -8,3 +8,6 @@ class PeriodoLectivo(ModeloBase):
     anio = models.IntegerField(default=0, verbose_name=u'Anio', unique=True)
     desde = models.DateField(verbose_name=u"Fecha de incio de periodo")
     hasta = models.DateField(verbose_name=u"Fecha de fin de periodo")
+
+    def __str__(self):
+        return '{} - Año: {} Dese: {} - Hasta: {}'.format(self.nombre, self.anio, self.desde, self.hasta)

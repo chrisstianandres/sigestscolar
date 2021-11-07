@@ -9,7 +9,7 @@ class Materia(ModeloBase):
     nombre = models.CharField(default='', blank=True, null=True, max_length=30, verbose_name=u'Nombre')
 
     def __str__(self):
-        return self.nombre
+        return '({}) {} - {}'.format(self.identificacion, self.nombre, self.alias)
         # return u'%s - %s - %s' % (
         # self.nombre_completo(), self.profesor_principal() if self.profesor_principal() else '', self.nombre)
 

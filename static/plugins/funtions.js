@@ -31,8 +31,8 @@ function borrar_todo_alert(title, content, callback, callback2) {
         showCancelButton: true,
         confirmButtonColor: '#3085d6',
         cancelButtonColor: '#d33',
-        confirmButtonText: '<i class="fa fa-thumbs-o-up"></i> Si',
-        cancelButtonText: '<i class="fa fa-thumbs-down"></i> No'
+        confirmButtonText: 'Si',
+        cancelButtonText: 'No'
     }).then((result) => {
         if (result.isConfirmed) {
             callback();
@@ -45,7 +45,7 @@ function save_with_ajax(title, url, content, parametros, callback) {
     Swal.fire({
         title: title,
         text: content,
-        icon: 'question',
+        icon: 'warning',
         showCancelButton: true,
         confirmButtonColor: '#3085d6',
         cancelButtonColor: '#d33',
@@ -53,28 +53,31 @@ function save_with_ajax(title, url, content, parametros, callback) {
         cancelButtonText: 'No'
     }).then((result) => {
         if (result.isConfirmed) {
-            $.ajax({
-                dataType: 'JSON',
-                type: 'POST',
-                url: url,
-                data: parametros,
-            }).done(function (data) {
-                if (!data.hasOwnProperty('error')) {
-                    $.isLoading({
-                        text: "<strong>" + 'Cargando..' + "</strong>",
-                        tpl: '<span class="isloading-wrapper %wrapper%"><i class="fa fa-refresh fa-2x fa-spin"></i><br>%text%</span>',
+            var dialog  = bootbox.dialog({
+                title: 'Estamos procesando!!!',
+                message: '<p><i class="fa fa-spin fa-spinner"></i> Cargando...</p>',
+                size: 'small',
+                centerVertical: true,
+                closeButton: false,
+            })
+                .on('shown.bs.modal', function(){
+                    $.ajax({
+                        dataType: 'JSON',
+                        type: 'POST',
+                        url: url,
+                        data: parametros,
+                    }).done(function (data) {
+                         dialog.modal('hide');
+                        if (!data.hasOwnProperty('error')) {
+                            callback(data);
+                            return false;
+                        }
+                        menssaje_error_form('Error', data.error, 'fa fa-ban');
+                    }).fail(function (jqXHR, textStatus, errorThrown) {
+                        dialog.modal('hide');
+                        alert(textStatus + ': ' + errorThrown);
                     });
-                    setTimeout(function () {
-                        $.isLoading('hide');
-                        callback(data);
-                    }, 1000);
-                    return false;
-                }
-                menssaje_error('Error', data.error, 'fas fa-exclamation-circle');
-
-            }).fail(function (jqXHR, textStatus, errorThrown) {
-                alert(textStatus + ': ' + errorThrown);
-            });
+                });
         }
     })
 }
