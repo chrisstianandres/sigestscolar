@@ -26,6 +26,10 @@
   <link rel="stylesheet" href="{% static 'adminlte/plugins/daterangepicker/daterangepicker.css' %}">
   <!-- summernote -->
   <link rel="stylesheet" href="{% static 'adminlte/plugins/summernote/summernote-bs4.min.css' %}">
+
+    {% block extra_head %}
+
+    {% endblock %}
     <style>
         table.dataTable tbody tr.selected a, table.dataTable tbody th.selected a, table.dataTable tbody td.selected a {
             color: black;

@@ -26,5 +26,6 @@ urlpatterns = [
     path('cursos/', include('apps.curso.urls', namespace='cursos')),
     path('paralelos/', include('apps.paralelo.urls', namespace='paralelos')),
     path('materias/', include('apps.materia.urls', namespace='materias')),
-    path('producto/', include('apps.producto.urls', namespace='producto')),
+    path('productos/', include('apps.producto.urls', namespace='productos')),
+    path('periodos/', include('apps.periodo.urls', namespace='periodos')),
 ]

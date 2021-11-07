@@ -325,7 +325,7 @@ function menssaje_error_form(title, content, icon, callback) {
          html +=content;
     }else {
         $.each(content, function (key, value) {
-            html += key + ': ' + value+'<br>';
+            html += '<b>'+key +'</b>'+ ': ' + value+'<br>';
         });
     }
     html += '</ul>';

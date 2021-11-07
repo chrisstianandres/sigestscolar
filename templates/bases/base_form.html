@@ -1,5 +1,9 @@
 {% extends 'bases/base.html' %}
 {% load static %}
+{% block extra_head %}
+    <link rel="stylesheet" href="{% static 'adminlte/plugins/daterangepicker/daterangepicker.css' %}">
+    <link rel="stylesheet" href="{% static 'adminlte/plugins/tempusdominus-bootstrap-4/css/tempusdominus-bootstrap-4.min.css' %}">
+{% endblock %}
 {% block content %}
     <section class="content">
       <div class="container-fluid">
@@ -36,7 +40,10 @@
     </section>
 {% endblock %}
 {% block extra_scripts %}
-   <script src="{% static 'adminlte/plugins/jquery-validation/jquery.validate.min.js'%}"></script>
+    <script src="{% static 'adminlte/plugins/jquery-validation/jquery.validate.min.js' %}"></script>
+    <script src="{% static 'adminlte/plugins/moment/moment.min.js'%}"></script>
+    <script src="{% static 'adminlte/plugins/daterangepicker/daterangepicker.js' %}"></script>
+    <script src="{% static 'adminlte/plugins/tempusdominus-bootstrap-4/js/tempusdominus-bootstrap-4.min.js'%}"></script>
  <script>
     $(function () {
         $('[data-toggle="tooltip"]').tooltip();

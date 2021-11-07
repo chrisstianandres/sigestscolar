@@ -1,0 +1,41 @@
+{% extends 'bases/base_list.html' %}
+{% block header_tabla %}
+    <th class="dt-center">Nombre</th>
+    <th class="dt-center">Desde</th>
+    <th class="dt-center">Hasta</th>
+    <th class="dt-center">Año</th>
+    <th style="text-align:center; width: 10%" class="dt-center"><i class="fa fa-cogs"></i></th>
+{% endblock %}
+{% block body_tabla %}
+    {% for elemento in page_obj %}
+      <tr>
+        <td  class="dt-center">{{ elemento.nombre }}</td>
+        <td  class="dt-center">{{ elemento.desde }}</td>
+        <td  class="dt-center">{{ elemento.hasta }}</td>
+        <td  class="dt-center">{{ elemento.anio }}</td>
+        <td style="text-align:center; width: 10%"  class="dt-center">
+            <a type="button" class="btn btn-warning btn-xs editar" pk="{{ elemento.pk }}" style="color: white"><i class="fa fa-edit"></i></a>
+            <a type="button" class="btn btn-danger btn-xs eliminar" pk="{{ elemento.pk }}"><i class="fa fa-trash"></i></a>
+        </td>
+    </tr>
+    {% empty %}
+        <tr>
+        <td colspan="5" style="text-align: center">No existen registros para mostrar</td>
+        </tr>
+    {% endfor %}
+{% endblock %}
+{% block nombre_validate %}{% endblock %}
+{% block extra_validate %}
+    var hoy = new  Date;
+    $('#id_desde, #id_hasta').daterangepicker({
+    locale: {
+        format: 'YYYY-MM-DD',
+        applyLabel: '<i class="fa fa-check-circle"></i> Seleccionar',
+        cancelLabel: '<i class="fa fa-ban"></i> Cancelar',
+    },
+    singleDatePicker: true,
+    showDropdowns: true,
+    minYear: hoy.getFullYear(),
+    maxYear: (hoy.getFullYear())+5,
+    });
+{% endblock %}
