@@ -251,8 +251,8 @@ class ListviewAperutar(TemplateView):
         data = super().get_context_data(**kwargs)
         data['icono'] = self.icon
         data['boton'] = 'Guardar'
-        data['titulo'] = 'Lista de ' + str(self.entidad) + 's'
-        data['titulo_tabla'] = 'Lista de ' + str(self.entidad) + 's'
+        data['titulo'] = 'Lista de cursos aperturados'
+        data['titulo_tabla'] = 'Lista de cursos aperturados'
         data['empresa'] = nombre_empresa()
         data['entidad'] = self.entidad
         return data

@@ -23,39 +23,44 @@
                         </div>
                         <!-- /.card-header -->
                         <div class="card-body">
-                            <div class="row float-right">
+                            {% block filtros %}
+                                <div class="row float-right">
 
-                                <div class="form-group">
-                                    <form action="{{ request.path }}">
-                                        <div class="input-group">
-                                            <input type="text" class="form-control input-sm" style="height: 10%"
-                                                   placeholder="Buscar...." autocomplete="off"
-                                                   aria-label="Buscar..." aria-describedby="basic-addon2" name="search"
-                                                   value="{{ search }}">
-                                            <div class="input-group-append">
-                                                <button class="btn btn-outline-success btn-sm" type="submit"
-                                                        data-toggle="tooltip" data-placement="bottom" title="Buscar...">
-                                                    <i class="fa fa-search"></i></button>
-                                                {% if search %}
-                                                    <button class="btn btn-outline-danger btn-sm" type="button"
+                                    <div class="form-group">
+                                        <form action="{{ request.path }}">
+                                            <div class="input-group">
+                                                <input type="text" class="form-control input-sm" style="height: 10%"
+                                                       placeholder="Buscar...." autocomplete="off"
+                                                       aria-label="Buscar..." aria-describedby="basic-addon2"
+                                                       name="search"
+                                                       value="{{ search }}">
+                                                <div class="input-group-append">
+                                                    <button class="btn btn-outline-success btn-sm" type="submit"
                                                             data-toggle="tooltip" data-placement="bottom"
-                                                            title="Mostrar todos"
-                                                            onclick="window.location.href ='{{ request.path }}'"><i
-                                                            class="fas fa-redo-alt"></i></button>
-                                                {% endif %}
+                                                            title="Buscar...">
+                                                        <i class="fa fa-search"></i></button>
+                                                    {% if search %}
+                                                        <button class="btn btn-outline-danger btn-sm" type="button"
+                                                                data-toggle="tooltip" data-placement="bottom"
+                                                                title="Mostrar todos"
+                                                                onclick="window.location.href ='{{ request.path }}'"><i
+                                                                class="fas fa-redo-alt"></i></button>
+                                                    {% endif %}
 
+                                                </div>
                                             </div>
-                                        </div>
-                                    </form>
-                                </div>&nbsp;&nbsp;
-                                <div class="form-group">
-                                    <button {% if not modal_form %}onclick="window.location.href ={{ url_add }};" {% endif %}type="button"
-                                            class="btn btn-block btn-primary btn-sm"
-                                            {% if modal_form %} data-toggle="modal" data-target="#modal_form"{% endif %}
-                                            style="margin-right: 2px;"><i class="fa fa-plus-circle"></i> Agregar
-                                    </button>
+                                        </form>
+                                    </div>&nbsp;&nbsp;
+                                    <div class="form-group">
+                                        <button {% if not modal_form %}onclick="window.location.href ={{ url_add }};" {% endif %}type="button"
+                                                class="btn btn-block btn-primary btn-sm"
+                                                {% if modal_form %} data-toggle="modal"
+                                                data-target="#modal_form"{% endif %}
+                                                style="margin-right: 2px;"><i class="fa fa-plus-circle"></i> Agregar
+                                        </button>
+                                    </div>
                                 </div>
-                            </div>
+                            {% endblock %}
                             <table class="table table-bordered">
                                 <thead>
                                 <tr>

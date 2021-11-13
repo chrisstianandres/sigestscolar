@@ -1,4 +1,70 @@
 {% extends 'bases/base_list.html' %}
+{% block filtros %}
+    <div class="row">
+        <div class="col-sm-10">
+            <div class="row">
+                <div class="col-sm-3">
+                    <select name="periodos" id="id_periodos" class="form-control input-sm">
+                        <option hidden selected>Buscar por periodo</option>
+                        <option value="0">Todos</option>
+                    </select>
+                </div>
+                <div class="col-sm-3">
+                    <select name="cursos" id="id_cursos" class="form-control input-sm">
+                        <option hidden selected>Buscar por curso</option>
+                        <option value="0">Todos</option>
+                    </select>
+                </div>
+             <div class="col-sm-3">
+                    <select name="paralelos" id="id_paralelos" class="form-control input-sm">
+                        <option hidden selected>Buscar por paralelo</option>
+                        <option value="0">Todos</option>
+                    </select>
+                </div>
+                <div class="col-sm-3">
+                    <div class="form-group">
+                        <form action="{{ request.path }}">
+                            <div class="input-group">
+                                <input type="text" class="form-control input-sm" style="height: 10%"
+                                       placeholder="Buscar...." autocomplete="off"
+                                       aria-label="Buscar..." aria-describedby="basic-addon2"
+                                       name="search"
+                                       value="{{ search }}">
+                                <div class="input-group-append">
+                                    <button class="btn btn-outline-success btn-sm" type="submit"
+                                            data-toggle="tooltip" data-placement="bottom"
+                                            title="Buscar...">
+                                        <i class="fa fa-search"></i></button>
+                                    {% if search %}
+                                        <button class="btn btn-outline-danger btn-sm" type="button"
+                                                data-toggle="tooltip" data-placement="bottom"
+                                                title="Mostrar todos"
+                                                onclick="window.location.href ='{{ request.path }}'"><i
+                                                class="fas fa-redo-alt"></i></button>
+                                    {% endif %}
+
+                                </div>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+        <div class="col-sm-2">
+            <div class="form-group float-right">
+                <button {% if not modal_form %}onclick="window.location.href ={{ url_add }};" {% endif %}type="button"
+                        class="btn btn-block btn-primary btn-sm"
+                        {% if modal_form %} data-toggle="modal"
+                        data-target="#modal_form"{% endif %}
+                        style="margin-right: 2px;"><i class="fa fa-plus-circle"></i> Agregar
+                </button>
+            </div>
+        </div>
+
+    </div>
+    <br>
+{% endblock %}
 {% block header_tabla %}
     <th class="dt-center">Curso</th>
     <th class="dt-center">Paralelo</th>
