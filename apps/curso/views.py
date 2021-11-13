@@ -16,6 +16,7 @@ from apps.curso.models import Curso, CursoParalelo, CursoMateria
 from apps.extras import PrimaryKeyEncryptor
 from apps.materia.models import Materia
 from apps.paralelo.models import Paralelo
+from apps.periodo.models import PeriodoLectivo
 from apps.profesor.models import MateriaAsignada
 from sigestscolar.settings import SECRET_KEY_ENCRIPT
 
@@ -112,7 +113,7 @@ class ListviewAperutar(TemplateView):
     template_name = 'curso/list_apertura.html'
     template_name_add = 'curso/form.html'
     icon = 'far fa-calendar-alt'
-    entidad = 'Aperturar Curso'
+    entidad = 'Cursos Aperturados'
     form = FormularioApertura
 
     @csrf_exempt
@@ -175,7 +176,7 @@ class ListviewAperutar(TemplateView):
                     data = self.get_context_data()
                     data['action'] = action
                     data['form'] = self.form
-                    data['titulo_form'] = 'Nuevo ' + str(self.entidad)
+                    data['titulo_form'] = 'Aperturar nuevo curso'
                     return render(request, self.template_name_add, data)
                 if action == 'edit':
                     data = self.get_context_data()
@@ -189,12 +190,47 @@ class ListviewAperutar(TemplateView):
                         for m in instancia.cursomateria_set.all():
                             materias.append({'identificacion': m.materia.identificacion, 'nombre': m.materia.nombre, 'alias': m.materia.alias, 'id': m.materia.id})
                         data['materias'] = materias
-                    data['titulo_form'] = 'Editar ' + str(self.entidad)
+                    data['titulo_form'] = 'Editar curso aperturado'
                     return render(request, self.template_name_add, data)
+                if action == 'filter_periodo':
+                    data = []
+                    term = request.GET['term']
+                    for objeto in PeriodoLectivo.objects.filter(Q(status=True), Q(nombre__icontains=term))[:10]:
+                        item = {'id': objeto.pk, 'text': objeto.nombre}
+                        data.append(item)
+                    return JsonResponse(data, safe=False)
+                if action == 'filter_curso':
+                    data = []
+                    filtros = Q(status=True)
+                    term = request.GET['term']
+                    if 'id' in request.GET and not request.GET['id'] == '':
+                        ids = self.model.objects.values_list('curso_id').filter(Q(periodo_id=request.GET['id']))
+                        filtros.add(Q(id__in=ids), Q.AND)
+                    query = Curso.objects.filter(filtros, Q(nombre__icontains=term) | Q(descripcion__icontains=term))
+                    for objeto in query[:10]:
+                        item = {'id': objeto.pk, 'text': objeto.nombre}
+                        data.append(item)
+                    return JsonResponse(data, safe=False)
+                if action == 'filter_paralelo':
+                    data = []
+                    filtros = Q(status=True)
+                    term = request.GET['term']
+                    if 'id' in request.GET and not request.GET['id'] == '':
+                        filtros.add(Q(periodo_id=request.GET['id']), Q.AND)
+                    if 'curso_id' in request.GET and not request.GET['curso_id'] == '':
+                        filtros.add(Q(curso_id=request.GET['curso_id']), Q.AND)
+                    ids = self.model.objects.values_list('paralelo_id').filter(filtros)
+                    f = Q(status=True)
+                    if 'id' in request.GET and not request.GET['id'] == '' or 'curso_id' in request.GET and not request.GET['curso_id'] == '':
+                        f.add(Q(id__in=ids), Q.AND)
+                    for objeto in Paralelo.objects.filter(f, Q(nombre__icontains=term) | Q(descripcion__icontains=term))[:10]:
+                            item = {'id': objeto.pk, 'text': objeto.nombre}
+                            data.append(item)
+                    return JsonResponse(data, safe=False)
                 if action == 'search_curso':
                     data = []
                     term = request.GET['term']
-                    if not request.GET['id'] == '':
+                    if 'id' in request.GET and not request.GET['id'] == '':
                         periodo = request.GET['id']
                         excludes = self.model.objects.values_list('curso_id').filter(status=True, periodo_id=periodo)
                         for objeto in Curso.objects.filter(Q(status=True), Q(nombre__icontains=term) | Q(
@@ -205,7 +241,7 @@ class ListviewAperutar(TemplateView):
                 if action == 'search_paralelo':
                     data = []
                     term = request.GET['term']
-                    if not request.GET['id'] == '':
+                    if 'id' in request.GET and not request.GET['id'] == '':
                         periodo = request.GET['id']
                         for objeto in Paralelo.objects.filter(Q(status=True), Q(nombre__icontains=term) | Q(
                                 descripcion__icontains=term))[:10]:
@@ -228,10 +264,21 @@ class ListviewAperutar(TemplateView):
             else:
                 data = self.get_context_data()
                 list = self.model.objects.filter(status=True).order_by('-id')
-                if 'search' in request.GET:
-                    if not request.GET['search'] == '':
-                        data['search'] = search = request.GET['search']
-                        list = list.filter(Q(curso__nombre__icontains=search) | Q(paralelo__nombre__icontains=search))
+                filtros = Q(status=True)
+                if 'periodo' in request.GET and not request.GET['periodo'] == '':
+                    filtros.add(Q(periodo_id=request.GET['periodo']), Q.AND)
+                    data['periodo'] = PeriodoLectivo.objects.get(id=request.GET['periodo'])
+                if 'curso' in request.GET and not request.GET['curso'] == '':
+                    filtros.add(Q(curso_id=request.GET['curso']), Q.AND)
+                    data['curso'] = Curso.objects.get(id=request.GET['curso'])
+                if 'paralelo' in request.GET and not request.GET['paralelo'] == '':
+                    filtros.add(Q(paralelo_id=request.GET['paralelo']), Q.AND)
+                    data['paralelo'] = Paralelo.objects.get(id=request.GET['paralelo'])
+                if 'search' in request.GET and not request.GET['search'] == '':
+                    filtros.add((Q(curso__nombre__icontains=request.GET['search']) | Q(paralelo__nombre__icontains=request.GET['search'])), Q.AND)
+                    # filtros.add(, Q.OR)
+                    data['search'] = search = request.GET['search']
+                list = list.filter(filtros)
                 page_number = request.GET.get('page', 1)
                 paginator = Paginator(list, 10)
                 page_range = paginator.get_elided_page_range(number=page_number)

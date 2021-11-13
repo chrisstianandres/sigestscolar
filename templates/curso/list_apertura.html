@@ -1,67 +1,65 @@
 {% extends 'bases/base_list.html' %}
 {% block filtros %}
     <div class="row">
-        <div class="col-sm-10">
-            <div class="row">
-                <div class="col-sm-3">
-                    <select name="periodos" id="id_periodos" class="form-control input-sm">
-                        <option hidden selected>Buscar por periodo</option>
-                        <option value="0">Todos</option>
-                    </select>
-                </div>
-                <div class="col-sm-3">
-                    <select name="cursos" id="id_cursos" class="form-control input-sm">
-                        <option hidden selected>Buscar por curso</option>
-                        <option value="0">Todos</option>
-                    </select>
-                </div>
-             <div class="col-sm-3">
-                    <select name="paralelos" id="id_paralelos" class="form-control input-sm">
-                        <option hidden selected>Buscar por paralelo</option>
-                        <option value="0">Todos</option>
-                    </select>
-                </div>
-                <div class="col-sm-3">
-                    <div class="form-group">
-                        <form action="{{ request.path }}">
-                            <div class="input-group">
-                                <input type="text" class="form-control input-sm" style="height: 10%"
-                                       placeholder="Buscar...." autocomplete="off"
-                                       aria-label="Buscar..." aria-describedby="basic-addon2"
-                                       name="search"
-                                       value="{{ search }}">
-                                <div class="input-group-append">
-                                    <button class="btn btn-outline-success btn-sm" type="submit"
-                                            data-toggle="tooltip" data-placement="bottom"
-                                            title="Buscar...">
-                                        <i class="fa fa-search"></i></button>
-                                    {% if search %}
-                                        <button class="btn btn-outline-danger btn-sm" type="button"
+        <div class="col-sm-12">
+            <form action="{{ request.path }}">
+                <table>
+                    <tbody>
+                    <tr>
+                        <td style="width: 20%">
+                            <select name="periodos" id="id_periodos" class="form-control input-sm">
+                            </select>
+                        </td>
+                        <td style="width: 20%">
+                            <select name="cursos" id="id_cursos" class="form-control input-sm">
+                            </select>
+                        </td>
+                        <td style="width: 20%">
+                            <select name="paralelos" id="id_paralelos" class="form-control input-sm">
+                            </select>
+                        </td>
+                        <td style="width: 20%">
+                            <div class="form-group"><br>
+                                <div class="input-group">
+                                    <input type="text" class="form-control input-sm input-search"
+                                           style="border-top-right-radius: 0 !important; border-bottom-right-radius: 0 !important;"
+                                           placeholder="Buscar...." autocomplete="off"
+                                           aria-label="Buscar..." aria-describedby="basic-addon2"
+                                           name="search"
+                                           value="{{ search }}">
+                                    <div class="input-group-append">
+                                        <button class="btn btn-outline-success btn-sm" type="button" id="search"
                                                 data-toggle="tooltip" data-placement="bottom"
-                                                title="Mostrar todos"
-                                                onclick="window.location.href ='{{ request.path }}'"><i
-                                                class="fas fa-redo-alt"></i></button>
-                                    {% endif %}
+                                                title="Buscar...">
+                                            <i class="fa fa-search"></i></button>
+                                        {% if search %}
+                                            <button class="btn btn-outline-danger btn-sm" type="button"
+                                                    data-toggle="tooltip" data-placement="bottom"
+                                                    title="Mostrar todos"
+                                                    onclick="window.location.href ='{{ request.path }}'"><i
+                                                    class="fas fa-redo-alt"></i></button>
+                                        {% endif %}
 
+                                    </div>
                                 </div>
+
                             </div>
-                        </form>
-                    </div>
-                </div>
-            </div>
-
+                        </td>
+                        <td style="width: 10%">
+                            <div class="form-group float-right">
+                                <button {% if not modal_form %}onclick="window.location.href ={{ url_add }};" {% endif %}type="button"
+                                        class="btn btn-block btn-primary btn-sm"
+                                        {% if modal_form %} data-toggle="modal"
+                                        data-target="#modal_form"{% endif %}
+                                        style="margin-right: 2px;"><i class="fa fa-plus-circle"></i> Agregar
+                                </button>
+                            </div>
+                        </td>
+                    </tr>
+                    </tbody>
+                </table>
+            </form>
         </div>
-        <div class="col-sm-2">
-            <div class="form-group float-right">
-                <button {% if not modal_form %}onclick="window.location.href ={{ url_add }};" {% endif %}type="button"
-                        class="btn btn-block btn-primary btn-sm"
-                        {% if modal_form %} data-toggle="modal"
-                        data-target="#modal_form"{% endif %}
-                        style="margin-right: 2px;"><i class="fa fa-plus-circle"></i> Agregar
-                </button>
-            </div>
-        </div>
-
     </div>
     <br>
 {% endblock %}
@@ -182,6 +180,144 @@
                     })
                 });
             });
+            $('#id_periodos').select2({
+                language: {
+                    inputTooShort: function () {
+                        return "Ingresa al menos un caracter...";
+                    },
+                    "noResults": function () {
+                        return "Sin resultados";
+                    },
+                    "searching": function () {
+                        return "Buscando...";
+                    }
+                },
+                theme: 'bootstrap4',
+                allowClear: true,
+                ajax: {
+                    delay: 250,
+                    type: 'GET',
+                    url: '/cursos/aperturar/',
+                    data: function (params) {
+                        return {
+                            term: params.term,
+                            action: 'filter_periodo'
+                        };
+                    },
+                    processResults: function (data) {
+                        return {
+                            results: data
+                        };
+
+                    },
+
+                },
+                placeholder: 'Buscar por periodo',
+                minimumInputLength: 1,
+            }).on('change', function (e) {
+                e.preventDefault();
+                $('#id_cursos').val('').trigger('change');
+                $('#id_paralelos').val('').trigger('change');
+
+            });
+            $('#id_cursos').select2({
+                language: {
+                    inputTooShort: function () {
+                        return "Ingresa al menos un caracter...";
+                    },
+                    "noResults": function () {
+                        return "Sin resultados";
+                    },
+                    "searching": function () {
+                        return "Buscando...";
+                    }
+                },
+                theme: 'bootstrap4',
+                allowClear: true,
+                ajax: {
+                    delay: 250,
+                    type: 'GET',
+                    url: '/cursos/aperturar/',
+                    data: function (params) {
+                        return {
+                            term: params.term,
+                            action: 'filter_curso',
+                            id: $('#id_periodos option:selected').val()
+                        };
+                    },
+                    processResults: function (data) {
+                        return {
+                            results: data
+                        };
+
+                    },
+
+                },
+                placeholder: 'Buscar por Curso',
+                minimumInputLength: 1,
+            }).on('change', function (e) {
+                e.preventDefault();
+                $('#id_paralelos').val('').trigger('change');
+            });
+            $('#id_paralelos').select2({
+                language: {
+                    inputTooShort: function () {
+                        return "Ingresa al menos un caracter...";
+                    },
+                    "noResults": function () {
+                        return "Sin resultados";
+                    },
+                    "searching": function () {
+                        return "Buscando...";
+                    }
+                },
+                theme: 'bootstrap4',
+                allowClear: true,
+                ajax: {
+                    delay: 250,
+                    type: 'GET',
+                    url: '/cursos/aperturar/',
+                    data: function (params) {
+                        return {
+                            term: params.term,
+                            action: 'filter_paralelo',
+                            id: $('#id_periodo option:selected').val(),
+                            curso_id: $('#id_cursos option:selected').val()
+                        };
+                    },
+                    processResults: function (data) {
+                        return {
+                            results: data
+                        };
+
+                    },
+
+                },
+                placeholder: 'Busca un Paralelo',
+                minimumInputLength: 1,
+            });
+            $('#search').on('click', function (e) {
+                e.preventDefault();
+                let periodo = '', curso = '',paralelo = '', search='';
+                if ($('#id_periodos').val() != null){periodo = $('#id_periodos').val();}
+                if ($('#id_cursos').val() != null){curso = $('#id_cursos').val();}
+                if ($('#id_paralelos').val() != null){paralelo = $('#id_paralelos').val();}
+                if ($('.input-search').val() !== ''){ search = $('.input-search').val();}
+                window.location.href = '/cursos/aperturar?periodo='+periodo+'&curso='+curso+'&paralelo='+paralelo+'&search='+search
+
+            });
+            {% if periodo %}
+                var newOption = new Option('{{ periodo.nombre }}', {{ periodo.id }}, true, true);
+                $('#id_periodos').append(newOption).trigger('change');
+            {% endif %}
+            {% if curso %}
+                var cursooption = new Option('{{ curso.nombre }}', {{ curso.id }}, true, true);
+                $('#id_cursos').append(cursooption).trigger('change');
+            {% endif %}
+            {% if paralelo %}
+                 var paralelooption = new Option('{{ paralelo.nombre }}', {{ paralelo.id }}, true, true);
+                $('#id_paralelos').append(paralelooption).trigger('change');
+            {% endif %}
         });
     </script>
 
