@@ -12,7 +12,7 @@ class PerfilUsuario(ModeloBase):
     persona = models.ForeignKey(Persona, on_delete=models.PROTECT)
     administrativo = models.ForeignKey(Administrativo, blank=True, null=True, verbose_name=u'Administrativo', on_delete=models.PROTECT)
     profesor = models.ForeignKey(Profesor, blank=True, null=True, verbose_name=u'Profesor', on_delete=models.PROTECT)
-    externo = models.ForeignKey(Externo, blank=True, null=True, verbose_name=u'Cliente externo', on_delete=models.PROTECT)
+    externo = models.BooleanField(default=True, verbose_name=u'Perfil Externo')
     inscripcion = models.ForeignKey(Inscripcion, blank=True, null=True, verbose_name=u'Inscripción', on_delete=models.PROTECT)
     inscripcionprincipal = models.BooleanField(default=False, verbose_name=u'Inscripción principal')
 

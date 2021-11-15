@@ -564,9 +564,21 @@ function validador() {
         }
     });
 
-    jQuery.validator.addMethod("validar", function (value, element) {
+    jQuery.validator.addMethod("validar_cedula", function (value, element) {
         return validar(element);
-    }, "Número de documento no valido para Ecuador");
+    }, "Número de cedula no valido para Ecuador");
+
+    jQuery.validator.addMethod("validar_celular", function (value, element) {
+        return validar_celular(element);
+    }, "El numero debe iniciar con 09");
+
+    jQuery.validator.addMethod("validar_convecional", function (value, element) {
+        return validar_convecional(element);
+    }, "El numero no coincide con los codigos para telefonia ecuatoriana");
+
+    jQuery.validator.addMethod("validar_ruc", function (value, element) {
+        return validar(element);
+    }, "Número de ruc no valido para Ecuador");
 
     function validar(element) {
         var cad = document.getElementById(element.id).value.trim();
@@ -577,9 +589,7 @@ function validador() {
             return aux(total, cad);
         } else if (longitud === 13 && cad.slice(10, 13) === '001') {
             return aux(total, cad);
-        } else {
-            return false;
-        }
+        } else return longitud === 0;
     }
 
     function aux(total, cad) {
@@ -597,6 +607,16 @@ function validador() {
             total = total % 10 ? 10 - total % 10 : 0;
             return parseInt(cad.charAt(9)) === total;
         }
+    }
+
+    function validar_celular(element) {
+        var cad = document.getElementById(element.id).value.trim();
+        return cad.slice(0, 2) === '09';
+    }
+    function validar_convecional(element) {
+        var cad = document.getElementById(element.id).value.trim();
+        var codigos = ['02', '03', '04', '05', '06', '07'];
+        return codigos.indexOf(cad.slice(0, 2)) > -1 || cad.length === 0;
     }
 }
 

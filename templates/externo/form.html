@@ -1,0 +1,353 @@
+{% extends 'bases/base_form.html' %}
+{% block form %}
+    <form id="form" class="{% block inline %}{% endblock %}">
+        <div class="card-body">
+            <p><b><i class="fas fa-id-card-alt"></i> Nombres</b></p>
+            <hr>
+            <div class="row">
+                <input type="hidden" name="action" value="{{ action }}">
+                <input type="hidden" name="pk" value="{{ pk }}">
+                <div class="col-sm-3">
+                    <div class="form-group">
+                        {{ form.nombres.label_tag }}
+                        {{ form.nombres }}
+                    </div>
+                </div>
+                <div class="col-sm-3">
+                    <div class="form-group">
+                        {{ form.apellido1.label_tag }}
+                        {{ form.apellido1 }}
+                    </div>
+                </div>
+                <div class="col-sm-3">
+                    <div class="form-group">
+                        {{ form.apellido2.label_tag }}
+                        {{ form.apellido2 }}
+                    </div>
+                </div>
+            </div>
+            <br>
+            <p><b><i class="far fa-id-card"></i> Documentos personales</b></p>
+            <hr>
+            <div class="row">
+                <div class="col-sm-3">
+                    <div class="form-group">
+                        {{ form.cedula.label_tag }}
+                        {{ form.cedula }}
+                    </div>
+                </div>
+                <div class="col-sm-3">
+                    <div class="form-group">
+                        {{ form.ruc.label_tag }}
+                        {{ form.ruc }}
+                    </div>
+                </div>
+                <div class="col-sm-3">
+                    <div class="form-group">
+                        {{ form.pasaporte.label_tag }}
+                        {{ form.pasaporte }}
+                    </div>
+                </div>
+                <div class="col-sm-3">
+                    <div class="form-group">
+                        {{ form.libretamilitar.label_tag }}
+                        {{ form.libretamilitar }}
+                    </div>
+                </div>
+
+            </div>
+            <br>
+            <p><b><i class="fas fa-map-marked-alt"></i> Direcciones</b></p>
+            <hr>
+            <div class="row">
+                <div class="col-sm-4">
+                    <div class="form-group">
+                        {{ form.direccion.label_tag }}
+                        {{ form.direccion }}
+                    </div>
+                </div>
+                <div class="col-sm-4">
+                    <div class="form-group">
+                        {{ form.direccion2.label_tag }}
+                        {{ form.direccion2 }}
+                    </div>
+                </div>
+                <div class="col-sm-1">
+                    <div class="form-group">
+                        {{ form.num_direccion.label_tag }}
+                        {{ form.num_direccion }}
+                    </div>
+                </div>
+                <div class="col-sm-3">
+                    <div class="form-group">
+                        {{ form.referencia.label_tag }}
+                        {{ form.referencia }}
+                    </div>
+                </div>
+
+            </div>
+            <p><b><i class="fas fa-mail-bulk"></i> Contactos</b></p>
+            <hr>
+            <div class="row">
+                <div class="col-sm-3">
+                    <div class="form-group">
+                        {{ form.telefono.label_tag }}
+                        {{ form.telefono }}
+                    </div>
+                </div>
+                <div class="col-sm-3">
+                    <div class="form-group">
+                        {{ form.telefono_conv.label_tag }}
+                        {{ form.telefono_conv }}
+                    </div>
+                </div>
+                <div class="col-sm-3">
+                    <div class="form-group">
+                        {{ form.email.label_tag }}
+                        {{ form.email }}
+                    </div>
+                </div>
+            </div>
+            <br>
+            <p><b><i class="fas fa-coffee"></i> Datos Extras</b></p>
+            <hr>
+            <div class="row">
+                <div class="col-sm-4">
+                    <div class="form-group">
+                        {{ form.nacimiento.label_tag }}
+                        {{ form.nacimiento }}
+                    </div>
+                </div>
+                <div class="col-sm-2">
+                    <div class="form-group">
+                        {{ form.genero.label_tag }}
+                        {{ form.genero }}
+                    </div>
+                </div>
+                <div class="col-sm-2">
+                    <div class="form-group">
+                        {{ form.sangre.label_tag }}
+                        {{ form.sangre }}
+                    </div>
+                </div>
+                <div class="col-sm-1">
+                    <div class="form-group">
+                        {{ form.lgtbi.label_tag }}
+                        {{ form.lgtbi }}
+                    </div>
+                </div>
+            </div>
+            {% block extra_form %}
+
+            {% endblock %}
+        </div>
+        <!-- /.card-body -->
+
+        <div class="card-footer">
+            <button type="submit" class="btn btn-primary">Guardar</button>
+            <button type="button" class="btn btn-danger"
+                    onclick="window.location.href = '{{ request.path }}';">Cancelar
+            </button>
+        </div>
+    </form>
+{% endblock %}
+{% block validate_form %}
+    <script>
+        $(function () {
+            validador();
+            $("#form").validate({
+                rules: {
+                    nombres: {
+                        required: true,
+                        minlength: 3,
+                        maxlength: 50,
+                        lettersonly: true,
+                    },
+                    apellido1: {
+                        required: true,
+                        minlength: 3,
+                        maxlength: 50,
+                        lettersonly: true,
+                    },
+                    apellido2: {
+                        required: true,
+                        minlength: 3,
+                        maxlength: 50,
+                        lettersonly: true,
+                    },
+                    cedula: {
+                        required: true,
+                        minlength: 10,
+                        maxlength: 10,
+                        validar_cedula: true
+                    },
+                    ruc: {
+                        required: false,
+                        minlength: 13,
+                        maxlength: 13,
+                        validar_ruc: true
+                    },
+                    pasaporte: {
+                        required: false,
+                        minlength: 5,
+                        maxlength: 20,
+                    },
+                    libretamilitar: {
+                        required: false,
+                        minlength: 5,
+                        maxlength: 20,
+                    },
+                    direccion: {
+                        required: true,
+                        minlength: 5,
+                        maxlength: 200,
+                    },
+                    direccion2: {
+                        required: true,
+                        minlength: 5,
+                        maxlength: 200,
+                    },
+                    num_direccion: {
+                        required: false,
+                        minlength: 1,
+                        maxlength: 5,
+                    },
+                    referencia: {
+                        required: false,
+                        minlength: 5,
+                        maxlength: 300,
+                    },
+                    telefono: {
+                        required: true,
+                        minlength: 10,
+                        maxlength: 10,
+                        validar_celular: true
+                    },
+                    telefono_conv: {
+                        required: false,
+                        minlength: 9,
+                        maxlength: 9,
+                        validar_convecional:true
+                    },
+                    email: {
+                        required: true,
+                        maxlength: 200,
+                        email_valido: true,
+                    },
+                    nacimiento: {
+                        required: true
+                    },
+                    id_sangre: {
+                        required: true
+                    },
+                },
+                messages: {
+                    nombres: {
+                        required: "Por favor ingresa los nombres",
+                        minlength: "Debe ingresar al menos 3 letras",
+                        lettersonly: "Debe ingresar unicamente letras y espacios",
+                        maxlength: "La descripcion debe tener maximo 50 caracteres",
+                    },
+                    apellido1: {
+                        required: "Por favor ingresa el primer apellido",
+                        minlength: "Debe ingresar al menos 3 letras",
+                        lettersonly: "Debe ingresar unicamente letras y espacios",
+                        maxlength: "La descripcion debe tener maximo 50 caracteres",
+                    },
+                    apellido2: {
+                        required: "Por favor ingresa el segundo apellido",
+                        minlength: "Debe ingresar al menos 3 letras",
+                        lettersonly: "Debe ingresar unicamente letras y espacios",
+                        maxlength: "La descripcion debe tener maximo 50 caracteres",
+                    },
+                    cedula: {
+                        required: "Por favor ingresa el numero de cedula",
+                        minlength: "La cedula debe tener 10 digitos",
+                        maxlength: "La cedula debe tener 10 digitos"
+                    },
+                    ruc: {
+                        minlength: "El ruc debe tener 13 digitos",
+                        maxlength: "El ruc debe tener 13 digitos"
+                    },
+                    pasaporte: {
+                        minlength: "El pasaporte debe tener al menos 5 digitos",
+                        maxlength: "El pasaporte debe tener maximo 20 digitos"
+                    },
+                    libretamilitar: {
+                        minlength: "La libreta militar debe tener al menos 5 digitos",
+                        maxlength: "La libreta militar debe tener maximo 20 digitos"
+                    },
+                    direccion: {
+                        required: 'La calle principal es requerida',
+                        minlength: "La calle principal debe tener al menos 5 caracteres",
+                        maxlength: "La calle principal debe tener maximo 200 caracteres"
+                    },
+                    direccion2: {
+                        required: 'La calle secundaria es requerida',
+                        minlength: "La calle secundaria debe tener al menos 5 caracteres",
+                        maxlength: "La calle secundaria debe tener maximo 200 caracteres"
+                    },
+                    num_direccion: {
+                        maxlength: "Maximo 5 digitos",
+                    },
+                    referencia: {
+                        minlength: "La referencia debe tener al menos 5 caracteres",
+                        maxlength: "La referencia debe tener maximo 200 caracteres",
+                    },
+                    telefono: {
+                        required: 'El numero celular es requerido',
+                        minlength: "Debe ingresar 10 digitos",
+                        maxlength: "Debe ingresar 10 digitos"
+                    },
+                    telefono_conv: {
+                        minlength: "Debe ingresar 9 digitos",
+                        maxlength: "Debe ingresar 9 digitos",
+                    },
+                    email: {
+                        required: 'El correo personal es requerido',
+                        email_valido: 'Correo no valido',
+                    },
+                    nacimiento: {
+                        required: 'Esta fecha es requerida'
+                    },
+                    sangre: {
+                        required: 'Seleccione un tipo de sangre'
+                    },
+                    {% block menssages_fom %}
+                    {% endblock %}
+                },
+            });
+            $('input[name="nombres"]').keypress(function (e) {
+                if (e.which >= 48 && e.which <= 57) {
+                    return false;
+                }
+            });
+            $('input[name="cedula"], input[name="ruc"], input[name="num_direccion"], input[name="telefono"], input[name="telefono_conv"]').keypress(function (e) {
+                    if (e.which !== 8 && e.which !== 0 && (e.which < 48 || e.which > 57)) {
+                        return false;
+                    }
+                });//Para solo numeros;
+
+            var hoy = moment();
+            $('#id_nacimiento').daterangepicker({
+                locale: {
+                    format: 'YYYY-MM-DD',
+                    applyLabel: '<i class="fa fa-check"></i> Seleccionar',
+                    cancelLabel: '<i class="fa fa-ban"></i> Cancelar',
+                },
+                singleDatePicker: true,
+                showDropdowns: true,
+                minYear: hoy.year()-90,
+                maxYear: hoy.year()-5,
+                maxDate: moment().subtract(5, 'years'),
+                minDate: moment().subtract(90, 'years'),
+                startDate: {% if nacimiento %} moment('{{ nacimiento }}', "YYYY-MM-DD") {% else %} moment().subtract(5, 'years'){% endif %}
+            });
+
+        });
+    </script>
+    {% block extra_validate %}
+    {% endblock %}
+{% endblock %}
+
+

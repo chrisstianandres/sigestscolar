@@ -1,7 +1,10 @@
+from datetime import datetime
+
 from django.contrib.auth.models import User
 from django.db import models
 
-from apps.extras import ModeloBase
+from apps.extras import ModeloBase, PrimaryKeyEncryptor
+from sigestscolar.settings import SECRET_KEY_ENCRIPT
 
 
 class Sexo(ModeloBase):
@@ -87,21 +90,23 @@ RH = [(1, '+'), (2, '-')]
 
 
 class TipoSangre(ModeloBase):
-    grupo = models.CharField(default='', max_length=2, verbose_name=u"Grupo", unique=True)
+    grupo = models.CharField(default='', max_length=2, verbose_name=u"Grupo")
     rh = models.IntegerField(default=1, choices=RH, verbose_name=u"RH")
 
     def __str__(self):
-        return '{}{}'.format(self.grupo, self.rh)
+        return '{}{}'.format(self.grupo, self.get_rh_display())
 
     class Meta:
         verbose_name = u"Tipo de Sangre"
         verbose_name_plural = u"Tipos de Sangre"
         ordering = ['grupo']
-        unique_together = ('grupo',)
 
     def save(self, *args, **kwargs):
         self.grupo = self.grupo.upper()
         super(TipoSangre, self).save(*args, **kwargs)
+
+
+Genero = [(1, 'Masculino'), (2, 'Femenino'), (3, 'Transgenero'), (4, 'Neutro'), (5, 'Sin genero')]
 
 
 class Persona(ModeloBase):
@@ -112,22 +117,22 @@ class Persona(ModeloBase):
     pasaporte = models.CharField(default='', max_length=20, blank=True, verbose_name=u"Pasaporte")
     ruc = models.CharField(default='', max_length=20, blank=True, null=True, verbose_name=u"Ruc")
     nacimiento = models.DateField(verbose_name=u"Fecha de nacimiento o constitución")
-    genero = models.ForeignKey(Sexo, blank=True, null=True, verbose_name=u'Sexo', on_delete=models.PROTECT)
+    genero = models.IntegerField(choices=Genero, default=1)
     lugarnacimiento = models.ForeignKey(Parroquia, blank=True, null=True, related_name='+', verbose_name=u"Lugar de nacimiento", on_delete=models.PROTECT)
     lugarecidencia = models.ForeignKey(Parroquia, blank=True, null=True, related_name='+', verbose_name=u"Lugar de residencia", on_delete=models.PROTECT)
     sector = models.CharField(default='', max_length=300, verbose_name=u"Sector de residencia")
     direccion = models.CharField(default='', max_length=300, verbose_name=u"Calle principal")
     direccion2 = models.CharField(default='', max_length=300, verbose_name=u"Calle secundaria")
     num_direccion = models.CharField(default='', max_length=15, verbose_name=u"Numero")
-    referencia = models.CharField(default='', max_length=100, verbose_name=u"Referencia")
+    referencia = models.CharField(default='', max_length=300, verbose_name=u"Referencia")
     telefono = models.CharField(default='', max_length=50, verbose_name=u"Telefono movil")
-    telefono_conv = models.CharField(default='', max_length=50, verbose_name=u"Telefono fijo")
+    telefono_conv = models.CharField(default='', blank=True, null=True, max_length=50, verbose_name=u"Telefono fijo")
     email = models.CharField(default='', max_length=200, verbose_name=u"Correo electronico personal")
     emailinst = models.CharField(default='', max_length=200, verbose_name=u"Correo electronico institucional")
     sangre = models.ForeignKey(TipoSangre, blank=True, null=True, verbose_name=u"Tipo de Sangre", on_delete=models.PROTECT)
-    libretamilitar = models.CharField(default='', max_length=20, verbose_name=u'Libreta militar')
-    usuario = models.ForeignKey(User, null=True, on_delete=models.PROTECT)
-    lgtbi = models.BooleanField(default=False, verbose_name=u'GLTBI')
+    libretamilitar = models.CharField(default='', blank=True, null=True, max_length=20, verbose_name=u'Libreta militar')
+    usuario = models.ForeignKey(User, null=True, blank=True, on_delete=models.PROTECT)
+    lgtbi = models.BooleanField(default=False, verbose_name=u'LGTBI')
     datosactualizados = models.IntegerField(default=0, verbose_name=u'Datos Actualizados')
 
     def __str__(self):
@@ -138,6 +143,31 @@ class Persona(ModeloBase):
         verbose_name_plural = u"Personal"
         ordering = ['apellido1', 'apellido2', 'nombres']
         unique_together = ('cedula', 'ruc', 'pasaporte',)
+
+    def nombre_completo(self):
+        return '{} {} {}'.format(self.nombres, self.apellido1, self.apellido2)
+
+    def icono_genero(self):
+        if self.genero == 1:
+            icono = 'fas fa-mars'
+            color = '#3498db'
+            return {'icono': icono, 'color': color}
+        elif self.genero == 2:
+            icono = 'fas fa-venus'
+            color = '#e83e8ca6'
+            return {'icono': icono, 'color': color}
+        elif self.genero == 3:
+            icono = 'fas fa-transgender'
+            color = '#6610f2b8'
+            return {'icono': icono, 'color': color}
+        elif self.genero == 4:
+            icono = 'fas fa-neuter'
+            color = '#28a745c2'
+            return {'icono': icono, 'color': color}
+        else:
+            icono = 'fas fa-genderless'
+            color = '#f39c12'
+            return {'icono': icono, 'color': color}
 
     def matriculado(self):
         return Matricula.objects.values("id").filter(cerrada=False, inscripcion__persona=self).exists()
@@ -266,6 +296,9 @@ class Persona(ModeloBase):
             return True
         return False
 
+    def edad_cumple(self):
+        return self.edad()+1
+
     def edad(self):
         hoy = datetime.now().date()
         try:
@@ -322,26 +355,19 @@ class Persona(ModeloBase):
             return self.administrativo_set.all()[0]
         return None
 
+    def encoded_id(self):
+        return PrimaryKeyEncryptor(SECRET_KEY_ENCRIPT).encrypt(self.id)
+
     def save(self, *args, **kwargs):
-        if self.tipopersona == 1 or self.tipopersona == 3:
-            self.apellido1 = self.apellido1.upper().strip()
-            self.apellido2 = self.apellido2.upper().strip()
-            self.cedula = self.cedula.upper().strip()
-            self.pasaporte = self.pasaporte.upper().strip()
-            self.nacionalidad = self.nacionalidad.upper().strip() if self.nacionalidad else ''
-        else:
-            self.ruc = self.ruc.upper().strip()
-            self.cedula = ''
-            self.pasaporte = ''
-            self.nacionalidad = ''
         self.nombres = self.nombres.upper().strip()
+        self.apellido1 = self.apellido1.upper().strip()
+        self.apellido2 = self.apellido2.upper().strip()
         self.direccion = self.direccion.upper().strip()
         self.direccion2 = self.direccion2.upper().strip()
-        self.num_direccion = self.num_direccion.upper().strip()
-        self.sector = self.sector.upper().strip()
-        self.ciudad = self.ciudad.upper().strip()
+        self.num_direccion = self.num_direccion.upper().strip() if self.num_direccion else ''
         self.telefono = self.telefono.upper().strip()
-        self.telefono_conv = self.telefono_conv.upper().strip()
+        self.cedula = self.cedula.upper().strip()
+        self.telefono_conv = self.telefono_conv.upper().strip() if self.telefono_conv else ''
         self.email = self.email.lower()
         self.emailinst = self.emailinst.lower() if self.emailinst else ''
         super(Persona, self).save(*args, **kwargs)

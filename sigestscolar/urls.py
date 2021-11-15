@@ -28,4 +28,5 @@ urlpatterns = [
     path('materias/', include('apps.materia.urls', namespace='materias')),
     path('productos/', include('apps.producto.urls', namespace='productos')),
     path('periodos/', include('apps.periodo.urls', namespace='periodos')),
+    path('externos/', include('apps.externo.urls', namespace='externos')),
 ]
