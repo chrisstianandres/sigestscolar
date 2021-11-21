@@ -176,23 +176,6 @@ class Persona(ModeloBase):
         return Matricula.objects.values("id").filter(cerrada=False, nivel__periodo=periodo,
                                                      inscripcion__persona=self).exists()
 
-    def crear_perfil(self, administrativo=None, inscripcion=None, profesor=None, externo=None):
-        if inscripcion:
-            perfil = PerfilUsuario(persona=self,
-                                   inscripcion=inscripcion)
-            perfil.save()
-        elif administrativo:
-            perfil = PerfilUsuario(persona=self,
-                                   administrativo=administrativo)
-            perfil.save()
-        elif profesor:
-            perfil = PerfilUsuario(persona=self,
-                                   profesor=profesor)
-            perfil.save()
-        elif externo:
-            perfil = PerfilUsuario(persona=externo.persona,
-                                   externo=externo)
-            perfil.save()
 
     def perfilusuario_administrativo(self):
         if self.perfilusuario_set.values("id").filter(administrativo__isnull=False,
@@ -316,6 +299,9 @@ class Persona(ModeloBase):
                 raise NameError('Error')
         except Exception as ex:
             return 0
+
+    def es_mayor_de_edad(self):
+        return self.edad()>=18
 
     def emails(self):
         if self.emailinst:

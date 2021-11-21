@@ -1,8 +1,8 @@
 {% extends 'bases/base_list.html' %}
 {% block header_tabla %}
     <th class="dt-center" style="width: 16%">Nombre completo</th>
+    <th class="dt-center" style="width: 10%">Usuario</th>
     <th class="dt-center" style="width: 15%">Identificaciones</th>
-    <th class="dt-center" style="width: 24%">Direccion</th>
     <th class="dt-center" style="width: 20%">Contactos</th>
     <th class="dt-center" style="width: 15%">Datos Extras</th>
     <th style="text-align:center; width: 10%" class="dt-center"><i class="fa fa-cogs"></i></th>
@@ -11,6 +11,13 @@
     {% for elemento in page_obj %}
         <tr>
             <td class="dt-center">{{ elemento.persona.nombre_completo }}<br>
+                {% if elemento.persona.mi_cumpleannos %}
+                    <b>Hoy es su cumpleaños</b><i data-toggle="tooltip" data-placement="bottom"
+                                                  title="Hoy cumple {{ elemento.persona.edad_cumple }} años"
+                                                  class="fas fa-birthday-cake fa-2x" style="color: #e21b76"></i>
+                {% endif %}
+            </td>
+            <td class="dt-center">{{ elemento.persona.usuario.username }}<br>
                 {% if elemento.persona.mi_cumpleannos %}
                     <b>Hoy es su cumpleaños</b><i data-toggle="tooltip" data-placement="bottom"
                                                   title="Hoy cumple {{ elemento.persona.edad_cumple }} años"
@@ -29,21 +36,6 @@
                 {% if elemento.persona.libretamilitar %}
                     <b>Libreta Militar: </b>{{ elemento.persona.libretamilitar }}
 
-                {% endif %}
-            </td>
-            <td class="dt-center">
-                {% if elemento.persona.direccion %}
-                    <b>Calle principal: </b> {{ elemento.persona.direccion }}<br>
-                    {% if elemento.persona.direccion2 %}
-                        <b>Calle Secundaria: </b> {{ elemento.persona.direccion2 }}<br>
-                    {% endif %}
-                    {% if elemento.persona.num_direccion %}
-                        <b>Numero: </b>{{ elemento.persona.num_direccion }}<br>
-                    {% endif %}
-                {% endif %}
-
-                {% if elemento.persona.referencia %}
-                    <b>Referencia: </b><br>{{ elemento.persona.referencia }}<br>
                 {% endif %}
             </td>
             <td class="dt-center">
@@ -84,27 +76,6 @@
                    href="{{ request.path }}?action=edit&pk={{ elemento.persona.encoded_id }}"{% endif %}><i
                         class="fa fa-edit"></i></a>
                 <a type="button" class="btn btn-danger btn-xs eliminar" pk="{{ elemento.pk }}"><i
-                        class="fa fa-trash"></i></a>
-                <div class="nav-item dropdown">
-                    <a type="button" class="btn btn-default dropdown-toggle dropdown-icon btn-xs"
-                            data-toggle="dropdown"
-                            aria-expanded="true">
-                        <i class="fa fa-cog"></i>
-                    </a>
-                    <div class="dropdown-menu dropdown-menu-xs dropdown-menu-right">
-                     {% if elemento.persona.es_mayor_de_edad %}
-                        {% if not elemento.persona.es_administrativo %}
-                            <a class="dropdown-item administrativo" href="#" obj="{{ elemento.persona.pk }}"
-                               style="font-size: 12px;"><i class="fa fa-user-cog"></i> Crear Administrativo</a>
-                        {% endif %}
-                        {% if not elemento.persona.es_docente %}
-                            <a class="dropdown-item docente" href="#" obj="{{ elemento.persona.pk }}"
-                               style="font-size: 12px;"> <i class="fa fa-university"></i> Crear Docente</a>
-                        {% endif %}
-                     {% endif %}
-                    </div>
-                </div>
-
             </td>
         </tr>
     {% empty %}
@@ -113,9 +84,9 @@
         </tr>
     {% endfor %}
     <style>
-        {#.dropdown-menu {#}
-        {#    left: -40px !important;#}
-        {# }#}
+        .dropdown-menu {
+            left: -40px !important;
+        }
     </style>
 {% endblock %}
 {% block validate_form %}

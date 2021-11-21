@@ -1,16 +1,22 @@
+from datetime import datetime
+
+from django.contrib.auth.models import Group
 from django.core.paginator import Paginator
+from django.db import transaction
 from django.forms import model_to_dict
 from django.http import JsonResponse
 from django.shortcuts import render
 from django.views.decorators.csrf import csrf_exempt
 from django.views.generic import TemplateView
 
-from apps.backEnd import nombre_empresa
+from apps.administrativo.models import Administrativo
+from apps.backEnd import nombre_empresa, generar_usuario
 from apps.externo.models import Externo
 from apps.extras import PrimaryKeyEncryptor
 from apps.perfil.models import PerfilUsuario
 from apps.persona.models import Persona
 from apps.externo.forms import Formulario
+from apps.profesor.models import Profesor
 
 from sigestscolar.settings import SECRET_KEY_ENCRIPT
 
@@ -31,36 +37,70 @@ class Listview(TemplateView):
 
     def post(self, request, *args, **kwargs):
         data = {}
-        try:
-            action = request.POST['action']
-            if action == 'add':
-                form = self.form(request.POST)
-                if form.is_valid():
-                    perfil = self.second_model()
-                    perfil.persona = form.save()
-                    perfil.externo = True
-                    perfil.save()
-                    externo = self.model()
-                    externo.persona = perfil.persona
-                    externo.save()
+        with transaction.atomic():
+            try:
+                action = request.POST['action']
+                if action == 'add':
+                    form = self.form(request.POST)
+                    if form.is_valid():
+                        perfil = self.second_model()
+                        perfil.persona = form.save()
+                        perfil.externo = True
+                        perfil.save()
+                        externo = self.model()
+                        externo.persona = perfil.persona
+                        externo.save()
+                    else:
+                        data['error'] = form.errors
+                elif action == 'edit':
+                    pk = PrimaryKeyEncryptor(SECRET_KEY_ENCRIPT).decrypt(request.POST['pk'])
+                    objeto = self.model_person.objects.get(pk=pk)
+                    form = self.form(request.POST, instance=objeto)
+                    if form.is_valid():
+                        form.save()
+                    else:
+                        data['error'] = form.errors
+                elif action == 'delete':
+                    objeto = self.model.objects.get(pk=request.POST['pk'])
+                    objeto.delete()
+                elif action == 'add_administrativo':
+                    try:
+                        persona = Persona.objects.get(pk=request.POST['id'])
+                        if persona.es_administrativo():
+                            data['error'] = 'Ya existe un perfil administrativo para esta persona'
+                        administrativo = Administrativo(persona=persona, fechaingreso=datetime.now().date())
+                        administrativo.save(request)
+                        g = Group.objects.get(name='Administrativo')
+                        if not persona.usuario:
+                            generar_usuario(persona, g.id)
+                        g.user_set.add(persona.usuario)
+                        g.save()
+                        perfil = PerfilUsuario(persona=persona, administrativo=administrativo)
+                        perfil.save()
+                    except Exception as ex:
+                        transaction.set_rollback(True)
+                        data['error'] = 'Error en la transaccion.'
+                elif action == 'add_docente':
+                    try:
+                        persona = Persona.objects.get(pk=request.POST['id'])
+                        if persona.es_profesor():
+                            data['error'] = 'Ya existe un perfil docente para esta persona'
+                        profesor = Profesor(persona=persona, fechaingreso=datetime.now().date())
+                        profesor.save(request)
+                        g = Group.objects.get(name='Docente')
+                        if not persona.usuario:
+                            generar_usuario(persona, g.id)
+                        g.user_set.add(persona.usuario)
+                        g.save()
+                        perfil = PerfilUsuario(persona=persona, profesor=profesor)
+                        perfil.save()
+                    except Exception as ex:
+                        data['error'] = 'Error en la transaccion.'
                 else:
-                    data['error'] = form.errors
-            elif action == 'edit':
-                pk = PrimaryKeyEncryptor(SECRET_KEY_ENCRIPT).decrypt(request.POST['pk'])
-                objeto = self.model_person.objects.get(pk=pk)
-                form = self.form(request.POST, instance=objeto)
-                if form.is_valid():
-                    form.save()
-                else:
-                    data['error'] = form.errors
-            elif action == 'delete':
-                objeto = self.model.objects.get(pk=request.POST['pk'])
-                objeto.delete()
-            else:
-                data['error'] = 'No ha seleccionado una opcion'
-        except Exception as e:
-            data['error'] = str(e)
-        return JsonResponse(data, safe=False)
+                    data['error'] = 'No ha seleccionado una opcion'
+            except Exception as e:
+                data['error'] = str(e)
+            return JsonResponse(data, safe=False)
 
     def get(self, request, *args, **kwargs):
         data = {}

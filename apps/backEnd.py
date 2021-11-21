@@ -4,7 +4,7 @@ from email.mime.multipart import MIMEMultipart
 from email.mime.text import MIMEText
 from crum import get_current_request
 
-from django.contrib.auth.models import Group
+from django.contrib.auth.models import Group, User
 from django.contrib.auth.views import LoginView
 from django.core.exceptions import ObjectDoesNotExist
 from django.shortcuts import render, HttpResponseRedirect, redirect
@@ -26,6 +26,7 @@ from django.views.decorators.csrf import csrf_exempt
 from django.views.generic.base import View
 
 from apps.empresa.models import Empresa
+from apps.perfil.models import PerfilUsuario
 
 
 def nombre_empresa():
@@ -74,6 +75,25 @@ class DashboardView(TemplateView):
         return data
 
 
+def generar_usuario(persona, g):
+    usuario = User(username=persona.cedula)
+    usuario.set_password(persona.cedula)
+    usuario.save()
+    persona.usuario = usuario
+    persona.save()
+    return usuario
+
+
+def crear_perfil_usuario(persona, administrativo=None, inscripcion=None, profesor=None):
+    if inscripcion:
+        perfil = PerfilUsuario(persona=persona, inscripcion=inscripcion)
+        perfil.save()
+    elif administrativo:
+        perfil = PerfilUsuario(persona=persona, administrativo=administrativo)
+        perfil.save()
+    elif profesor:
+        perfil = PerfilUsuario(persona=persona, profesor=profesor)
+        perfil.save()
 # class LoginFormView(LoginView):
 #     template_name = 'front-end/login.html'
 #

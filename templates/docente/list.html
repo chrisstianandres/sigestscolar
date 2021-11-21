@@ -85,26 +85,6 @@
                         class="fa fa-edit"></i></a>
                 <a type="button" class="btn btn-danger btn-xs eliminar" pk="{{ elemento.pk }}"><i
                         class="fa fa-trash"></i></a>
-                <div class="nav-item dropdown">
-                    <a type="button" class="btn btn-default dropdown-toggle dropdown-icon btn-xs"
-                            data-toggle="dropdown"
-                            aria-expanded="true">
-                        <i class="fa fa-cog"></i>
-                    </a>
-                    <div class="dropdown-menu dropdown-menu-xs dropdown-menu-right">
-                     {% if elemento.persona.es_mayor_de_edad %}
-                        {% if not elemento.persona.es_administrativo %}
-                            <a class="dropdown-item administrativo" href="#" obj="{{ elemento.persona.pk }}"
-                               style="font-size: 12px;"><i class="fa fa-user-cog"></i> Crear Administrativo</a>
-                        {% endif %}
-                        {% if not elemento.persona.es_docente %}
-                            <a class="dropdown-item docente" href="#" obj="{{ elemento.persona.pk }}"
-                               style="font-size: 12px;"> <i class="fa fa-university"></i> Crear Docente</a>
-                        {% endif %}
-                     {% endif %}
-                    </div>
-                </div>
-
             </td>
         </tr>
     {% empty %}
@@ -113,9 +93,9 @@
         </tr>
     {% endfor %}
     <style>
-        {#.dropdown-menu {#}
-        {#    left: -40px !important;#}
-        {# }#}
+        .dropdown-menu {
+            left: -40px !important;
+        }
     </style>
 {% endblock %}
 {% block validate_form %}
