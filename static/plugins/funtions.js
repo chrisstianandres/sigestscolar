@@ -567,6 +567,9 @@ function validador() {
     jQuery.validator.addMethod("validar_cedula", function (value, element) {
         return validar(element);
     }, "Número de cedula no valido para Ecuador");
+    jQuery.validator.addMethod("cupominimo", function (value, element) {
+        return element.value >= 5;
+    }, "Ingrese un cupo de al menos 5 personas");
 
     jQuery.validator.addMethod("validar_celular", function (value, element) {
         return validar_celular(element);

@@ -7,6 +7,7 @@ from apps.persona.models import Persona
 
 class Alumno(ModeloBase):
     persona = models.ForeignKey(Persona, verbose_name=u"Persona", on_delete=models.PROTECT)
+    representante = models.ForeignKey(Persona, related_name='+', blank=True, null=True, on_delete=models.PROTECT, verbose_name=u"Representante")
     fechaingreso = models.DateField(verbose_name=u'Fecha ingreso')
     activo = models.BooleanField(default=True, verbose_name=u"Activo")
 

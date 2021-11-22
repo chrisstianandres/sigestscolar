@@ -43,7 +43,7 @@ class FormularioApertura(forms.ModelForm):
 
     class Meta:
         model = CursoParalelo
-        fields = ['periodo', 'curso', 'paralelo']
+        fields = ['periodo', 'curso', 'paralelo', 'cupo']
         labels = {'curso': 'Curso', 'paralelo': 'Paralelo', 'periodo': 'Periodo'}
         # widgets = {'curso': forms.Select(), 'paralelo': forms.Select(), 'periodo': forms.Select()}
 

@@ -42,12 +42,6 @@ class Inscripcion(ModeloBase):
             return self.matricula_set.filter(cerrada=False)[0]
         return None
 
-    def save(self, *args, **kwargs):
-        self.colegio = self.colegio.upper().strip()
-        self.identificador = self.identificador.upper().strip()
-        self.coordinacion = self.mi_coordinacion()
-        super(Inscripcion, self).save(*args, **kwargs)
-
 
 # class CursoInscripcion(ModeloBase):
 #     curso = models.ForeignKey(CursoParalelo, on_delete=models.PROTECT)

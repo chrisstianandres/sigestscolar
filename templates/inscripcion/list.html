@@ -64,18 +64,19 @@
     <br>
 {% endblock %}
 {% block header_tabla %}
+    <th class="dt-center">Alumno</th>
     <th class="dt-center">Curso</th>
     <th class="dt-center">Paralelo</th>
     <th class="dt-center">Periodo</th>
-    <th class="dt-center">Estadisticas</th>
     <th style="text-align:center; width: 10%" class="dt-center"><i class="fa fa-cogs"></i></th>
 {% endblock %}
 {% block body_tabla %}
     {% for elemento in page_obj %}
         <tr>
-            <td class="dt-center">{{ elemento.curso.nombre }}</td>
-            <td class="dt-center">{{ elemento.paralelo.nombre }}</td>
-            <td class="dt-center">{{ elemento.periodo.nombre }}</td>
+            <td class="dt-center">{{ elemento.alumno.persona }}</td>
+            <td class="dt-center">{{ elemento.curso.curso.nombre }}</td>
+            <td class="dt-center">{{ elemento.curso.paralelo.nombre }}</td>
+            <td class="dt-center">{{ elemento.curso.periodo.nombre }}</td>
             <td class="dt-center" style="font-size: 14px"><b>Total materias: </b> <span
                     class="badge badge-info">{{ elemento.total_materias }}</span> <br>
                 <b>Total inscritos: </b> <span class="badge badge-info">{{ elemento.total_inscritos }}</span><br>
@@ -309,7 +310,7 @@
 
             });
             {% if periodo %}
-                var newOption = new Option('{{ periodo.nombre }}', {{ periodo.id }}, true, true);
+                |
                 $('#id_periodos').append(newOption).trigger('change');
             {% endif %}
             {% if curso %}

@@ -1,0 +1,320 @@
+{% extends 'bases/base_form.html' %}
+
+{% block  form %}
+       <form id="form" class="{% block inline %}{% endblock %}">
+        <div class="card-body">
+            <p><b><i class="fas fa-id-card-alt"></i> Alumno</b></p>
+            <hr>
+            <div class="row">
+                <input type="hidden" name="action" value="{{ action }}">
+                <input type="hidden" name="pk" value="{{ pk }}">
+                <div class="col-sm-6">
+                    <div class="form-group">
+                        <label for="id_persona">Alumno:</label>
+                        <select name="persona" id="id_persona" class="select2 form-control" style="width: 100%"></select>
+                    </div>
+                </div>
+                <div class="col-sm-6">
+                    <div class="form-group">
+                        <label for="id_representante">Representante:</label>
+                        <select name="representante" id="id_representante" class="select2 form-control" style="width: 100%"></select>
+                    </div>
+                </div>
+            </div>
+            <br>
+            <p><b><i class="far fa-id-card"></i> Curso:</b></p>
+            <hr>
+            <div class="row">
+                <div class="col-sm-4">
+                    <div class="form-group">
+                        <label for="id_periodo">Periodo:</label>
+                        <select name="periodo" id="id_periodo" class="select2 form-control" style="width: 100%;"></select>
+                    </div>
+                </div>
+                <div class="col-sm-4">
+                   <div class="form-group">
+                        <label for="id_curso">Curso:</label>
+                        <select name="curso" id="id_curso" class="select2 form-control" style="width: 100%;"></select>
+                    </div>
+                </div>
+                <div class="col-sm-4">
+                     <div class="form-group">
+                        <label for="id_paralelo">Paralelo:</label>
+                        <select name="paralelo" id="id_paralelo" class="select2 form-control" style="width: 100%"></select>
+                    </div>
+                </div>
+            </div>
+            {% block extra_form %}
+
+            {% endblock %}
+        </div>
+        <!-- /.card-body -->
+
+        <div class="card-footer">
+            <button type="submit" class="btn btn-primary">Guardar</button>
+            <button type="button" class="btn btn-danger"
+                    onclick="window.location.href = '{{ request.path }}';">Cancelar
+            </button>
+        </div>
+    </form>
+{% endblock %}
+{% block sumbit_form %}
+{% endblock %}
+{% block validate_form %}
+    <script>
+        $(function () {
+            $('#id_periodo').select2({
+                language: {
+                    inputTooShort: function () {
+                        return "Ingresa al menos un caracter...";
+                    },
+                    "noResults": function () {
+                        return "Sin resultados";
+                    },
+                    "searching": function () {
+                        return "Buscando...";
+                    }
+                },
+                theme: 'bootstrap4',
+                allowClear: true,
+                ajax: {
+                    delay: 250,
+                    type: 'GET',
+                    url: '/inscripciones/',
+                    data: function (params) {
+                        return {
+                            term: params.term,
+                            action: 'search_periodo'
+                        };
+                    },
+                    processResults: function (data) {
+                        return {
+                            results: data
+                        };
+
+                    },
+
+                },
+                placeholder: 'Busca un periodo',
+                minimumInputLength: 1,
+            });
+            $('#id_curso').select2({
+                language: {
+                    inputTooShort: function () {
+                        return "Ingresa al menos un caracter...";
+                    },
+                    "noResults": function () {
+                        return "Sin resultados";
+                    },
+                    "searching": function () {
+                        return "Buscando...";
+                    }
+                },
+                theme: 'bootstrap4',
+                allowClear: true,
+                ajax: {
+                    delay: 250,
+                    type: 'GET',
+                    url: '/inscripciones/',
+                    data: function (params) {
+                        return {
+                            term: params.term,
+                            action: 'search_curso',
+                            id: $('#id_periodo option:selected').val()
+                        };
+                    },
+                    processResults: function (data) {
+                        return {
+                            results: data
+                        };
+
+                    },
+
+                },
+                placeholder: 'Busca un Curso',
+                minimumInputLength: 1,
+            });
+            $('#id_paralelo').select2({
+                language: {
+                    inputTooShort: function () {
+                        return "Ingresa al menos un caracter...";
+                    },
+                    "noResults": function () {
+                        return "Sin resultados";
+                    },
+                    "searching": function () {
+                        return "Buscando...";
+                    }
+                },
+                theme: 'bootstrap4',
+                allowClear: true,
+                ajax: {
+                    delay: 250,
+                    type: 'GET',
+                    url: '/inscripciones/',
+                    data: function (params) {
+                        return {
+                            term: params.term,
+                            action: 'search_paralelo',
+                            id: $('#id_periodo option:selected').val(),
+                            idcurso: $('#id_curso option:selected').val()
+                        };
+                    },
+                    processResults: function (data) {
+                        return {
+                            results: data
+                        };
+
+                    },
+
+                },
+                placeholder: 'Busca un Paralelo',
+                minimumInputLength: 1,
+            });
+            $('#id_persona').select2({
+                language: {
+                    inputTooShort: function () {
+                        return "Ingresa al menos un caracter...";
+                    },
+                    "noResults": function () {
+                        return "Sin resultados";
+                    },
+                    "searching": function () {
+                        return "Buscando...";
+                    }
+                },
+                theme: 'bootstrap4',
+                allowClear: true,
+                ajax: {
+                    delay: 250,
+                    type: 'GET',
+                    url: '/inscripciones/',
+                    data: function (params) {
+                        return {
+                            term: params.term,
+                            action: 'search_alumno',
+                        };
+                    },
+                    processResults: function (data) {
+                        return {
+                            results: data
+                        };
+
+                    },
+
+                },
+                placeholder: 'Busca un alumno',
+                minimumInputLength: 1,
+            }).on('select2:select', function (e) {
+                $.ajax({
+                    type: "GET",
+                    url: '/inscripciones/',
+                    data: {
+                        "id": $('#id_persona option:selected').val(),
+                        'action': 'check_alumno'
+                    },
+                    dataType: 'json',
+                    success: function (data) {
+                        if (data.resp === true){
+                            preguntar('Atencion!', 'Este almuno tiene como respresentante a '+data.representante+' ' +
+                                'Desea conservarlo como representante?', function () {
+                                var newOption = new Option(data.text , data.id , true, true);
+                                $('#id_representante').append(newOption).trigger('change');
+                            }, function (e) {})
+                        } else {
+                            menssaje_ok('Atencion!', 'Este alumno no tiene un representante asiganado, por favor elige uno para continuar', 'info', function () {})
+                        }
+                    },
+                    error: function (xhr, status, data) {
+                        alert(data);
+                    },
+
+                })
+            });
+            $('#id_representante').select2({
+                language: {
+                    inputTooShort: function () {
+                        return "Ingresa al menos un caracter...";
+                    },
+                    "noResults": function () {
+                        return "Sin resultados";
+                    },
+                    "searching": function () {
+                        return "Buscando...";
+                    }
+                },
+                theme: 'bootstrap4',
+                allowClear: true,
+                ajax: {
+                    delay: 250,
+                    type: 'GET',
+                    url: '/inscripciones/',
+                    data: function (params) {
+                        return {
+                            term: params.term,
+                            action: 'search_representante',
+                        };
+                    },
+                    processResults: function (data) {
+                        return {
+                            results: data
+                        };
+
+                    },
+
+                },
+                placeholder: 'Busca un representante',
+                minimumInputLength: 1,
+            });
+            $('#table_materias').on('click', 'a[rel="remove"]', function () {
+                var tr = tblmaterias.cell($(this).closest('td, li')).index();
+                borrar_todo_alert('Alerta de Eliminación',
+                    'Esta seguro que desea eliminar esta materia <br> ' +
+                    '<strong>CONTINUAR?</strong>', function () {
+                        apertura.items.materias.splice(tr.row, 1);
+                        apertura.list();
+                    })
+            });
+            validador();
+            $("#form").validate({
+                rules: {
+                    periodo: {required: true,},
+                    paralelo: {required: true},
+                    curso: {required: true},
+                    persona: {required: true},
+                    representante: {required: true},
+                },
+                messages: {
+                    periodo: {required: "Por favor elige un periodo"},
+                    paralelo: {required: "Por favor elige un paralelo"},
+                    curso: {required: "Por favor elige un curso"},
+                    persona: {required: "Por favor elige un alumno"},
+                    representante: {required: "Por favor elige un representante"},
+                },
+            });
+            $('[data-toggle="tooltip"]').tooltip();
+            $('#form').on('submit', function (e) {
+                e.preventDefault();
+                if ($(this).valid()) {
+                    var parametros = new FormData(this);
+                    {% if pk %}parametros['pk'] = '{{ pk }}';{% endif %}
+                    save_with_ajax2('Estas seguro?', '/inscripciones/', 'Desea guardar esta informacion?', parametros,
+                        function (e) {
+                            menssaje_ok('Todo correcto!', 'Informacion guardada corectamente!', 'success', function (e) {
+                                window.location.replace('/inscripciones/');
+                            })
+
+                        })
+                }
+
+            });
+            {% if materias %}
+                apertura.add({{ materias.0|safe }});
+            {% endif %}
+            apertura.list();
+        });
+
+
+    </script>
+
+{% endblock %}

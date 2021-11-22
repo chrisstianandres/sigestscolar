@@ -50,6 +50,7 @@
         var apertura = {
             items: {
                 periodo: '',
+                cupo: '',
                 curso: '',
                 paralelo: '',
                 materias: [],
@@ -240,12 +241,14 @@
                 rules: {
                     periodo: {required: true,},
                     paralelo: {required: true},
-                    curso: {required: true}
+                    curso: {required: true},
+                    cupo: {required: true, cupominimo:true},
                 },
                 messages: {
                     periodo: {required: "Por favor elige un periodo"},
                     paralelo: {required: "Por favor elige un paralelo"},
                     curso: {required: "Por favor elige un curso"},
+                    cupo: {required: "Por favor ingresa un cupo"},
                 },
             });
             $('[data-toggle="tooltip"]').tooltip();
@@ -255,6 +258,7 @@
                     apertura.items.curso = $('#id_curso').val();
                     apertura.items.paralelo = $('#id_paralelo').val();
                     apertura.items.periodo = $('#id_periodo').val();
+                    apertura.items.cupo = $('#id_cupo').val();
                     var parametros = {'apertura': JSON.stringify(apertura.items)};
                     parametros['action'] = '{{ action }}';
                      {% if pk %}parametros['pk'] = '{{ pk }}';{% endif %}

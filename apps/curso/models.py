@@ -34,6 +34,7 @@ class CursoParalelo(ModeloBase):
     curso = models.ForeignKey(Curso, on_delete=models.PROTECT)
     paralelo = models.ForeignKey(Paralelo, on_delete=models.PROTECT)
     periodo = models.ForeignKey(PeriodoLectivo, on_delete=models.PROTECT)
+    cupo = models.IntegerField(default=5)
 
     def __str__(self):
         return '{} - {}  {}'.format(self.periodo.nombre, self.curso.nombre, self.paralelo.nombre)
@@ -54,6 +55,9 @@ class CursoParalelo(ModeloBase):
 
     def encoded_id(self):
         return PrimaryKeyEncryptor(SECRET_KEY_ENCRIPT).encrypt(self.id)
+
+    def cupos_disponible(self):
+        return self.total_inscritos() < self.cupo
 
     class Meta:
         verbose_name = u"Curso Paralelo"
