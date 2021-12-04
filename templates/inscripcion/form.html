@@ -7,7 +7,7 @@
             <hr>
             <div class="row">
                 <input type="hidden" name="action" value="{{ action }}">
-                <input type="hidden" name="pk" value="{{ pk }}">
+                <input type="hidden" name="pk" value="{{ instancia.pk }}">
                 <div class="col-sm-6">
                     <div class="form-group">
                         <label for="id_persona">Alumno:</label>
@@ -63,6 +63,13 @@
 {% block validate_form %}
     <script>
         $(function () {
+            {% if instancia %}
+                var personaedit = new Option('{{ instancia.alumno.persona.nombre_completo }}', {{ instancia.alumno.persona.id }}, true, true);
+                var representanteedit = new Option('{{ instancia.alumno.representante.nombre_completo }}', {{ instancia.alumno.representante.id }}, true, true);
+                var periodoedit = new Option('{{ instancia.curso.periodo.nombre }}', {{ instancia.curso.periodo.id }}, true, true);
+                var cursoedit = new Option('{{ instancia.curso.curso.nombre }}', {{ instancia.curso.curso.id }}, true, true);
+                var paraleloedit = new Option('{{ instancia.curso.paralelo.nombre }}', {{ instancia.curso.id }}, true, true);
+            {% endif %}
             $('#id_periodo').select2({
                 language: {
                     inputTooShort: function () {
@@ -97,7 +104,32 @@
                 },
                 placeholder: 'Busca un periodo',
                 minimumInputLength: 1,
-            });
+            }).on('select2:select', function (e) {
+                $.ajax({
+                    type: "GET",
+                    url: '/inscripciones/',
+                    data: {
+                        "id": $('#id_periodo option:selected').val(),
+                        "alumno": $('#id_persona option:selected').val(),
+                        'action': 'check_inscripcion'
+                    },
+                    dataType: 'json',
+                    success: function (data) {
+                        if (data.resp === true){
+                            menssaje_error('Este Alumn@ ya se encuentra inscrito en el periodo seleccionado');
+                            $('#id_periodo').val(null).change();
+                        } else if (data.resp === false && data.mensaje) {
+                            menssaje_error(data.mensaje);
+                            $('#id_periodo').val(null).change();
+                        }
+                    },
+                    error: function (xhr, status, data) {
+                        alert(data);
+                    },
+
+                })
+            })
+            {% if instancia %}.append(periodoedit).trigger('change'){% endif %};
             $('#id_curso').select2({
                 language: {
                     inputTooShort: function () {
@@ -133,7 +165,7 @@
                 },
                 placeholder: 'Busca un Curso',
                 minimumInputLength: 1,
-            });
+            }){% if instancia %}.append(cursoedit).trigger('change'){% endif %};
             $('#id_paralelo').select2({
                 language: {
                     inputTooShort: function () {
@@ -170,7 +202,7 @@
                 },
                 placeholder: 'Busca un Paralelo',
                 minimumInputLength: 1,
-            });
+            }){% if instancia %}.append(paraleloedit).trigger('change'){% endif %};
             $('#id_persona').select2({
                 language: {
                     inputTooShort: function () {
@@ -216,11 +248,13 @@
                     dataType: 'json',
                     success: function (data) {
                         if (data.resp === true){
-                            preguntar('Atencion!', 'Este almuno tiene como respresentante a '+data.representante+' ' +
+                            preguntar_si_no('Atencion!', 'Este almuno tiene como respresentante a: <br> <b>'+data.text+'</b><br> ' +
                                 'Desea conservarlo como representante?', function () {
                                 var newOption = new Option(data.text , data.id , true, true);
                                 $('#id_representante').append(newOption).trigger('change');
-                            }, function (e) {})
+                            }, function () {
+                                $('#id_representante').val(null).trigger('change')
+                            })
                         } else {
                             menssaje_ok('Atencion!', 'Este alumno no tiene un representante asiganado, por favor elige uno para continuar', 'info', function () {})
                         }
@@ -230,7 +264,10 @@
                     },
 
                 })
-            });
+            })
+                .on('change', function () {
+                $('#id_representante').val(null).trigger('change')
+            }){% if instancia %}.append(personaedit).trigger('change'){% endif %};
             $('#id_representante').select2({
                 language: {
                     inputTooShort: function () {
@@ -265,16 +302,7 @@
                 },
                 placeholder: 'Busca un representante',
                 minimumInputLength: 1,
-            });
-            $('#table_materias').on('click', 'a[rel="remove"]', function () {
-                var tr = tblmaterias.cell($(this).closest('td, li')).index();
-                borrar_todo_alert('Alerta de Eliminación',
-                    'Esta seguro que desea eliminar esta materia <br> ' +
-                    '<strong>CONTINUAR?</strong>', function () {
-                        apertura.items.materias.splice(tr.row, 1);
-                        apertura.list();
-                    })
-            });
+            }){% if instancia %}.append(representanteedit).trigger('change'){% endif %};
             validador();
             $("#form").validate({
                 rules: {
@@ -308,10 +336,6 @@
                 }
 
             });
-            {% if materias %}
-                apertura.add({{ materias.0|safe }});
-            {% endif %}
-            apertura.list();
         });
 
 

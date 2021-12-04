@@ -42,7 +42,6 @@ class Listview(TemplateView):
             action = request.POST['action']
             if action == 'add':
                 with transaction.atomic():
-                    print(request.POST)
                     alumno_id = request.POST['persona']
                     representante_id = request.POST['representante']
                     paralelo_id = request.POST['paralelo']
@@ -61,16 +60,18 @@ class Listview(TemplateView):
                         data['error'] = form.errors
             elif action == 'edit':
                 with transaction.atomic():
-                    pk = PrimaryKeyEncryptor(SECRET_KEY_ENCRIPT).decrypt(request.POST['pk'])
-                    info = json.loads(request.POST['apertura'])
-                    objeto = self.model.objects.get(pk=pk)
-                    form = self.form(info, instance=objeto)
+                    instancia = self.model.objects.get(id=request.POST['pk'])
+                    alumno_id = request.POST['persona']
+                    representante_id = request.POST['representante']
+                    paralelo_id = request.POST['paralelo']
+                    alumno = Alumno.objects.get(persona_id=alumno_id)
+                    if not alumno.representante_id == representante_id:
+                        alumno.representante_id = representante_id
+                        alumno.save()
+                    info = {'alumno': alumno, 'curso': paralelo_id, 'fecha': datetime.now().date()}
+                    form = self.form(info, instance=instancia)
                     if form.is_valid():
                         form.save()
-                        for m in objeto.cursomateria_set.all().exclude(id__in=[id for id in MateriaAsignada.objects.filter(materia_id__in=objeto.cursomateria_set.all().values_list('materia_id'))]):
-                            m.delete()
-                        for materia in info['materias']:
-                            CursoMateria(curso=objeto, materia_id=materia['id']).save()
                     else:
                         data['error'] = form.errors
             elif action == 'delete':
@@ -106,16 +107,10 @@ class Listview(TemplateView):
                 if action == 'edit':
                     data = self.get_context_data()
                     data['action'] = action
-                    data['pk'] = request.GET['pk']
                     pk = PrimaryKeyEncryptor(SECRET_KEY_ENCRIPT).decrypt(request.GET['pk'])
                     instancia = self.model.objects.get(id=pk)
-                    data['form'] = self.form(instance=instancia)
-                    if instancia.total_materias() > 0:
-                        materias = []
-                        for m in instancia.cursomateria_set.all():
-                            materias.append({'identificacion': m.materia.identificacion, 'nombre': m.materia.nombre, 'alias': m.materia.alias, 'id': m.materia.id})
-                        data['materias'] = materias
-                    data['titulo_form'] = 'Editar curso aperturado'
+                    data['instancia'] = instancia
+                    data['titulo_form'] = 'Editar inscripcion'
                     return render(request, self.template_name_add, data)
                 if action == 'filter_periodo':
                     data = []
@@ -129,7 +124,7 @@ class Listview(TemplateView):
                     filtros = Q(status=True)
                     term = request.GET['term']
                     if 'id' in request.GET and not request.GET['id'] == '':
-                        ids = self.model.objects.values_list('curso_id').filter(Q(periodo_id=request.GET['id']))
+                        ids = self.model.objects.values_list('curso__curso_id').filter(Q(curso__periodo_id=request.GET['id']))
                         filtros.add(Q(id__in=ids), Q.AND)
                     query = Curso.objects.filter(filtros, Q(nombre__icontains=term) | Q(descripcion__icontains=term))
                     for objeto in query[:10]:
@@ -141,10 +136,10 @@ class Listview(TemplateView):
                     filtros = Q(status=True)
                     term = request.GET['term']
                     if 'id' in request.GET and not request.GET['id'] == '':
-                        filtros.add(Q(periodo_id=request.GET['id']), Q.AND)
+                        filtros.add(Q(curso__periodo_id=request.GET['id']), Q.AND)
                     if 'curso_id' in request.GET and not request.GET['curso_id'] == '':
-                        filtros.add(Q(curso_id=request.GET['curso_id']), Q.AND)
-                    ids = self.model.objects.values_list('paralelo_id').filter(filtros)
+                        filtros.add(Q(curso__curso_id=request.GET['curso_id']), Q.AND)
+                    ids = self.model.objects.values_list('curso__paralelo_id').filter(filtros)
                     f = Q(status=True)
                     if 'id' in request.GET and not request.GET['id'] == '' or 'curso_id' in request.GET and not request.GET['curso_id'] == '':
                         f.add(Q(id__in=ids), Q.AND)
@@ -187,17 +182,24 @@ class Listview(TemplateView):
                         item = {'id': objeto.pk, 'text': str(objeto)}
                         data.append(item)
                     return JsonResponse(data, safe=False)
+                if action == 'check_inscripcion':
+                    if 'alumno' in request.GET and not request.GET['alumno'] == '':
+                        data['resp'] = Inscripcion.objects.filter(curso__periodo_id=int(request.GET['id']),
+                                                                  alumno__persona_id=int(request.GET['alumno'])).exists()
+                    else:
+                        data = {'resp': False, 'mensaje': 'Debe seleccionar un alumno!'}
+                    return JsonResponse(data, safe=False)
                 if action == 'check_alumno':
                     id = request.GET['id']
-                    data = []
+                    # data = []
                     if Alumno.objects.filter(persona_id=id).exists():
                         alumno = Alumno.objects.get(persona_id=id)
                         if alumno.representante:
-                            item = {'id': alumno.representante.pk, 'text': alumno.representante.nombre, 'resp': True}
-                            data.append(item)
+                            data = {'id': alumno.representante.pk, 'text': alumno.representante.nombre_completo(), 'resp': True}
+                            # data.append(item)
                     else:
-                        item = {'resp': False}
-                        data.append(item)
+                        data = {'resp': False}
+                        # data.append(item)
                     return JsonResponse(data, safe=False)
                 if action == 'search_representante':
                     data = []
@@ -214,16 +216,16 @@ class Listview(TemplateView):
                 list = self.model.objects.filter(status=True).order_by('-id')
                 filtros = Q(status=True)
                 if 'periodo' in request.GET and not request.GET['periodo'] == '':
-                    filtros.add(Q(periodo_id=request.GET['periodo']), Q.AND)
+                    filtros.add(Q(curso__periodo_id=request.GET['periodo']), Q.AND)
                     data['periodo'] = PeriodoLectivo.objects.get(id=request.GET['periodo'])
                 if 'curso' in request.GET and not request.GET['curso'] == '':
-                    filtros.add(Q(curso_id=request.GET['curso']), Q.AND)
+                    filtros.add(Q(curso__curso_id=request.GET['curso']), Q.AND)
                     data['curso'] = Curso.objects.get(id=request.GET['curso'])
                 if 'paralelo' in request.GET and not request.GET['paralelo'] == '':
-                    filtros.add(Q(paralelo_id=request.GET['paralelo']), Q.AND)
+                    filtros.add(Q(curso__paralelo_id=request.GET['paralelo']), Q.AND)
                     data['paralelo'] = Paralelo.objects.get(id=request.GET['paralelo'])
                 if 'search' in request.GET and not request.GET['search'] == '':
-                    filtros.add((Q(alumno__persona__nombre__icontains=request.GET['search']) | Q(alumno__persona__apellido1__icontains=request.GET['search']) | Q(alumno__persona__apellido2__icontains=request.GET['search'])), Q.AND)
+                    filtros.add((Q(alumno__persona__nombres__icontains=request.GET['search']) | Q(alumno__persona__apellido1__icontains=request.GET['search']) | Q(alumno__persona__apellido2__icontains=request.GET['search'])), Q.AND)
                     data['search'] = search = request.GET['search']
                 list = list.filter(filtros)
                 page_number = request.GET.get('page', 1)

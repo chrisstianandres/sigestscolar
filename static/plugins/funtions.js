@@ -173,6 +173,7 @@ function preguntar(title, content, callback, cancel, nada) {
     Swal.fire({
         title: title,
         text: content,
+        allowOutsideClick: false,
         icon: 'info',
         showCancelButton: true,
         showDenyButton: true,
@@ -189,6 +190,25 @@ function preguntar(title, content, callback, cancel, nada) {
             cancel();
         } else{
             nada();
+        }
+    });
+}
+function preguntar_si_no(title, content, callback, cancel) {
+    Swal.fire({
+        title: title,
+        html: content,
+        allowOutsideClick: false,
+        icon: 'info',
+        showCancelButton: true,
+        confirmButtonColor: '#3085d6',
+        cancelButtonColor: '#d33',
+        confirmButtonText: '<i class="fa fa-thumbs-up" aria-hidden="true"></i> Si',
+        cancelButtonText: '<i class="fa fa-times" aria-hidden="true"></i> No',
+    }).then((result) => {
+        if (result.isConfirmed) {
+            callback();
+        } else if (result.isDenied){
+            cancel();
         }
     });
 }

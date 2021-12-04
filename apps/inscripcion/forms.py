@@ -32,7 +32,7 @@ class Formulario(forms.ModelForm):
         curso = self.cleaned_data['curso']
         if u.pk is None:
             if Inscripcion.objects.filter(alumno_id=alumno, curso_id=curso, activo=True).exists():
-                self.add_error('alumno', 'Ya existe una inscriocion para este alumno en este periodo seleccionado')
+                self.add_error('alumno', 'Ya existe una inscripcion para este alumno en el periodo seleccionado')
         else:
             if Inscripcion.objects.filter(alumno_id=alumno, curso_id=curso, activo=True).exclude(id=u.pk).exists():
                 self.add_error('alumno', 'Ya existe una inscriocion para este alumno en este periodo seleccionado')

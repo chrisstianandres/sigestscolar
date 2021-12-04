@@ -77,15 +77,8 @@
             <td class="dt-center">{{ elemento.curso.curso.nombre }}</td>
             <td class="dt-center">{{ elemento.curso.paralelo.nombre }}</td>
             <td class="dt-center">{{ elemento.curso.periodo.nombre }}</td>
-            <td class="dt-center" style="font-size: 14px"><b>Total materias: </b> <span
-                    class="badge badge-info">{{ elemento.total_materias }}</span> <br>
-                <b>Total inscritos: </b> <span class="badge badge-info">{{ elemento.total_inscritos }}</span><br>
-                <b>Cupo: </b> <span class="badge badge-success">{{ elemento.cupo }}</span>
-            </td>
             <td style="text-align:center; width: 10%" class="dt-center">
-                <a type="button" class="btn btn-primary btn-xs detalle" pk="{{ elemento.pk }}" style="color: white"
-                   data-toggle="tooltip" title="Detalle de materias"><i class="fas fa-book"></i></a>
-                <a type="button" class="btn btn-warning btn-xs editar" pk="{{ elemento.pk }}" style="color: white"
+                <a type="button" class="btn btn-warning btn-xs editar" pk="{{ elemento.encoded_id }}" style="color: white"
                         {% if not modal_form %}
                    href="{{ request.path }}?action=edit&pk={{ elemento.encoded_id }}"{% endif %}><i
                         class="fa fa-edit"></i></a>
@@ -200,7 +193,7 @@
                 ajax: {
                     delay: 250,
                     type: 'GET',
-                    url: '/cursos/aperturar/',
+                    url: '/inscripciones/',
                     data: function (params) {
                         return {
                             term: params.term,
@@ -240,7 +233,7 @@
                 ajax: {
                     delay: 250,
                     type: 'GET',
-                    url: '/cursos/aperturar/',
+                    url: '/inscripciones/',
                     data: function (params) {
                         return {
                             term: params.term,
@@ -279,7 +272,7 @@
                 ajax: {
                     delay: 250,
                     type: 'GET',
-                    url: '/cursos/aperturar/',
+                    url: '/inscripciones/',
                     data: function (params) {
                         return {
                             term: params.term,
@@ -306,11 +299,11 @@
                 if ($('#id_cursos').val() != null){curso = $('#id_cursos').val();}
                 if ($('#id_paralelos').val() != null){paralelo = $('#id_paralelos').val();}
                 if ($('.input-search').val() !== ''){ search = $('.input-search').val();}
-                window.location.href = '/cursos/aperturar?periodo='+periodo+'&curso='+curso+'&paralelo='+paralelo+'&search='+search
+                window.location.href = '/inscripciones?periodo='+periodo+'&curso='+curso+'&paralelo='+paralelo+'&search='+search
 
             });
             {% if periodo %}
-                |
+                var newOption = new Option('{{ periodo.nombre }}', {{ periodo.id }}, true, true);
                 $('#id_periodos').append(newOption).trigger('change');
             {% endif %}
             {% if curso %}

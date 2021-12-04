@@ -2,8 +2,9 @@ from django.db import models
 
 from apps.alumno.models import Alumno
 from apps.curso.models import CursoParalelo
-from apps.extras import ModeloBase
+from apps.extras import ModeloBase, PrimaryKeyEncryptor
 from apps.persona.models import Persona
+from sigestscolar.settings import SECRET_KEY_ENCRIPT
 
 
 class Inscripcion(ModeloBase):
@@ -20,6 +21,9 @@ class Inscripcion(ModeloBase):
         verbose_name_plural = u"Inscripciones de alumnos"
         ordering = ["alumno", '-fecha', 'curso']
         unique_together = ('alumno', 'curso')
+
+    def encoded_id(self):
+        return PrimaryKeyEncryptor(SECRET_KEY_ENCRIPT).encrypt(self.id)
 
     def perfil_usuario(self):
         return self.perfilusuario_set.all()[0]
