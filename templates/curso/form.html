@@ -51,6 +51,7 @@
             items: {
                 periodo: '',
                 cupo: '',
+                cupoindividual: '',
                 curso: '',
                 paralelo: '',
                 materias: [],
@@ -259,6 +260,7 @@
                     apertura.items.paralelo = $('#id_paralelo').val();
                     apertura.items.periodo = $('#id_periodo').val();
                     apertura.items.cupo = $('#id_cupo').val();
+                    apertura.items.cupoindividual = $('#id_cupoindividual').is(':checked');
                     var parametros = {'apertura': JSON.stringify(apertura.items)};
                     parametros['action'] = '{{ action }}';
                      {% if pk %}parametros['pk'] = '{{ pk }}';{% endif %}

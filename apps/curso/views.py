@@ -11,8 +11,8 @@ from django.views.decorators.csrf import csrf_exempt
 from django.views.generic import ListView, TemplateView
 
 from apps.backEnd import nombre_empresa
-from apps.curso.forms import Formulario, FormularioApertura
-from apps.curso.models import Curso, CursoParalelo, CursoMateria
+from apps.curso.forms import Formulario, FormularioApertura, FormularioConfiguracionValores
+from apps.curso.models import Curso, CursoParalelo, CursoMateria, ConfiguracionValoresCurso, ConfiguracionValoresGeneral
 from apps.extras import PrimaryKeyEncryptor
 from apps.materia.models import Materia
 from apps.paralelo.models import Paralelo
@@ -161,6 +161,40 @@ class ListviewAperutar(TemplateView):
                             'identificacion': materia.materia.identificacion,
                             'id': num + 1}
                     data.append(item)
+            elif action == 'configuraciongeneral':
+                if ConfiguracionValoresGeneral.objects.exists():
+                    confi = ConfiguracionValoresGeneral.objects.first()
+                    configuracion = FormularioConfiguracionValores(request.POST, instance=confi)
+                else:
+                    configuracion = FormularioConfiguracionValores(request.POST)
+                if configuracion.is_valid():
+                    configuracion.save(request)
+            elif action == 'configurarcomogeneral':
+                if ConfiguracionValoresGeneral.objects.filter(status=True).exists():
+                    configuraciongeneral = ConfiguracionValoresGeneral.objects.first()
+                    configuracionindividual = ConfiguracionValoresCurso(curso_id=request.POST['pk'],
+                                                                        matricula=configuraciongeneral.matricula,
+                                                                        pension=configuraciongeneral.pension,
+                                                                        numeropensiones=configuraciongeneral.numeropensiones)
+                    configuracionindividual.save(request)
+                    data['resp'] = True
+                else:
+                    data['resp'] = False
+                    data['mensaje'] = 'No existe la confguracion General'
+                return JsonResponse(data, safe=False)
+            elif action == 'configurarindividual':
+                configuracion = FormularioConfiguracionValores(request.POST)
+                if configuracion.is_valid():
+                    configuracionindividual = ConfiguracionValoresCurso(curso_id=request.POST['pk'],
+                                                                        matricula=configuracion.cleaned_data['matricula'],
+                                                                        pension=configuracion.cleaned_data['pension'],
+                                                                        numeropensiones=configuracion.cleaned_data['numeropensiones'])
+                    configuracionindividual.save(request)
+                    data['resp'] = True
+                else:
+                    data['resp'] = False
+                    data['mensaje'] = 'No existe la confguracion General'
+                return JsonResponse(data, safe=False)
             else:
                 data['error'] = 'No ha seleccionado una opcion'
         except Exception as e:
@@ -261,6 +295,8 @@ class ListviewAperutar(TemplateView):
                     id = request.GET['id']
                     data = model_to_dict(Materia.objects.get(id=id))
                     return JsonResponse(data, safe=False)
+
+
             else:
                 data = self.get_context_data()
                 list = self.model.objects.filter(status=True).order_by('-id')
@@ -271,9 +307,6 @@ class ListviewAperutar(TemplateView):
                 if 'curso' in request.GET and not request.GET['curso'] == '':
                     filtros.add(Q(curso_id=request.GET['curso']), Q.AND)
                     data['curso'] = Curso.objects.get(id=request.GET['curso'])
-                if 'paralelo' in request.GET and not request.GET['paralelo'] == '':
-                    filtros.add(Q(paralelo_id=request.GET['paralelo']), Q.AND)
-                    data['paralelo'] = Paralelo.objects.get(id=request.GET['paralelo'])
                 if 'search' in request.GET and not request.GET['search'] == '':
                     filtros.add((Q(curso__nombre__icontains=request.GET['search']) | Q(paralelo__nombre__icontains=request.GET['search'])), Q.AND)
                     # filtros.add(, Q.OR)
@@ -290,6 +323,12 @@ class ListviewAperutar(TemplateView):
                 data['form'] = self.form
                 data['titulo_form'] = 'Nueva ' + str(self.entidad)
                 data['action_form'] = 'add'
+                data['formvaloresindividual'] = FormularioConfiguracionValores()
+                if ConfiguracionValoresGeneral.objects.exists():
+                    valores = ConfiguracionValoresGeneral.objects.first()
+                    data['formvalores'] = FormularioConfiguracionValores(instance=valores)
+                else:
+                    data['formvalores'] = FormularioConfiguracionValores()
                 return render(request, self.template_name, data)
         except Exception as e:
             data['error'] = str(e)

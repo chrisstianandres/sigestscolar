@@ -199,11 +199,12 @@ function preguntar_si_no(title, content, callback, cancel) {
         html: content,
         allowOutsideClick: false,
         icon: 'info',
-        showCancelButton: true,
+        showCancelButton: false,
+        showDenyButton: true,
         confirmButtonColor: '#3085d6',
-        cancelButtonColor: '#d33',
+        denyButtonColor: '#d33',
         confirmButtonText: '<i class="fa fa-thumbs-up" aria-hidden="true"></i> Si',
-        cancelButtonText: '<i class="fa fa-times" aria-hidden="true"></i> No',
+        denyButtonText: '<i class="fa fa-times" aria-hidden="true"></i> No',
     }).then((result) => {
         if (result.isConfirmed) {
             callback();
@@ -571,6 +572,12 @@ function validador() {
     $.validator.addMethod("email_valido", function (value, element) {
       return validateEmail(value);
     }, "");
+    $.validator.addMethod("valorminimo", function (value, element, param) {
+        return value >= param;
+    }, "Debe Ingresar un valor mayor o igual a {0}");
+    $.validator.addMethod("valormaximo", function (value, element, param) {
+        return value <= param;
+    }, "Debe Ingresar un valor menor o igual a {0}");
     ///^[a-zA-Z0-9.!#$%&'*+\/=?^_`{|}~-]+@[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?(?:\.[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?)*$/
 
 
@@ -684,5 +691,22 @@ function ajax_sin_confirmar(url, parametros, callback) {
         }
         menssaje_error(data.error, data.content, 'fa fa-times-circle');
     });
+
+
+}
+function ajax_sin_confirmar_post(url, parametros, callback) {
+    $.ajax({
+        dataType: 'JSON',
+        type: 'POST',
+        url: url,
+        data: parametros,
+    }).done(function (data) {
+        if (!data.hasOwnProperty('error')) {
+                callback(data);
+            return false;
+        }
+        menssaje_error(data.error, data.content, 'fa fa-times-circle');
+    });
+
 
 }

@@ -32,9 +32,10 @@ class Curso(ModeloBase):
 
 class CursoParalelo(ModeloBase):
     curso = models.ForeignKey(Curso, on_delete=models.PROTECT)
-    paralelo = models.ForeignKey(Paralelo, on_delete=models.PROTECT)
+    paralelo = models.ManyToManyField(Paralelo)
     periodo = models.ForeignKey(PeriodoLectivo, on_delete=models.PROTECT)
     cupo = models.IntegerField(default=5)
+    cupoindividual = models.BooleanField(default=False)
 
     def __str__(self):
         return '{} - {}  {}'.format(self.periodo.nombre, self.curso.nombre, self.paralelo.nombre)
@@ -57,7 +58,17 @@ class CursoParalelo(ModeloBase):
         return PrimaryKeyEncryptor(SECRET_KEY_ENCRIPT).encrypt(self.id)
 
     def cupos_disponible(self):
-        return self.total_inscritos() < self.cupo
+        return self.total_inscritos() < self.cupo_total()
+
+    def configuracion_valores(self):
+        if self.configuracionvalorescurso_set.exists():
+            return self.configuracionvalorescurso_set.first()
+        return False
+
+    def cupo_total(self):
+        if self.cupoindividual:
+            return self.cupo * self.paralelo.all().count()
+        return self.cupo
 
     class Meta:
         verbose_name = u"Curso Paralelo"
@@ -82,4 +93,17 @@ class CursoMateria(ModeloBase):
         verbose_name = u"Curso Materia"
         verbose_name_plural = u"Cursos Materias"
         ordering = ['materia']
+
+
+class ConfiguracionValoresCurso(ModeloBase):
+    curso = models.ForeignKey(CursoParalelo, on_delete=models.PROTECT)
+    matricula = models.DecimalField(max_digits=5, decimal_places=2, default=0)
+    pension = models.DecimalField(max_digits=5, decimal_places=2, default=0)
+    numeropensiones = models.IntegerField(default=1)
+
+
+class ConfiguracionValoresGeneral(ModeloBase):
+    matricula = models.DecimalField(max_digits=5, decimal_places=2, default=0)
+    pension = models.DecimalField(max_digits=5, decimal_places=2, default=0)
+    numeropensiones = models.IntegerField(default=1)
 

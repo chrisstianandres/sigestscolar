@@ -68,7 +68,7 @@
                 var representanteedit = new Option('{{ instancia.alumno.representante.nombre_completo }}', {{ instancia.alumno.representante.id }}, true, true);
                 var periodoedit = new Option('{{ instancia.curso.periodo.nombre }}', {{ instancia.curso.periodo.id }}, true, true);
                 var cursoedit = new Option('{{ instancia.curso.curso.nombre }}', {{ instancia.curso.curso.id }}, true, true);
-                var paraleloedit = new Option('{{ instancia.curso.paralelo.nombre }}', {{ instancia.curso.id }}, true, true);
+                var paraleloedit = new Option('{{ instancia.paralelo.nombre }}', {{ instancia.curso.id }}, true, true);
             {% endif %}
             $('#id_periodo').select2({
                 language: {

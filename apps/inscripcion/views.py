@@ -52,6 +52,7 @@ class Listview(TemplateView):
                         if not alumno.representante_id == representante_id:
                             alumno.representante_id = representante_id
                     alumno.save()
+
                     info = {'alumno': alumno, 'curso': paralelo_id, 'fecha': datetime.now().date()}
                     form = self.form(info)
                     if form.is_valid():
@@ -169,8 +170,9 @@ class Listview(TemplateView):
                     if 'id' in request.GET and not request.GET['id'] == '' and 'idcurso' in request.GET and not request.GET['idcurso'] == '':
                         periodo = request.GET['id']
                         curso = request.GET['idcurso']
-                        for objeto in CursoParalelo.objects.filter(status=True, curso_id=curso, periodo_id=periodo, paralelo__nombre__icontains=term)[:10]:
-                            item = {'id': objeto.pk, 'text': objeto.paralelo.nombre}
+                        query = CursoParalelo.objects.filter(status=True, curso_id=curso, periodo_id=periodo).first()
+                        for objeto in query.paralelo.filter(nombre__icontains=term)[:10]:
+                            item = {'id': query.pk, 'text': objeto.nombre}
                             data.append(item)
                     return JsonResponse(data, safe=False)
                 if action == 'search_alumno':

@@ -3,6 +3,7 @@ from django.db import models
 from apps.alumno.models import Alumno
 from apps.curso.models import CursoParalelo
 from apps.extras import ModeloBase, PrimaryKeyEncryptor
+from apps.paralelo.models import Paralelo
 from apps.persona.models import Persona
 from sigestscolar.settings import SECRET_KEY_ENCRIPT
 
@@ -10,6 +11,7 @@ from sigestscolar.settings import SECRET_KEY_ENCRIPT
 class Inscripcion(ModeloBase):
     alumno = models.ForeignKey(Alumno, verbose_name=u'Persona', on_delete=models.PROTECT)
     curso = models.ForeignKey(CursoParalelo, verbose_name=u'Curso', on_delete=models.PROTECT)
+    paralelo = models.ForeignKey(Paralelo, on_delete=models.PROTECT, null=True, blank=True)
     fecha = models.DateField(verbose_name=u'Fecha de inscripción')
     activo = models.BooleanField(default=True, verbose_name=u"Activo")
 

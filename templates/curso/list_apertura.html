@@ -15,10 +15,6 @@
                             </select>
                         </td>
                         <td style="width: 20%">
-                            <select name="paralelos" id="id_paralelos" class="form-control input-sm">
-                            </select>
-                        </td>
-                        <td style="width: 20%">
                             <div class="form-group"><br>
                                 <div class="input-group">
                                     <input type="text" class="form-control input-sm input-search"
@@ -53,6 +49,13 @@
                                         data-target="#modal_form"{% endif %}
                                         style="margin-right: 2px;"><i class="fa fa-plus-circle"></i> Agregar
                                 </button>
+                                <br>
+                             <button type="button"
+                                        class="btn btn-block btn-success btn-sm"
+                                        data-toggle="modal"
+                                        data-target="#modal_configuracion"
+                                        style="margin-right: 2px;"><i class="fa fa-dollar-sign"></i> Valores
+                                </button>
                             </div>
                         </td>
                     </tr>
@@ -65,7 +68,7 @@
 {% endblock %}
 {% block header_tabla %}
     <th class="dt-center">Curso</th>
-    <th class="dt-center">Paralelo</th>
+    <th class="dt-center">Paralelos</th>
     <th class="dt-center">Periodo</th>
     <th class="dt-center">Estadisticas</th>
     <th style="text-align:center; width: 10%" class="dt-center"><i class="fa fa-cogs"></i></th>
@@ -73,13 +76,25 @@
 {% block body_tabla %}
     {% for elemento in page_obj %}
         <tr>
-            <td class="dt-center">{{ elemento.curso.nombre }}</td>
-            <td class="dt-center">{{ elemento.paralelo.nombre }}</td>
+            <td class="dt-center">{{ elemento.curso.nombre }}<br>
+            {% if not elemento.configuracion_valores %}
+                <span class="badge badge-danger" style="font-size: 12px">Este curso aun no tiene configurado los valores</span>
+             {% else %}
+                <br><b><i class="far fa-money-bill-alt"></i> Valores</b><br>
+                <b>Matricula :</b> <i class="fa fa-dollar-sign"></i> {{ elemento.configuracion_valores.matricula }}<br>
+                <b>Pension :</b> <i class="fa fa-dollar-sign"></i> {{ elemento.configuracion_valores.pension }}<br>
+                <b>Total pensiones :</b> {{ elemento.configuracion_valores.numeropensiones }}<br>
+            {% endif %}</td>
+            <td class="dt-center">{%  for paralelo in elemento.paralelo.all %}
+                {{ paralelo.nombre }}<br>
+                {% endfor %}
+                </td>
             <td class="dt-center">{{ elemento.periodo.nombre }}</td>
             <td class="dt-center" style="font-size: 14px"><b>Total materias: </b> <span
                     class="badge badge-info">{{ elemento.total_materias }}</span> <br>
                 <b>Total inscritos: </b> <span class="badge badge-info">{{ elemento.total_inscritos }}</span><br>
                 <b>Cupo: </b> <span class="badge badge-success">{{ elemento.cupo }}</span>
+                {% if elemento.cupoindividual %}<br><span class="badge badge-dark" style="color: white">Cupo individual por paralelo</span>{% endif %}
             </td>
             <td style="text-align:center; width: 10%" class="dt-center">
                 <a type="button" class="btn btn-primary btn-xs detalle" pk="{{ elemento.pk }}" style="color: white"
@@ -92,6 +107,10 @@
                     <a type="button" class="btn btn-danger btn-xs eliminar" pk="{{ elemento.pk }}"><i
                             class="fa fa-trash"></i></a>
                 {% endif %}
+            {% if not elemento.configuracion_valores %}
+                <a type="button" class="btn btn-secondary btn-xs configuracionform" data-toggle="tooltip"
+                   title="Este curso aun no tiene configurado los valores" pk="{{ elemento.pk }}"><i class="fas fa-hand-holding-usd"></i></a>
+            {% endif %}
             </td>
         </tr>
     {% empty %}
@@ -141,12 +160,71 @@
                     </form>
                 </div>
             </div>
+            <div class="modal fade" id="modal_configuracion" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel"
+                 aria-hidden="true">
+                <div class="modal-dialog" role="document">
+                    <form id="form_config" method="post">
+                        <div class="modal-content">
+                            <div class="modal-header">
+                                <h5 class="modal-title" id="titulo_form"><i
+                                        class="fas fa-book"></i> Configuracion de Valores
+                                </h5>
+                                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                                    <span aria-hidden="true">&times;</span>
+                                </button>
+                            </div>
+                            <div class="modal-body">
+
+                                <div class="card-body">
+                                    <input type="hidden" name="action" value="configuraciongeneral">
+                                    {{ formvalores }}
+                                </div>
+
+                            </div>
+                            <div class="modal-footer">
+                                <button type="submit" class="btn btn-success"> <i class="fa fa-save"></i> Guardar</button>
+                                <button type="button" class="btn btn-danger" data-dismiss="modal"> Cerrar</button>
+                            </div>
+                        </div>
+                    </form>
+                </div>
+            </div>
+            <div class="modal fade" id="modal_valores_individual" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel"
+                 aria-hidden="true">
+                <div class="modal-dialog" role="document">
+                    <form id="form_config_individual" method="post">
+                        <div class="modal-content">
+                            <div class="modal-header">
+                                <h5 class="modal-title" id="titulo_form"><i
+                                        class="fas fa-book"></i> Configuracion de Valores Individual
+                                </h5>
+                                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                                    <span aria-hidden="true">&times;</span>
+                                </button>
+                            </div>
+                            <div class="modal-body">
+
+                                <div class="card-body">
+                                    <input type="hidden" name="action" value="configurarindividual">
+                                    {{ formvaloresindividual }}
+                                </div>
+
+                            </div>
+                            <div class="modal-footer">
+                                <button type="submit" class="btn btn-success"> <i class="fa fa-save"></i> Guardar</button>
+                                <button type="button" class="btn btn-danger" data-dismiss="modal"> Cerrar</button>
+                            </div>
+                        </div>
+                    </form>
+                </div>
+            </div>
         </div>
     </div>
 {% endblock %}
 {% block validate_form %}
     <script>
         $(function () {
+            var pkindividual='';
             $('.detalle').on('click', function (e) {
                 $('#modal_detalle').modal('show');
                 e.preventDefault();
@@ -261,51 +339,19 @@
                 e.preventDefault();
                 $('#id_paralelos').val('').trigger('change');
             });
-            $('#id_paralelos').select2({
-                language: {
-                    inputTooShort: function () {
-                        return "Ingresa al menos un caracter...";
-                    },
-                    "noResults": function () {
-                        return "Sin resultados";
-                    },
-                    "searching": function () {
-                        return "Buscando...";
-                    }
-                },
-                theme: 'bootstrap4',
-                allowClear: true,
-                ajax: {
-                    delay: 250,
-                    type: 'GET',
-                    url: '/cursos/aperturar/',
-                    data: function (params) {
-                        return {
-                            term: params.term,
-                            action: 'filter_paralelo',
-                            id: $('#id_periodo option:selected').val(),
-                            curso_id: $('#id_cursos option:selected').val()
-                        };
-                    },
-                    processResults: function (data) {
-                        return {
-                            results: data
-                        };
-
-                    },
-
-                },
-                placeholder: 'Busca un Paralelo',
-                minimumInputLength: 1,
-            });
             $('#search').on('click', function (e) {
                 e.preventDefault();
-                let periodo = '', curso = '',paralelo = '', search='';
-                if ($('#id_periodos').val() != null){periodo = $('#id_periodos').val();}
-                if ($('#id_cursos').val() != null){curso = $('#id_cursos').val();}
-                if ($('#id_paralelos').val() != null){paralelo = $('#id_paralelos').val();}
-                if ($('.input-search').val() !== ''){ search = $('.input-search').val();}
-                window.location.href = '/cursos/aperturar?periodo='+periodo+'&curso='+curso+'&paralelo='+paralelo+'&search='+search
+                let periodo = '', curso = '', paralelo = '', search = '';
+                if ($('#id_periodos').val() != null) {
+                    periodo = $('#id_periodos').val();
+                }
+                if ($('#id_cursos').val() != null) {
+                    curso = $('#id_cursos').val();
+                }
+                if ($('.input-search').val() !== '') {
+                    search = $('.input-search').val();
+                }
+                window.location.href = '/cursos/aperturar?periodo=' + periodo + '&curso=' + curso + '&search=' + search
 
             });
             {% if periodo %}
@@ -316,10 +362,84 @@
                 var cursooption = new Option('{{ curso.nombre }}', {{ curso.id }}, true, true);
                 $('#id_cursos').append(cursooption).trigger('change');
             {% endif %}
-            {% if paralelo %}
-                 var paralelooption = new Option('{{ paralelo.nombre }}', {{ paralelo.id }}, true, true);
-                $('#id_paralelos').append(paralelooption).trigger('change');
-            {% endif %}
+            $('.configuracionform').click(function () {
+                let pk = $(this).attr('pk');
+                preguntar_si_no('Atencion!', 'Desea utilizar la configuracion de valores general para este curso?',
+                    function (e) {
+                        ajax_sin_confirmar_post('/cursos/aperturar/', {
+                            'action': 'configurarcomogeneral',
+                            'pk': pk
+                        }, function (e) {
+                           menssaje_ok('Todo correcto!', 'Confguracion guardada corectamente!', 'success', function (e) {
+                                window.location.reload();
+                            })
+                        })
+                    },
+                    function (e) {
+                        $('#modal_valores_individual').modal('show');
+                        pkindividual = $('.configuracionform').attr('pk');
+                    })
+
+            });
+
+            $('#form_config').submit(function (e) {
+                e.preventDefault();
+                if ($(this).valid()) {
+                    var parametros = new FormData(this);
+                    save_with_ajax2('Estas seguro?', window.location.pathname, 'Desea guardar esta informacion?', parametros,
+                        function (e) {
+                            menssaje_ok('Todo correcto!', 'Informacion guardada corectamente!', 'success', function (e) {
+                                window.location.reload();
+                            })
+                        })
+                }
+
+            });
+            $('#form_config_individual').submit(function (e) {
+                e.preventDefault();
+                if ($(this).valid()) {
+                    var parametros = new FormData(this);
+                    parametros.append('pk', pkindividual);
+                    save_with_ajax2('Estas seguro?', window.location.pathname, 'Desea guardar esta informacion?', parametros,
+                        function (e) {
+                            menssaje_ok('Todo correcto!', 'Confguracion guardada corectamente!', 'success', function (e) {
+                                window.location.reload();
+                            })
+                        })
+                }
+
+            });
+            validador();
+            $("#form_config").validate({
+                rules: {
+                    matricula: {required: true, valorminimo: 10.00, valormaximo: 5000},
+                    pension: {required: true, valorminimo: 10.00, valormaximo: 5000},
+                    numeropensiones: {required: true, valorminimo: 1, valormaximo: 12},
+                },
+                messages: {
+                    matricula: {required: "Por favor ingresa el valor de la matricula"},
+                    pension: {required: "Por favor ingresa el valor de la pension"},
+                    numeropensiones: {required: "Por favor ingresa el numero de pensiones"},
+                },
+            });
+            $("#form_config_individual").validate({
+                rules: {
+                    matricula: {required: true, valorminimo: 10.00, valormaximo: 5000},
+                    pension: {required: true, valorminimo: 10.00, valormaximo: 5000},
+                    numeropensiones: {required: true, valorminimo: 1, valormaximo: 12},
+                },
+                messages: {
+                    matricula: {required: "Por favor ingresa el valor de la matricula"},
+                    pension: {required: "Por favor ingresa el valor de la pension"},
+                    numeropensiones: {required: "Por favor ingresa el numero de pensiones"},
+                },
+            });
+            $('#modal_configuracion').on('hidden.bs.modal', function (e) {
+                reset_form('#form_config');
+            });
+            $('#modal_valores_individual').on('hidden.bs.modal', function (e) {
+                reset_form('#form_config_individual');
+            });
         });
     </script>
 
