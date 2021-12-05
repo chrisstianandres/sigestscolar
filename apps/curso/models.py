@@ -70,6 +70,15 @@ class CursoParalelo(ModeloBase):
             return self.cupo * self.paralelo.all().count()
         return self.cupo
 
+    def cupo_individual(self):
+        if self.cupoindividual:
+            return self.cupo
+
+    def cupo_disponible_por_paralelo(self, paralelo):
+        if self.cupoindividual:
+            return self.cupo_individual() > self.inscripcion_set.filter(paralelo_id=paralelo).count()
+
+
     class Meta:
         verbose_name = u"Curso Paralelo"
         verbose_name_plural = u"Cursos Paralelos"

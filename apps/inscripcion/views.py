@@ -45,36 +45,59 @@ class Listview(TemplateView):
                     alumno_id = request.POST['persona']
                     representante_id = request.POST['representante']
                     paralelo_id = request.POST['paralelo']
-                    if not Alumno.objects.filter(persona_id=alumno_id).exists():
-                        alumno = Alumno(persona_id=alumno_id, representante_id=representante_id, fechaingreso=datetime.now().date())
+                    curso_id = request.POST['curso']
+                    cursoparalelo = CursoParalelo.objects.get(id=curso_id)
+                    cupo = False
+                    if cursoparalelo.cupoindividual:
+                        if cursoparalelo.cupo_disponible_por_paralelo(paralelo_id):
+                            cupo = True
                     else:
-                        alumno = Alumno.objects.get(persona_id=alumno_id)
-                        if not alumno.representante_id == representante_id:
-                            alumno.representante_id = representante_id
-                    alumno.save()
-
-                    info = {'alumno': alumno, 'curso': paralelo_id, 'fecha': datetime.now().date()}
-                    form = self.form(info)
-                    if form.is_valid():
-                        form.save()
+                        if cursoparalelo.cupos_disponible():
+                            cupo = True
+                    if cupo:
+                        if not Alumno.objects.filter(persona_id=alumno_id).exists():
+                            alumno = Alumno(persona_id=alumno_id, representante_id=representante_id, fechaingreso=datetime.now().date())
+                        else:
+                            alumno = Alumno.objects.get(persona_id=alumno_id)
+                            if not alumno.representante_id == int(representante_id):
+                                alumno.representante_id = representante_id
+                        alumno.save()
+                        info = {'alumno': alumno, 'curso': curso_id, 'paralelo': paralelo_id, 'fecha': datetime.now().date()}
+                        form = self.form(info)
+                        if form.is_valid():
+                            form.save()
+                        else:
+                            data['error'] = form.errors
                     else:
-                        data['error'] = form.errors
+                        data['error'] = 'Cupo no diponible'
             elif action == 'edit':
                 with transaction.atomic():
                     instancia = self.model.objects.get(id=request.POST['pk'])
                     alumno_id = request.POST['persona']
                     representante_id = request.POST['representante']
                     paralelo_id = request.POST['paralelo']
+                    curso_id = request.POST['curso']
                     alumno = Alumno.objects.get(persona_id=alumno_id)
-                    if not alumno.representante_id == representante_id:
-                        alumno.representante_id = representante_id
-                        alumno.save()
-                    info = {'alumno': alumno, 'curso': paralelo_id, 'fecha': datetime.now().date()}
-                    form = self.form(info, instance=instancia)
-                    if form.is_valid():
-                        form.save()
+                    cursoparalelo = CursoParalelo.objects.get(id=curso_id)
+                    cupo = False
+                    if cursoparalelo.cupoindividual:
+                        if cursoparalelo.cupo_disponible_por_paralelo(paralelo_id):
+                            cupo = True
                     else:
-                        data['error'] = form.errors
+                        if cursoparalelo.cupos_disponible():
+                            cupo = True
+                    if cupo:
+                        if not alumno.representante_id == int(representante_id):
+                            alumno.representante_id = representante_id
+                            alumno.save()
+                        info = {'alumno': alumno, 'curso': curso_id, 'paralelo':paralelo_id, 'fecha': datetime.now().date()}
+                        form = self.form(info, instance=instancia)
+                        if form.is_valid():
+                            form.save()
+                        else:
+                            data['error'] = form.errors
+                    else:
+                        data['error'] = 'Cupo no diponible'
             elif action == 'delete':
                 objeto = self.model.objects.get(pk=request.POST['pk'])
                 objeto.cursomateria_set.all().delete()
@@ -161,7 +184,7 @@ class Listview(TemplateView):
                     if 'id' in request.GET and not request.GET['id'] == '':
                         periodo = request.GET['id']
                         for objeto in CursoParalelo.objects.filter(Q(status=True), Q(curso__nombre__icontains=term), Q(periodo_id=int(periodo)))[:10]:
-                            item = {'id': objeto.curso.pk, 'text': objeto.curso.nombre}
+                            item = {'id': objeto.pk, 'text': objeto.curso.nombre}
                             data.append(item)
                     return JsonResponse(data, safe=False)
                 if action == 'search_paralelo':
@@ -170,9 +193,9 @@ class Listview(TemplateView):
                     if 'id' in request.GET and not request.GET['id'] == '' and 'idcurso' in request.GET and not request.GET['idcurso'] == '':
                         periodo = request.GET['id']
                         curso = request.GET['idcurso']
-                        query = CursoParalelo.objects.filter(status=True, curso_id=curso, periodo_id=periodo).first()
+                        query = CursoParalelo.objects.filter(status=True, id=curso, periodo_id=periodo).first()
                         for objeto in query.paralelo.filter(nombre__icontains=term)[:10]:
-                            item = {'id': query.pk, 'text': objeto.nombre}
+                            item = {'id': objeto.pk, 'text': objeto.nombre}
                             data.append(item)
                     return JsonResponse(data, safe=False)
                 if action == 'search_alumno':
@@ -224,7 +247,7 @@ class Listview(TemplateView):
                     filtros.add(Q(curso__curso_id=request.GET['curso']), Q.AND)
                     data['curso'] = Curso.objects.get(id=request.GET['curso'])
                 if 'paralelo' in request.GET and not request.GET['paralelo'] == '':
-                    filtros.add(Q(curso__paralelo_id=request.GET['paralelo']), Q.AND)
+                    filtros.add(Q(paralelo_id=request.GET['paralelo']), Q.AND)
                     data['paralelo'] = Paralelo.objects.get(id=request.GET['paralelo'])
                 if 'search' in request.GET and not request.GET['search'] == '':
                     filtros.add((Q(alumno__persona__nombres__icontains=request.GET['search']) | Q(alumno__persona__apellido1__icontains=request.GET['search']) | Q(alumno__persona__apellido2__icontains=request.GET['search'])), Q.AND)

@@ -21,8 +21,8 @@ class Formulario(forms.ModelForm):
 
     class Meta:
         model = Inscripcion
-        fields = ['alumno', 'curso', 'fecha']
-        labels = {'curso': 'Curso', 'alumno': 'Alumno', 'fecha': 'fecha'}
+        fields = ['alumno', 'curso', 'fecha', 'paralelo']
+        labels = {'curso': 'Curso', 'alumno': 'Alumno', 'fecha': 'fecha', 'paralelo': 'Paralelo'}
         # widgets = {'curso': forms.Select(), 'paralelo': forms.Select(), 'periodo': forms.Select()}
 
     def clean(self):

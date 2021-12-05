@@ -68,6 +68,7 @@ class Listview(TemplateView):
                         persona = Persona.objects.get(pk=request.POST['id'])
                         if persona.es_administrativo():
                             data['error'] = 'Ya existe un perfil administrativo para esta persona'
+                            return JsonResponse(data, safe=False)
                         administrativo = Administrativo(persona=persona, fechaingreso=datetime.now().date())
                         administrativo.save(request)
                         g = Group.objects.get(name='Administrativo')
@@ -85,6 +86,7 @@ class Listview(TemplateView):
                         persona = Persona.objects.get(pk=request.POST['id'])
                         if persona.es_profesor():
                             data['error'] = 'Ya existe un perfil docente para esta persona'
+                            return JsonResponse(data, safe=False)
                         profesor = Profesor(persona=persona, fechaingreso=datetime.now().date())
                         profesor.save(request)
                         g = Group.objects.get(name='Docente')
