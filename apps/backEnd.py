@@ -1,5 +1,6 @@
 import smtplib
 import uuid
+from datetime import datetime
 from email.mime.multipart import MIMEMultipart
 from email.mime.text import MIMEText
 from crum import get_current_request
@@ -35,6 +36,25 @@ def nombre_empresa():
     else:
         empresa = {'nombre': 'Sin nombre'}
     return empresa
+
+
+def calcular_edad(fecha):
+    hoy = datetime.now().date()
+    try:
+        nac = fecha
+        if hoy.year > nac.year:
+            edad = hoy.year - nac.year
+            if hoy.month <= nac.month:
+                if hoy.month == nac.month:
+                    if hoy.day < nac.day:
+                        edad -= 1
+                else:
+                    edad -= 1
+            return edad
+        else:
+            raise NameError('Error')
+    except Exception as ex:
+        return 0
 
 
 class DashboardView(TemplateView):

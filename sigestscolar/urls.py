@@ -30,5 +30,7 @@ urlpatterns = [
     path('periodos/', include('apps.periodo.urls', namespace='periodos')),
     path('externos/', include('apps.externo.urls', namespace='externos')),
     path('administrativos/', include('apps.administrativo.urls', namespace='administrativos')),
+    path('docentes/', include('apps.profesor.urls', namespace='profesor')),
+    path('alumnos/', include('apps.alumno.urls', namespace='alumnos')),
     path('inscripciones/', include('apps.inscripcion.urls', namespace='inscripciones')),
 ]

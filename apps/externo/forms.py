@@ -44,3 +44,44 @@ class Formulario(forms.ModelForm):
                    }),
                    'sangre': forms.Select()
                    }
+
+    def clean(self):
+        f = super()
+        u = f.save(commit=False)
+        cedula = self.cleaned_data['cedula']
+        pasaporte = self.cleaned_data['pasaporte']
+        ruc = self.cleaned_data['ruc']
+        telefono = self.cleaned_data['telefono']
+        telefono_conv = self.cleaned_data['telefono_conv']
+        email = self.cleaned_data['email']
+        libretamilitar = self.cleaned_data['libretamilitar']
+        if u.pk is None:
+            if cedula and Persona.objects.filter(cedula=cedula).exists():
+                self.add_error('cedula', 'Ya existe una persona con esta cedula')
+            if pasaporte and Persona.objects.filter(pasaporte=pasaporte).exists():
+                self.add_error('pasaporte', 'Ya existe una persona con este pasaporte')
+            if ruc and Persona.objects.filter(ruc=ruc).exists():
+                self.add_error('ruc', 'Ya existe una persona con este ruc')
+            if telefono and Persona.objects.filter(telefono=telefono).exists():
+                self.add_error('telefono', 'Ya existe una persona con este telefono')
+            if telefono_conv and Persona.objects.filter(telefono_conv=telefono_conv).exists():
+                self.add_error('telefono_conv', 'Ya existe una persona con este telefono convencional')
+            if email and Persona.objects.filter(email=email).exists():
+                self.add_error('email', 'Ya existe una persona con este email')
+            if libretamilitar and Persona.objects.filter(libretamilitar=libretamilitar).exists():
+                self.add_error('libretamilitar', 'Ya existe una persona con esta libretamilitar')
+        else:
+            if cedula and Persona.objects.filter(cedula=cedula).exclude(id=u.pk).exists():
+                self.add_error('cedula', 'Ya existe una persona con esta cedula')
+            if pasaporte and Persona.objects.filter(pasaporte=pasaporte).exclude(id=u.pk).exists():
+                self.add_error('pasaporte', 'Ya existe una persona con este pasaporte')
+            if ruc and Persona.objects.filter(ruc=ruc).exclude(id=u.pk).exists():
+                self.add_error('ruc', 'Ya existe una persona con este ruc')
+            if telefono and Persona.objects.filter(telefono=telefono).exclude(id=u.pk).exists():
+                self.add_error('telefono', 'Ya existe una persona con este telefono')
+            if telefono_conv and Persona.objects.filter(telefono_conv=telefono_conv).exclude(id=u.pk).exists():
+                self.add_error('telefono_conv', 'Ya existe una persona con este telefono convencional')
+            if email and Persona.objects.filter(email=email).exclude(id=u.pk).exists():
+                self.add_error('email', 'Ya existe una persona con este email')
+            if libretamilitar and Persona.objects.filter(libretamilitar=libretamilitar).exclude(id=u.pk).exists():
+                self.add_error('libretamilitar', 'Ya existe una persona con esta libretamilitar')
