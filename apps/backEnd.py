@@ -27,6 +27,7 @@ from django.views.decorators.csrf import csrf_exempt
 from django.views.generic.base import View
 
 from apps.empresa.models import Empresa
+from apps.models import Modulo
 from apps.perfil.models import PerfilUsuario
 
 
@@ -85,8 +86,19 @@ class DashboardView(TemplateView):
         except Exception as e:
             pass
 
+    def get_modulos(self):
+        try:
+            request = get_current_request()
+            modulos = Modulo.objects.filter(status=True)
+            if modulos.exists():
+                if 'modulos' not in request.session:
+                    request.session['modulos'] = modulos
+        except Exception as e:
+            pass
+
     def get_context_data(self, **kwargs):
         self.get_group_session()
+        self.get_modulos()
         data = super().get_context_data(**kwargs)
         data['titulo'] = 'Menu Principal'
         data['empresa'] = nombre_empresa()
