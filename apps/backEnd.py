@@ -126,36 +126,37 @@ def crear_perfil_usuario(persona, administrativo=None, inscripcion=None, profeso
     elif profesor:
         perfil = PerfilUsuario(persona=persona, profesor=profesor)
         perfil.save()
-# class LoginFormView(LoginView):
-#     template_name = 'front-end/login.html'
-#
-#     @method_decorator(csrf_exempt)
-#     def dispatch(self, request, *args, **kwargs):
-#         if request.user.is_authenticated:
-#             return redirect(settings.LOGIN_REDIRECT_URL)
-#         return super().dispatch(request, *args, **kwargs)
-#
-#     def post(self, request, *args, **kwargs):
-#         data = {}
-#         username = request.POST['username']
-#         password = request.POST['password']
-#         user = authenticate(username=username, password=password)
-#         if user is not None:
-#             if user.estado == 1:
-#                 login(request, user)
-#                 data['resp'] = True
-#             else:
-#                 data['error'] = '<strong>Usuario Inactivo </strong>'
-#         else:
-#             data['error'] = '<strong>Usuario no valido </strong><br>' \
-#                             'Verifica las credenciales de acceso y vuelve a intentarlo.'
-#         return JsonResponse(data)
-#
-#     def get_context_data(self, **kwargs):
-#         data = super().get_context_data(**kwargs)
-#         data['title'] = 'Inicio de Sesion'
-#         data['nomb'] = nombre_empresa()
-#         return data
+
+
+class LoginFormView(LoginView):
+    template_name = 'login.html'
+
+    @method_decorator(csrf_exempt)
+    def dispatch(self, request, *args, **kwargs):
+        if request.user.is_authenticated:
+            return redirect(settings.LOGIN_REDIRECT_URL)
+        return super().dispatch(request, *args, **kwargs)
+
+    def post(self, request, *args, **kwargs):
+        data = {}
+        username = request.POST['username']
+        password = request.POST['password']
+        user = authenticate(username=username, password=password)
+        if user is not None:
+            if user.is_active:
+                login(request, user)
+                data['resp'] = True
+            else:
+                data['error'] = '<strong>Usuario Inactivo </strong>'
+        else:
+            data['error'] = '<strong>Usuario no valido </strong><br> Verifica las credenciales de acceso y vuelve a intentarlo.'
+        return JsonResponse(data)
+
+    def get_context_data(self, **kwargs):
+        data = super().get_context_data(**kwargs)
+        data['title'] = 'Inicio de Sesion'
+        data['empresa'] = nombre_empresa()
+        return data
 
 
 # class ResetPasswordView(FormView):

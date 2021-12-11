@@ -75,7 +75,7 @@
                         {% if not modal_form %}
                    href="{{ request.path }}?action=edit&pk={{ elemento.persona.encoded_id }}"{% endif %}><i
                         class="fa fa-edit"></i></a>
-                <a type="button" class="btn btn-danger btn-xs eliminar" pk="{{ elemento.pk }}"><i
+                <a type="button" class="btn btn-danger btn-xs eliminar" pk="{{ elemento.pk }}"><i class="fa fa-trash"></i></a>
             </td>
         </tr>
     {% empty %}

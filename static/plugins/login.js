@@ -1,4 +1,5 @@
 $(function () {
+    console.log(12);
     validador();
     $("#formlogin").validate({
         rules: {
@@ -45,20 +46,18 @@ $(function () {
         };
         var isvalid = $(this).valid();
         if (isvalid) {
-            login('/connect/', parametros, function (data) {
-                $.isLoading({
-                    text: "<strong>" + 'Iniciando Sesion...' + "</strong>",
-                    tpl: '<span class="isloading-wrapper %wrapper%"><i class="fa fa-refresh fa-2x fa-spin"></i><br>%text%</span>',
-                });
-                setTimeout(function () {
-                    $.isLoading('hide');
-                    if (data.reset){
-                        window.location.href = '/persona/reset'
-                    }  else {window.location.href = '/menu';}
-                }, 1000);
+            var dialog  = bootbox.dialog({
+                title: 'Estamos iniciando sesion!!!',
+                message: '<p><i class="fa fa-spin fa-spinner"></i> Cargando tu sesion...</p>',
+                size: 'small',
+                centerVertical: true,
+                closeButton: false,
+            }).on('shown.bs.modal', function(){
+                login( window.location.pathname, parametros, function (data) {
+                    window.location.href = '/dashborad'});
                 return false;
+                 });
 
-            });
         }
     });
 

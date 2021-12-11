@@ -78,11 +78,13 @@
     <!-- Right navbar links -->
     <ul class="navbar-nav ml-auto">
       <!-- Notifications Dropdown Menu -->
-      <li class="nav-item dropdown">
+      {% if not request.user.is_superuser %}
+      <li>
         <a href="/admin">
                 <span class="badge badge-info" style="color: white">ADMIN DJANGO</span>
         </a>
       </li>
+      {% endif %}
       <li class="nav-item dropdown">
         <a class="nav-link" data-toggle="dropdown" href="#">
             {% if request.session.group %}
@@ -141,7 +143,7 @@
             <i class="fa fa-building mr-2"></i> Configuracion de la empresa
           </a>
           <div class="dropdown-divider"></div>
-          <a href="#" class="dropdown-item">
+          <a href="{% url 'logout' %}" class="dropdown-item">
             <i class="fa fa-sign-out-alt mr-2"></i> Cerrar sesion
           </a>
         </div>
@@ -177,14 +179,14 @@
           <img src="{% static 'adminlte/dist/img/user2-160x160.jpg'%}" class="img-circle elevation-2" alt="User Image">
         </div>
         <div class="info">
-          <a href="#" class="d-block">{{ request.user.get_full_name }}</a>
+          <a href="#" class="d-block">{{ request.user.get_full_name | upper }}</a>
         </div>
       </div>
 
       <!-- SidebarSearch Form -->
       <div class="form-inline">
         <div class="input-group" data-widget="sidebar-search">
-          <input class="form-control form-control-sidebar" type="search" placeholder="Search" aria-label="Search">
+          <input class="form-control form-control-sidebar" type="search" placeholder="Buscar" aria-label="Search">
           <div class="input-group-append">
             <button class="btn btn-sidebar">
               <i class="fas fa-search fa-fw"></i>
@@ -198,11 +200,11 @@
         <ul class="nav nav-pills nav-sidebar flex-column" data-widget="treeview" role="menu" data-accordion="false">
           <!-- Add icons to the links using the .nav-icon class
                with font-awesome or any other icon font library -->
-          <li class="nav-item menu-open">
+          <li class="nav-item">
             <a href="/dashborad" class="nav-link {% if request.path == '/dashborad/' %} active {% endif %}">
               <i class="nav-icon fas fa-tachometer-alt"></i>
               <p>
-                Dashboard
+                Menu Principal
               </p>
             </a>
           </li>
@@ -232,12 +234,12 @@
           <div class="col-sm-6">
             <h1 class="m-0">{{ entidad }} <i class="{{ icono }}"></i></h1>
           </div><!-- /.col -->
-          <div class="col-sm-6">
-            <ol class="breadcrumb float-sm-right">
-              <li class="breadcrumb-item"><a href="#">Home</a></li>
-              <li class="breadcrumb-item active">Dashboard v1</li>
-            </ol>
-          </div><!-- /.col -->
+{#          <div class="col-sm-6">#}
+{#            <ol class="breadcrumb float-sm-right">#}
+{#              <li class="breadcrumb-item"><a href="#">Home</a></li>#}
+{#              <li class="breadcrumb-item active">Dashboard v1</li>#}
+{#            </ol>#}
+{#          </div><!-- /.col -->#}
         </div><!-- /.row -->
       </div><!-- /.container-fluid -->
     </div>

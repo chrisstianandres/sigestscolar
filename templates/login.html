@@ -1,0 +1,188 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>{{empresa.nombre}} | Log in</title>
+
+  <!-- Google Font: Source Sans Pro -->
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Source+Sans+Pro:300,400,400i,700&display=fallback">
+  <!-- Font Awesome -->
+  <link rel="stylesheet" href="{% static 'adminlte/plugins/fontawesome-free/css/all.min.css' %}">
+  <!-- icheck bootstrap -->
+  <link rel="stylesheet" href="{% static 'adminlte/plugins/icheck-bootstrap/icheck-bootstrap.min.css' %}">
+  <!-- Theme style -->
+  <link rel="stylesheet" href="{% static 'adminlte/dist/css/adminlte.min.css' %}">
+</head>
+<body class="hold-transition login-page" style="background-image: url('{% static 'photo1.png' %}');">
+<div class="login-box">
+  <div class="login-logo">
+    <a>{{empresa.nombre |upper}}</a>
+  </div>
+  <!-- /.login-logo -->
+  <div class="card">
+    <div class="card-body login-card-body">
+      <p class="login-box-msg">Inicia sesion</p>
+
+      <form action="#" id="formlogin" method="POST">
+          {% csrf_token %}
+        <div class="input-group mb-3">
+          <input type="text" class="form-control" placeholder="Usuario" name="username" id="username_login">
+          <div class="input-group-append">
+            <div class="input-group-text">
+              <span class="fas fa-envelope"></span>
+            </div>
+          </div>
+        </div>
+        <div class="input-group mb-3">
+          <input type="password" class="form-control" placeholder="Contraseña" name="password" id="password_login">
+          <div class="input-group-append">
+            <div class="input-group-text">
+              <span class="fas fa-lock"></span>
+            </div>
+          </div>
+        </div>
+        <div class="row">
+          <div class="col-8">
+            <div class="icheck-primary">
+              <input type="checkbox" id="remember">
+              <label for="remember">
+                Remember Me
+              </label>
+            </div>
+          </div>
+          <!-- /.col -->
+          <div class="col-4">
+            <button type="submit" class="btn btn-primary btn-block">Ingresar</button>
+          </div>
+          <!-- /.col -->
+        </div>
+      </form>
+
+      <div class="social-auth-links text-center mb-3">
+        <p>- OR -</p>
+        <a href="#" class="btn btn-block btn-primary">
+          <i class="fab fa-facebook mr-2"></i> Sign in using Facebook
+        </a>
+        <a href="#" class="btn btn-block btn-danger">
+          <i class="fab fa-google-plus mr-2"></i> Sign in using Google+
+        </a>
+      </div>
+      <!-- /.social-auth-links -->
+
+      <p class="mb-1">
+        <a href="forgot-password.html">Olvide mi contraseña</a>
+      </p>
+    </div>
+    <!-- /.login-card-body -->
+  </div>
+</div>
+<!-- /.login-box -->
+
+<!-- jQuery -->
+<script src="{% static 'adminlte/plugins/jquery/jquery.js'%}"></script>
+<!-- Bootstrap 4 -->
+<script src="{% static 'adminlte/plugins/bootstrap/js/bootstrap.bundle.min.js'%}"></script>
+<!-- AdminLTE App -->
+<script src="{% static 'adminlte/dist/js/adminlte.min.js'%}"></script>
+{#<script src="{% static 'plugins/login.js'%}"></script>#}
+<script src="{% static 'adminlte/plugins/jquery-validation/jquery.validate.min.js' %}"></script>
+<script src="{% static 'adminlte/plugins/bootbox/bootbox.all.min.js'%}"></script>
+<script src="{% static 'adminlte/plugins/sweetalert2.js'%}"></script>
+<script src="{% static 'plugins/funtions.js'%}"></script>
+<script>
+    $(function () {
+    validador();
+    $("#formlogin").validate({
+        rules: {
+            username_login: {
+                required: true,
+                minlength: 2,
+                maxlength: 150,
+            },
+            password_login: {
+                required: true,
+                minlength: 2,
+                maxlength: 128,
+            }
+        },
+        messages: {
+            username_login: {
+                required: 'Ingresa un nombre de usuario valido',
+                minlength: "Ingrese al menos 2 caracteres",
+                maxlength: "Ingrese maximo 150 caracteres"
+
+            },
+            password_login: {
+                required: 'Ingresa una contraseña valida',
+                minlength: "Ingrese al menos 2 caracteres",
+                maxlength: "Ingrese maximo 128 caracteres"
+
+            }
+        }
+    });
+
+    $('#formlogin').on('submit', function (e) {
+        console.log(2);
+        e.preventDefault();
+        if ($('#username_login').val() === "") {
+            menssaje_error('Error!', "Debe ingresar un Username", 'far fa-times-circle');
+            return false
+        } else if ($('#password_login').val() === "") {
+            menssaje_error('Error!', "Debe ingresar una contraseña", 'far fa-times-circle');
+            return false
+        }
+        var parametros;
+        parametros = {
+            'username': $('#username_login').val(),
+            'password': $('#password_login').val(),
+            'csrfmiddlewaretoken':  '{{  csrf_token }}'
+        };
+        var isvalid = $(this).valid();
+        if (isvalid) {
+            var dialog  = bootbox.dialog({
+                title: 'Estamos iniciando sesion!!!',
+                message: '<p><i class="fa fa-spin fa-spinner"></i> Cargando tu sesion...</p>',
+                size: 'small',
+                centerVertical: true,
+                closeButton: false,
+            }).on('shown.bs.modal', function(){
+                login( window.location.pathname, parametros, function (data) {
+                    window.location.href = '/dashborad'});
+                return false;
+                 });
+
+        }
+    });
+
+    $('#form_person').on('submit', function (e) {
+    e.preventDefault();
+    var parametros = new FormData(this);
+    parametros.append('action', 'add');
+    var isvalid = $(this).valid();
+    if (isvalid) {
+        save_with_ajax2('Alerta',
+            '/register', 'Esta seguro que desea guardar este cliente?', parametros,
+            function (response) {
+                menssaje_ok('Exito!', 'Exito al registrarse, Su usuario y su contraseña son su numero de cedula!', 'far fa-smile-wink', function () {
+                    window.location.href = '/login'
+                });
+            });
+    }
+});
+
+});
+
+jQuery(function ($) {
+    $(document).on('click', '.toolbar a[data-target]', function (e) {
+        e.preventDefault();
+        var target = $(this).data('target');
+        $('.widget-box.visible').removeClass('visible');//hide others
+        $(target).addClass('visible');//show target
+    });
+});
+
+</script>
+</body>
+</html>

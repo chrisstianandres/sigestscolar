@@ -21,6 +21,8 @@ from apps import backEnd, curso
 
 urlpatterns = [
     path('admin/', admin.site.urls),
+    path('login/', backEnd.LoginFormView.as_view(), name ='login'),
+    path('logout/', backEnd.disconnect, name='logout'),
     path('dashborad/', login_required(backEnd.DashboardView.as_view()), name='dashborad'),
     path('change_profile/<int:pk>', login_required(backEnd.UserChangeGroup.as_view()), name='changeprofile'),
     path('cursos/', include('apps.curso.urls', namespace='cursos')),

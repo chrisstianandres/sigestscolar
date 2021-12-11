@@ -1,6 +1,6 @@
 {% extends 'bases/base_list.html' %}
 {% block header_tabla %}
-    <th class="dt-center" style="width: 16%">Nombre completo</th>
+     <th class="dt-center" style="width: 16%">Nombre completo</th>
     <th class="dt-center" style="width: 15%">Identificaciones</th>
     <th class="dt-center" style="width: 24%">Direccion</th>
     <th class="dt-center" style="width: 20%">Contactos</th>
@@ -92,11 +92,6 @@
             <td colspan="8" style="text-align: center">No existen registros para mostrar</td>
         </tr>
     {% endfor %}
-    <style>
-        .dropdown-menu {
-            left: -40px !important;
-        }
-    </style>
 {% endblock %}
 {% block validate_form %}
 
