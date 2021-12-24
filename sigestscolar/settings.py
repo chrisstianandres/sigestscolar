@@ -42,6 +42,7 @@ INSTALLED_APPS = [
 
     #crons
     'django_crontab',
+    'django_heroku',
 
     #apps del sistema
     'apps.administrativo',
@@ -100,16 +101,15 @@ WSGI_APPLICATION = 'sigestscolar.wsgi.application'
 # https://docs.djangoproject.com/en/3.2/ref/settings/#databases
 
 # DATABASES = {
-#     'default': {
-#         'ENGINE': 'django.db.backends.mysql',
-#         'NAME': 'bd_sigestscolar',
-#         'USER': 'user_bd',
-#         'PASSWORD': '123456',
-#         'HOST': 'localhost',
-#         'PORT': '3306',
-#         'STORAGE_ENGINE': 'MyISAM / INNODB / ETC'
+#         'default': {
+#             'ENGINE': 'django.db.backends.postgresql_psycopg2',
+#             'NAME': 'bd_scolar',
+#             'USER': 'postgres',
+#             'PASSWORD': '1234',
+#             'HOST': 'localhost',
+#             'PORT': '5432',
+#         }
 #     }
-# }
 import dj_database_url
 from decouple import config
 DATABASES = {
