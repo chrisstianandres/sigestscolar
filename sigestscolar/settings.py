@@ -201,3 +201,5 @@ CRONJOBS = [
 
 #django heroku
 django_heroku.settings(locals())
+
+
