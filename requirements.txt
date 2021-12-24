@@ -1,4 +1,3 @@
-decouple
 asgiref==3.4.1
 certifi==2021.10.8
 cffi==1.15.0
