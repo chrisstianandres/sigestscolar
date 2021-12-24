@@ -2,7 +2,6 @@ from datetime import datetime
 
 from django.db import models
 
-from apps.curso.models import CursoMateria
 from apps.extras import ModeloBase
 from apps.persona.models import Persona
 
@@ -48,10 +47,6 @@ class Profesor(ModeloBase):
     def mis_materiastodas(self, periodo):
         return ProfesorMateria.objects.filter(profesor=self, materia__nivel__periodo=periodo, activo=True)
 
-    def materias_imparte(self):
-        return Materia.objects.filter(nivel__fin__gte=datetime.now().date(), profesormateria__profesor=self,
-                                      profesormateria__principal=True)
-
     def materias_imparte_activas(self):
         return Materia.objects.filter(cerrado=False, profesormateria__profesor=self,
                                       profesormateria__principal=True).distinct()
@@ -71,7 +66,9 @@ class Profesor(ModeloBase):
         return Asignatura.objects.filter(materia__nivel__periodo=periodo, materia__profesormateria__profesor=self,
                                          materia__profesormateria__principal=True).distinct()
 
+    def cursos_imparte(self, periodo):
+        return self.materiaasignada_set.filter(status=True, materia__curso__periodo_id=periodo).distinct()
 
-class MateriaAsignada(ModeloBase):
-    profesor = models.ForeignKey(Profesor, on_delete=models.PROTECT)
-    materia = models.ForeignKey(CursoMateria, on_delete=models.PROTECT)
+    def materias_imparte(self, curso, paralelo):
+        return self.materiaasignada_set.filter(status=True, materia__curso__curso_id=curso, paralelo_id=paralelo).distinct()
+

@@ -16,10 +16,8 @@ from apps.inscripcion.forms import Formulario
 from apps.curso.models import Curso, CursoMateria, CursoParalelo
 from apps.extras import PrimaryKeyEncryptor
 from apps.inscripcion.models import Inscripcion
-from apps.materia.models import Materia
 from apps.paralelo.models import Paralelo
 from apps.periodo.models import PeriodoLectivo
-from apps.profesor.models import MateriaAsignada
 from sigestscolar.settings import SECRET_KEY_ENCRIPT
 
 

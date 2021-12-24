@@ -1,0 +1,78 @@
+{% extends 'bases/base_list.html' %}
+{% load tags_general %}
+{% block header_tabla %}
+{#    <th class="dt-center" style="width: 10%">Periodo</th>#}
+    <th class="dt-center" style="width: 25%">Docente</th>
+    <th class="dt-center" style="width: 60%">Detalles</th>
+{#    <th class="dt-center" style="width: 24%">Materia</th>#}
+    <th style="text-align:center; width: 5%" class="dt-center"><i class="fa fa-cogs"></i></th>
+{% endblock %}
+{% block body_tabla %}
+    {% for elemento in page_obj %}
+        <tr>
+            <td class="dt-center" style="width: 25%">{{ elemento.persona.nombre_completo }} </td>
+            <td class="dt-center" style="width: 60%">
+                <p>
+                    <a style="color: black" class="accordion-toggle" data-toggle="collapse"
+                       data-parent="#cursos{{ forloop.counter }}"
+                       href="#cursos{{ forloop.counter }}">
+                        <span class="fas fa-eye" aria-hidden="true"></span> Cursos
+                    </a>
+                </p>
+                <div class="collapse" id="cursos{{ forloop.counter }}">
+                    {% with cursos=elemento|args:periodo.pk|call:'cursos_imparte' %}
+                        {% for curso in  cursos %}
+                            <p><i class="fas fa-chevron-right"></i> {{ curso.materia.curso.curso.nombre }}&nbsp;&nbsp;
+                                <b>Paralelo: </b>{{ curso.paralelo }}
+                                <br> <a style="color: black" class="accordion-toggle" data-toggle="collapse"
+                                        data-parent="#materias{{ forloop.counter }}"
+                                        href="#materias{{ forloop.counter }}">
+                                    <span class="fas fa-eye" aria-hidden="true"></span> Materias
+                                </a></p>
+                            <div class="collapse" id="materias{{ forloop.counter }}">
+                                {% with materias=elemento|args:curso.materia.curso.curso.pk|args:curso.paralelo.pk|call:'materias_imparte' %}
+                                    {% for materia in  materias %}
+                                        &nbsp;&nbsp;&nbsp;&nbsp; <i class="fas fa-spell-check"></i>
+                                        {{ materia.materia.materia }}
+                                    {% endfor %}
+                                {% endwith %}
+                            </div>
+                            <hr>
+
+                        {% endfor %}
+                    {% endwith %}
+                </div>
+            </td>
+            <td style="text-align:center; width: 10%">
+                <a type="button" class="btn btn-warning btn-xs editar" pk="{{ elemento.pk }}" style="color: white"
+                        {% if not modal_form %}
+                   href="{{ request.path }}?action=edit&pk={{ elemento.persona.encoded_id }}"{% endif %}><i
+                        class="fa fa-edit"></i></a>
+                <a type="button" class="btn btn-danger btn-xs eliminar" pk="{{ elemento.persona.encoded_id }}"><i
+                        class="fa fa-trash"></i></a>
+            </td>
+        </tr>
+    {% empty %}
+        <tr>
+            <td colspan="8" style="text-align: center">No existen registros para mostrar</td>
+        </tr>
+    {% endfor %}
+
+    <style>
+        .dropdown-menu {
+            left: -40px !important;
+        }
+    </style>
+{% endblock %}
+{% block validate_form %}
+    <script>
+    $('.accordion-toggle').on('click',function () {
+        if ($(this).attr('aria-expanded')==='true'){
+            $(this).find('span').addClass('fa-eye').removeClass('fa-eye-slash');
+        }else {
+             $(this).find('span').addClass('fa-eye-slash').removeClass('fa-eye');
+        }
+    });
+
+    </script>
+{% endblock %}

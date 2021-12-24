@@ -78,7 +78,7 @@
     <!-- Right navbar links -->
     <ul class="navbar-nav ml-auto">
       <!-- Notifications Dropdown Menu -->
-      {% if not request.user.is_superuser %}
+      {% if request.user.is_superuser %}
       <li>
         <a href="/admin">
                 <span class="badge badge-info" style="color: white">ADMIN DJANGO</span>

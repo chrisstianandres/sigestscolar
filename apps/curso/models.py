@@ -5,6 +5,7 @@ from apps.extras import ModeloBase, PrimaryKeyEncryptor
 from apps.materia.models import Materia
 from apps.paralelo.models import Paralelo
 from apps.periodo.models import PeriodoLectivo
+from apps.profesor.models import Profesor
 from sigestscolar.settings import SECRET_KEY_ENCRIPT
 
 
@@ -38,7 +39,7 @@ class CursoParalelo(ModeloBase):
     cupoindividual = models.BooleanField(default=False)
 
     def __str__(self):
-        return '{} - {}  {}'.format(self.periodo.nombre, self.curso.nombre, self.paralelo.nombre)
+        return '{} - {}'.format(self.periodo.nombre, self.curso.nombre)
 
     def to_JSON(self):
         item = model_to_dict(self)
@@ -98,6 +99,9 @@ class CursoMateria(ModeloBase):
         item['materia'] = model_to_dict(self.materia)
         return item
 
+    def docentes(self):
+        self.materiaasignada_set.filter(status=True)
+
     class Meta:
         verbose_name = u"Curso Materia"
         verbose_name_plural = u"Cursos Materias"
@@ -115,4 +119,15 @@ class ConfiguracionValoresGeneral(ModeloBase):
     matricula = models.DecimalField(max_digits=5, decimal_places=2, default=0)
     pension = models.DecimalField(max_digits=5, decimal_places=2, default=0)
     numeropensiones = models.IntegerField(default=1)
+
+
+class MateriaAsignada(ModeloBase):
+    profesor = models.ForeignKey(Profesor, on_delete=models.PROTECT)
+    materia = models.ForeignKey(CursoMateria, on_delete=models.PROTECT)
+    paralelo = models.ForeignKey(Paralelo, on_delete=models.PROTECT)
+
+    def __str__(self):
+        return '{} {}'.format(self.profesor.persona.nombre_completo(), self.materia.materia.nombre)
+
+
 

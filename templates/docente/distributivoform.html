@@ -1,0 +1,289 @@
+{% extends 'bases/base_form.html' %}
+{% block extra_form %}
+    <hr>
+    <div class="card card-default">
+        <div class="card-header">
+            <h3 class="card-title"><i class="fas fa-book"></i><b> Materias a impartir</b></h3>
+            <div class="card-tools">
+                <button type="button" class="btn btn-tool" data-card-widget="collapse">
+                    <i class="fas fa-minus"></i>
+                </button>
+            </div>
+        </div>
+        <!-- /.card-header -->
+        <div class="card-body">
+            <div class="row">
+                <div class="col-md-12">
+                    <label for="id_materias">Busca una materia: </label>
+                    <select name="materias" id="id_materias" class="form-control select2">
+                    </select>
+                    <br>
+                    <div class="form-group">
+                        <table class="table table-bordered" id="table_materias">
+                            <thead>
+                            <tr>
+                                <th style="width: 5%">#</th>
+                                <th style="width:15%;">Identificacion</th>
+                                <th style="width: 50%;">Nombre</th>
+                                <th style="width: 20%">Alias</th>
+                                <th style="width: 10%">Quitar</th>
+                            </tr>
+                            </thead>
+                            <tbody>
+                            </tbody>
+                        </table>
+                    </div>
+                    <!-- /.form-group -->
+                </div>
+                <!-- /.col -->
+            </div>
+            <!-- /.row -->
+        </div>
+        <!-- /.card-body -->
+    </div>
+{% endblock %}
+{% block sumbit_form %}
+{% endblock %}
+{% block validate_form %}
+    <script>
+        var tblmaterias;
+        var apertura = {
+            items: {
+                periodo: '',
+                cupo: '',
+                cupoindividual: '',
+                curso: '',
+                paralelo: '',
+                materias: [],
+            },
+            get_ids: function () {
+                var ids = [];
+                $.each(this.items.materias, function (key, value) {
+                    ids.push(value.id);
+                });
+                return ids;
+            },
+            add: function (data) {
+                this.items.materias.push(data);
+                this.list();
+            },
+            list: function () {
+                tblmaterias = $("#table_materias").DataTable({
+                    destroy: true,
+                    dom: 't',
+                    autoWidth: false,
+                    dataSrc: "",
+                    responsive: true,
+                    language: {
+                        "url": '//cdn.datatables.net/plug-ins/1.10.15/i18n/Spanish.json'
+                    },
+                    data: this.items.materias,
+                    columns: [
+                        {data: "id"},
+                        {data: "identificacion"},
+                        {data: "nombre"},
+                        {data: "alias"},
+                        {data: "id"}
+                    ],
+                    columnDefs: [
+                        {
+                            targets: [-1],
+                            class: 'text-center',
+                            width: '5%',
+                            orderable: false,
+                            render: function (data, type, row) {
+                                {#console.log(row);#}
+                                return '<a rel="remove" type="button" class="btn btn-danger btn-xs btn-flat rounded-pill" style="color: white" data-toggle="tooltip" title="Quitar Producto"><i class="fa fa-times"></i></a>';
+
+                            }
+                        }
+                    ]
+                });
+            },
+        };
+        $(function () {
+            $('#id_curso').select2({
+                language: {
+                    inputTooShort: function () {
+                        return "Ingresa al menos un caracter...";
+                    },
+                    "noResults": function () {
+                        return "Sin resultados";
+                    },
+                    "searching": function () {
+                        return "Buscando...";
+                    }
+                },
+                theme: 'bootstrap4',
+                allowClear: true,
+                ajax: {
+                    delay: 250,
+                    type: 'GET',
+                    url: '/cursos/aperturar/',
+                    data: function (params) {
+                        return {
+                            term: params.term,
+                            action: 'search_curso',
+                            id: $('#id_periodo option:selected').val()
+                        };
+                    },
+                    processResults: function (data) {
+                        return {
+                            results: data
+                        };
+
+                    },
+
+                },
+                placeholder: 'Busca un Curso',
+                minimumInputLength: 1,
+            });
+            $('#id_paralelo').select2({
+                language: {
+                    inputTooShort: function () {
+                        return "Ingresa al menos un caracter...";
+                    },
+                    "noResults": function () {
+                        return "Sin resultados";
+                    },
+                    "searching": function () {
+                        return "Buscando...";
+                    }
+                },
+                theme: 'bootstrap4',
+                allowClear: true,
+                ajax: {
+                    delay: 250,
+                    type: 'GET',
+                    url: '/cursos/aperturar/',
+                    data: function (params) {
+                        return {
+                            term: params.term,
+                            action: 'search_paralelo',
+                            id: $('#id_periodo option:selected').val()
+                        };
+                    },
+                    processResults: function (data) {
+                        return {
+                            results: data
+                        };
+
+                    },
+
+                },
+                placeholder: 'Busca un Paralelo',
+                minimumInputLength: 1,
+            });
+            $('#id_materias').select2({
+                language: {
+                    inputTooShort: function () {
+                        return "Ingresa al menos un caracter...";
+                    },
+                    "noResults": function () {
+                        return "Sin resultados";
+                    },
+                    "searching": function () {
+                        return "Buscando...";
+                    }
+                },
+                theme: 'bootstrap4',
+                allowClear: true,
+                ajax: {
+                    delay: 250,
+                    type: 'GET',
+                    url: '/cursos/aperturar/',
+                    data: function (params) {
+                        return {
+                            term: params.term,
+                            action: 'search_materias',
+                            ids: JSON.stringify(apertura.get_ids())
+                        };
+                    },
+                    processResults: function (data) {
+                        return {
+                            results: data
+                        };
+
+                    },
+
+                },
+                placeholder: 'Busca una materia',
+                minimumInputLength: 1,
+            }).on('select2:select', function (e) {
+                $.ajax({
+                    type: "GET",
+                    url: '/cursos/aperturar/',
+                    data: {
+                        "id": $('#id_materias option:selected').val(),
+                        'action': 'get_materia'
+                    },
+                    dataType: 'json',
+                    success: function (data) {
+                        apertura.add(data);
+                        $('#id_materias').val(null).trigger('change');
+                    },
+                    error: function (xhr, status, data) {
+                        alert(data);
+                    },
+
+                })
+            });
+            $('#table_materias').on('click', 'a[rel="remove"]', function () {
+                var tr = tblmaterias.cell($(this).closest('td, li')).index();
+                borrar_todo_alert('Alerta de Eliminación',
+                    'Esta seguro que desea eliminar esta materia <br> ' +
+                    '<strong>CONTINUAR?</strong>', function () {
+                        apertura.items.materias.splice(tr.row, 1);
+                        apertura.list();
+                    })
+            });
+            validador();
+            $("#form").validate({
+                rules: {
+                    periodo: {required: true,},
+                    paralelo: {required: true},
+                    curso: {required: true},
+                    cupo: {required: true, cupominimo:true},
+                },
+                messages: {
+                    periodo: {required: "Por favor elige un periodo"},
+                    paralelo: {required: "Por favor elige un paralelo"},
+                    curso: {required: "Por favor elige un curso"},
+                    cupo: {required: "Por favor ingresa un cupo"},
+                },
+            });
+            $('[data-toggle="tooltip"]').tooltip();
+            $('#form').on('submit', function (e) {
+                e.preventDefault();
+                if ($(this).valid() && apertura.items.materias.length > 0) {
+                    apertura.items.curso = $('#id_curso').val();
+                    apertura.items.paralelo = $('#id_paralelo').val();
+                    apertura.items.periodo = $('#id_periodo').val();
+                    apertura.items.cupo = $('#id_cupo').val();
+                    apertura.items.cupoindividual = $('#id_cupoindividual').is(':checked');
+                    var parametros = {'apertura': JSON.stringify(apertura.items)};
+                    parametros['action'] = '{{ action }}';
+                     {% if pk %}parametros['pk'] = '{{ pk }}';{% endif %}
+                    save_with_ajax('Estas seguro?', '/cursos/aperturar/', 'Desea guardar esta informacion?', parametros,
+                        function (e) {
+                            menssaje_ok('Todo correcto!', 'Informacion guardada corectamente!', 'success', function (e) {
+                                window.location.replace('/cursos/aperturar/');
+                            })
+
+                        })
+                } else {
+                    menssaje_error('Error', 'Debes ingresar al menos 3 materias a impartir para aperturar el curso', 'error', function () {
+                    })
+                }
+
+            });
+            {% if materias %}
+                apertura.add({{ materias.0|safe }});
+            {% endif %}
+            apertura.list();
+        });
+
+
+    </script>
+
+{% endblock %}

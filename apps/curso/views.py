@@ -12,12 +12,12 @@ from django.views.generic import ListView, TemplateView
 
 from apps.backEnd import nombre_empresa
 from apps.curso.forms import Formulario, FormularioApertura, FormularioConfiguracionValores
-from apps.curso.models import Curso, CursoParalelo, CursoMateria, ConfiguracionValoresCurso, ConfiguracionValoresGeneral
+from apps.curso.models import Curso, CursoParalelo, CursoMateria, ConfiguracionValoresCurso, \
+    ConfiguracionValoresGeneral, MateriaAsignada
 from apps.extras import PrimaryKeyEncryptor
 from apps.materia.models import Materia
 from apps.paralelo.models import Paralelo
 from apps.periodo.models import PeriodoLectivo
-from apps.profesor.models import MateriaAsignada
 from sigestscolar.settings import SECRET_KEY_ENCRIPT
 
 
