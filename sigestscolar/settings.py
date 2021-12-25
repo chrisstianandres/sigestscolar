@@ -24,7 +24,7 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 SECRET_KEY = 'django-insecure-#0!acpa9i=uarck@f(1a^m8s0j)l-7-1h-q((#$x1aq9muq%g^'
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = False
+DEBUG = True
 
 ALLOWED_HOSTS = ['*']
 
@@ -116,12 +116,6 @@ from decouple import config
 DATABASES = {
     'default': {
         'ENGINE': dj_database_url.config(default=config('DATABASE_URL')),
-        # 'NAME': 'bd_sigestscolar',
-        # 'USER': 'user_bd',
-        # 'PASSWORD': '123456',
-        # 'HOST': 'localhost',
-        # 'PORT': '3306',
-        # 'STORAGE_ENGINE': 'MyISAM / INNODB / ETC'
     }
 }
 # Password validation
