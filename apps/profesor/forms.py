@@ -4,6 +4,7 @@ from .distributivodocente import MateriaAsignada
 from .models import Profesor
 from ..curso.models import CursoMateria
 from ..paralelo.models import Paralelo
+from ..periodo.models import PeriodoLectivo
 
 
 class Formulario(forms.Form):
@@ -20,6 +21,7 @@ class Formulario(forms.Form):
     #     fields = ['profesor']
     #     labels = {'profesor': 'Docente'}
     profesor = forms.ModelChoiceField(queryset=Profesor.objects.filter(status=True)[0:10], widget=forms.Select(attrs={'class': 'form-control select2'}))
-    cursom = forms.ModelChoiceField(queryset=CursoMateria.objects.filter(status=True)[0:10], widget=forms.Select(attrs={'class': 'form-control select2'}))
-    paralelo = forms.ModelChoiceField(queryset=Paralelo.objects.filter(status=True)[0:10], widget=forms.Select(attrs={'class': 'form-control select2'}))
+    periodo = forms.ModelChoiceField(queryset=PeriodoLectivo.objects.filter(status=True)[0:10], widget=forms.Select(attrs={'class': 'form-control select2'}))
+    curso = forms.CharField(widget=forms.Select(attrs={'class': 'form-control select2', 'placeholder': 'Selecciona un curso'}), label='Curso')
+    paralelo = forms.CharField(widget=forms.Select(attrs={'class': 'form-control select2', 'placeholder': 'Selecciona un paralelo', 'multiple': 'multiple'}))
 

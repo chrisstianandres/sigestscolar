@@ -47,13 +47,9 @@
 {% block validate_form %}
     <script>
         var tblmaterias;
-        var apertura = {
+        var distributivo = {
             items: {
-                periodo: '',
-                cupo: '',
-                cupoindividual: '',
-                curso: '',
-                paralelo: '',
+                profesor: '',
                 materias: [],
             },
             get_ids: function () {
@@ -80,9 +76,8 @@
                     data: this.items.materias,
                     columns: [
                         {data: "id"},
-                        {data: "identificacion"},
-                        {data: "nombre"},
-                        {data: "alias"},
+                        {data: "materia.nombre"},
+                        {data: "paralelo"},
                         {data: "id"}
                     ],
                     columnDefs: [
@@ -91,8 +86,7 @@
                             class: 'text-center',
                             width: '5%',
                             orderable: false,
-                            render: function (data, type, row) {
-                                {#console.log(row);#}
+                            render: function () {
                                 return '<a rel="remove" type="button" class="btn btn-danger btn-xs btn-flat rounded-pill" style="color: white" data-toggle="tooltip" title="Quitar Producto"><i class="fa fa-times"></i></a>';
 
                             }
@@ -119,7 +113,7 @@
                 ajax: {
                     delay: 250,
                     type: 'GET',
-                    url: '/cursos/aperturar/',
+                    url: '/distributivo',
                     data: function (params) {
                         return {
                             term: params.term,
@@ -155,12 +149,13 @@
                 ajax: {
                     delay: 250,
                     type: 'GET',
-                    url: '/cursos/aperturar/',
+                    url: '/distributivo/',
                     data: function (params) {
                         return {
                             term: params.term,
                             action: 'search_paralelo',
-                            id: $('#id_periodo option:selected').val()
+                            id: $('#id_periodo option:selected').val(),
+                            curso: $('#id_curso option:selected').val()
                         };
                     },
                     processResults: function (data) {
@@ -191,12 +186,15 @@
                 ajax: {
                     delay: 250,
                     type: 'GET',
-                    url: '/cursos/aperturar/',
+                    url: '/distributivo',
                     data: function (params) {
                         return {
                             term: params.term,
                             action: 'search_materias',
-                            ids: JSON.stringify(apertura.get_ids())
+                            ids: JSON.stringify(distributivo.get_ids()),
+                            id: $('#id_periodo').val(),
+                            curso: $('#id_curso').val(),
+                            paralelos: $('#id_paralelo').val(),
                         };
                     },
                     processResults: function (data) {
@@ -212,14 +210,14 @@
             }).on('select2:select', function (e) {
                 $.ajax({
                     type: "GET",
-                    url: '/cursos/aperturar/',
+                    url: '/distributivo',
                     data: {
                         "id": $('#id_materias option:selected').val(),
                         'action': 'get_materia'
                     },
                     dataType: 'json',
                     success: function (data) {
-                        apertura.add(data);
+                        distributivo.add(data);
                         $('#id_materias').val(null).trigger('change');
                     },
                     error: function (xhr, status, data) {
@@ -233,8 +231,8 @@
                 borrar_todo_alert('Alerta de Eliminación',
                     'Esta seguro que desea eliminar esta materia <br> ' +
                     '<strong>CONTINUAR?</strong>', function () {
-                        apertura.items.materias.splice(tr.row, 1);
-                        apertura.list();
+                        distributivo.items.materias.splice(tr.row, 1);
+                        distributivo.list();
                     })
             });
             validador();

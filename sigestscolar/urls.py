@@ -26,6 +26,7 @@ urlpatterns = [
                   path('admin/', admin.site.urls),
                   path('login/', backEnd.LoginFormView.as_view(), name='login'),
                   path('', backEnd.LoginFormView.as_view(), name='index'),
+                  path('accounts/login', backEnd.LoginFormView.as_view(), name='login_next'),
                   path('logout/', backEnd.disconnect, name='logout'),
                   path('dashborad/', login_required(backEnd.DashboardView.as_view()), name='dashborad'),
                   path('change_profile/<int:pk>', login_required(backEnd.UserChangeGroup.as_view()),
