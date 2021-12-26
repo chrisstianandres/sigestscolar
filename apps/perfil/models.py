@@ -2,7 +2,7 @@ from django.db import models
 
 from apps.administrativo.models import Administrativo
 from apps.externo.models import Externo
-from apps.extras import ModeloBase
+from apps.extras import ModeloBase, null_to_numeric
 from apps.inscripcion.models import Inscripcion
 from apps.persona.models import Persona
 from apps.profesor.models import Profesor
