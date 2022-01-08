@@ -67,8 +67,8 @@ class Profesor(ModeloBase):
                                          materia__profesormateria__principal=True).distinct()
 
     def cursos_imparte(self, periodo):
-        return self.materiaasignada_set.filter(status=True, materia__curso__periodo_id=periodo).distinct()
+        return self.materiaasignada_set.filter(status=True, materia__curso__periodo_id=periodo).distinct('paralelo')
 
     def materias_imparte(self, curso, paralelo):
-        return self.materiaasignada_set.filter(status=True, materia__curso__curso_id=curso, paralelo_id=paralelo).distinct()
+        return self.materiaasignada_set.filter(status=True, materia__curso__curso_id=curso, paralelo_id=paralelo).distinct('materia')
 

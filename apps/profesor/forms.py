@@ -22,6 +22,6 @@ class Formulario(forms.Form):
     #     labels = {'profesor': 'Docente'}
     profesor = forms.ModelChoiceField(queryset=Profesor.objects.filter(status=True)[0:10], widget=forms.Select(attrs={'class': 'form-control select2'}))
     periodo = forms.ModelChoiceField(queryset=PeriodoLectivo.objects.filter(status=True)[0:10], widget=forms.Select(attrs={'class': 'form-control select2'}))
-    curso = forms.CharField(widget=forms.Select(attrs={'class': 'form-control select2', 'placeholder': 'Selecciona un curso'}), label='Curso')
-    paralelo = forms.CharField(widget=forms.Select(attrs={'class': 'form-control select2', 'placeholder': 'Selecciona un paralelo', 'multiple': 'multiple'}))
+    # curso = forms.CharField(widget=forms.Select(attrs={'class': 'form-control select2', 'placeholder': 'Selecciona un curso'}), label='Curso')
+    # paralelo = forms.CharField(widget=forms.Select(attrs={'class': 'form-control select2', 'placeholder': 'Selecciona un paralelo', 'multiple': 'multiple'}))
 

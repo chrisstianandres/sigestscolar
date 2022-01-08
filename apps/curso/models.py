@@ -55,6 +55,24 @@ class CursoParalelo(ModeloBase):
     def total_materias(self):
         return self.cursomateria_set.all().count()
 
+    def materias_asignadas_curso(self):
+        data = []
+        for m in self.cursomateria_set.filter(status=True):
+            if m == self.cursomateria_set.filter(status=True)[0]:
+                data.append({'id': m.id, 'materia': m.materia.nombre, 'select': True})
+            else:
+                data.append({'id': m.id, 'materia': m.materia.nombre, 'select': False})
+        return data
+
+    def get_paralelos(self):
+        data = []
+        for p in self.paralelo.filter(status=True):
+            if p == self.paralelo.filter(status=True)[0]:
+                data.append({'id': p.id, 'paralelo': p.nombre, 'select': True})
+            else:
+                data.append({'id': p.id, 'paralelo': p.nombre, 'select': False})
+        return data
+
     def encoded_id(self):
         return PrimaryKeyEncryptor(SECRET_KEY_ENCRIPT).encrypt(self.id)
 

@@ -10,7 +10,7 @@
 {% block body_tabla %}
     {% for elemento in page_obj %}
         <tr>
-            <td class="dt-center" style="width: 25%">{{ elemento.persona.nombre_completo }} </td>
+            <td class="dt-center" style="width: 25%">{{ elemento.profesor.persona.nombre_completo }} </td>
             <td class="dt-center" style="width: 60%">
                 <p>
                     <a style="color: black" class="accordion-toggle" data-toggle="collapse"
@@ -20,7 +20,7 @@
                     </a>
                 </p>
                 <div class="collapse" id="cursos{{ forloop.counter }}">
-                    {% with cursos=elemento|args:periodo.pk|call:'cursos_imparte' %}
+                    {% with cursos=elemento.profesor|args:periodo.pk|call:'cursos_imparte' %}
                         {% for curso in  cursos %}
                             <p><i class="fas fa-chevron-right"></i> {{ curso.materia.curso.curso.nombre }}&nbsp;&nbsp;
                                 <b>Paralelo: </b>{{ curso.paralelo }}
@@ -30,7 +30,7 @@
                                     <span class="fas fa-eye" aria-hidden="true"></span> Materias
                                 </a></p>
                             <div class="collapse" id="materias{{ forloop.counter }}">
-                                {% with materias=elemento|args:curso.materia.curso.curso.pk|args:curso.paralelo.pk|call:'materias_imparte' %}
+                                {% with materias=elemento.profesor|args:curso.materia.curso.curso.pk|args:curso.paralelo.pk|call:'materias_imparte' %}
                                     {% for materia in  materias %}
                                         &nbsp;&nbsp;&nbsp;&nbsp; <i class="fas fa-spell-check"></i>
                                         {{ materia.materia.materia }}

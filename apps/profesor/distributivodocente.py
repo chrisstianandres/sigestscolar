@@ -36,36 +36,55 @@ class Listview(TemplateView):
     def post(self, request, *args, **kwargs):
         data = {}
         try:
-            action = request.POST['action']
-            if action == 'add':
-                form = self.form(request.POST)
-                if form.is_valid():
-                    if calcular_edad(form.cleaned_data['nacimiento']) >= 18:
-                        persona = form.save()
-                        prof = Profesor(persona_id=persona.pk, fechaingreso=datetime.now(), activo=True)
-                        prof.save()
+            with transaction.atomic():
+                action = request.POST['action']
+                if action == 'add':
+                    error = []
+                    info = json.loads(request.POST['distributivo'])
+                    if not info['profesor'] or info['profesor'] == '':
+                        error.append('Debe elegir un docente')
+                    if not info['periodo'] or info['periodo'] == '':
+                        error.append('Debe elegir un periodo valido')
+                    if len(error) > 0:
+                        data['error'] = error
                     else:
-                        data['error'] = 'Debe ser mayor de edad para ser docente'
-                else:
-                    data['error'] = form.errors
-            elif action == 'edit':
-                pk = PrimaryKeyEncryptor(SECRET_KEY_ENCRIPT).decrypt(request.POST['pk'])
-                objeto = Persona.objects.get(pk=pk)
-                form = self.form(request.POST, instance=objeto)
-                if form.is_valid():
-                    if calcular_edad(form.cleaned_data['nacimiento']) >= 18:
-                        form.save()
+                        docente = info['profesor']
+                        periodo = info['periodo']
+                        if docente and periodo:
+                            for dist in info['cursos']:
+                                materia = None
+                                paralelo = None
+                                for m in dist['materias']:
+                                    if m['select']:
+                                       materia = m['id']
+                                for p in dist['paralelos']:
+                                    if p['select']:
+                                        paralelo = p['id']
+                                if not MateriaAsignada.objects.filter(status=True, profesor_id=docente, materia_id=materia, paralelo_id=paralelo).exists():
+                                    distri = self.model(profesor_id=docente, materia_id=materia, paralelo_id=paralelo)
+                                    distri.save()
+                                else:
+                                    transaction.set_rollback(True)
+                                    data['error'].append('Existe una conbinacion de curso materia y paralelo repetida, por favor corrigela para continuar')
+                                    break
+                elif action == 'edit':
+                    pk = PrimaryKeyEncryptor(SECRET_KEY_ENCRIPT).decrypt(request.POST['pk'])
+                    objeto = Persona.objects.get(pk=pk)
+                    form = self.form(request.POST, initial=model_to_dict(objeto))
+                    if form.is_valid():
+                        if calcular_edad(form.cleaned_data['nacimiento']) >= 18:
+                            form.save()
+                        else:
+                            data['error'] = 'Debe ser mayor de edad para ser docente'
                     else:
-                        data['error'] = 'Debe ser mayor de edad para ser docente'
+                        data['error'] = form.errors
+                elif action == 'delete':
+                    pk = PrimaryKeyEncryptor(SECRET_KEY_ENCRIPT).decrypt(request.POST['pk'])
+                    objeto = Persona.objects.get(pk=pk)
+                    profesor = self.model.objects.get(persona=objeto)
+                    profesor.delete()
                 else:
-                    data['error'] = form.errors
-            elif action == 'delete':
-                pk = PrimaryKeyEncryptor(SECRET_KEY_ENCRIPT).decrypt(request.POST['pk'])
-                objeto = Persona.objects.get(pk=pk)
-                profesor = self.model.objects.get(persona=objeto)
-                profesor.delete()
-            else:
-                data['error'] = 'No ha seleccionado una opcion'
+                    data['error'] = 'No ha seleccionado una opcion'
         except Exception as e:
             data['error'] = str(e)
             transaction.set_rollback(True)
@@ -156,15 +175,19 @@ class Listview(TemplateView):
                     term = request.GET['term']
                     periodo = request.GET['id']
                     curso = request.GET['curso']
+                    paralelos = map(int, json.loads(request.GET['paralelos']))
                     ids = json.loads(request.GET['ids'])
-                    for objeto in CursoMateria.objects.filter(Q(status=True), Q(curso__curso_id=curso), Q(curso__periodo_id=periodo), Q(materia__nombre__icontains=term) | Q(
-                            materia__identificacion__icontains=term) | Q(materia__alias__icontains=term)).exclude(id__in=ids)[0:10]:
+                    query = CursoMateria.objects.filter(Q(status=True), Q(curso__curso_id=curso), Q(curso__periodo_id=periodo), Q(materia__nombre__icontains=term),
+                                                        Q(curso__paralelo__in=paralelos) | Q(
+                            materia__identificacion__icontains=term) | Q(materia__alias__icontains=term)).exclude(id__in=ids).distinct()[0:10]
+                    for objeto in query:
                         item = {'id': objeto.pk, 'text': str(objeto)}
                         data.append(item)
                     return JsonResponse(data, safe=False)
-                if action == 'get_materia':
+                if action == 'get_curso':
                     id = request.GET['id']
-                    data = model_to_dict(CursoMateria.objects.get(id=id))
+                    curs = CursoMateria.objects.get(id=id)
+                    data = {'curso': curs.curso.curso.nombre, 'id': curs.pk, 'materias': curs.curso.materias_asignadas_curso(), 'paralelos': curs.curso.get_paralelos()}
                     return JsonResponse(data, safe=False)
             else:
                 data = self.get_context_data()
@@ -181,9 +204,7 @@ class Listview(TemplateView):
                     filtros = filtros & Q(materia__curso__curso_id=request.GET['cur'])
                 if 'mat' in request.GET:
                     filtros = filtros & Q(materia__materia_id=request.GET['mat'])
-                objeto = self.model.objects.filter(filtros)
-                list = objeto.distinct().values_list('profesor_id', flat=True)
-                # list = Profesor.objects.filter(status=True, id__in=ids)
+                list = self.model.objects.filter(filtros).distinct('profesor')
                 if 'search' in request.GET:
                     if not request.GET['search'] == '':
                         data['search'] = search = request.GET['search']

@@ -308,8 +308,7 @@ function save_with_ajax2(title, url, content, parametros, callback) {
                 size: 'small',
                 centerVertical: true,
                 closeButton: false,
-            })
-                .on('shown.bs.modal', function(){
+            }).on('shown.bs.modal', function(){
                     $.ajax({
                         dataType: 'JSON',
                         type: 'POST',

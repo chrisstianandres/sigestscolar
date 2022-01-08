@@ -3,7 +3,7 @@
     <hr>
     <div class="card card-default">
         <div class="card-header">
-            <h3 class="card-title"><i class="fas fa-book"></i><b> Materias a impartir</b></h3>
+            <h3 class="card-title"><i class="fas fa-book"></i><b> Cursos a impartir</b></h3>
             <div class="card-tools">
                 <button type="button" class="btn btn-tool" data-card-widget="collapse">
                     <i class="fas fa-minus"></i>
@@ -14,18 +14,17 @@
         <div class="card-body">
             <div class="row">
                 <div class="col-md-12">
-                    <label for="id_materias">Busca una materia: </label>
-                    <select name="materias" id="id_materias" class="form-control select2">
+                    <label for="id_cursos">Busca un Curso: </label>
+                    <select name="cursos" id="id_cursos" class="form-control select2">
                     </select>
                     <br>
                     <div class="form-group">
-                        <table class="table table-bordered" id="table_materias">
+                        <table class="table table-bordered" id="table_curso_materias">
                             <thead>
                             <tr>
-                                <th style="width: 5%">#</th>
-                                <th style="width:15%;">Identificacion</th>
-                                <th style="width: 50%;">Nombre</th>
-                                <th style="width: 20%">Alias</th>
+                                <th style="width:15%;">Curso</th>
+                                <th style="width: 50%;">Materia</th>
+                                <th style="width: 20%">Paralelo(s)</th>
                                 <th style="width: 10%">Quitar</th>
                             </tr>
                             </thead>
@@ -50,21 +49,22 @@
         var distributivo = {
             items: {
                 profesor: '',
-                materias: [],
+                periodo: '',
+                cursos: [],
             },
             get_ids: function () {
                 var ids = [];
-                $.each(this.items.materias, function (key, value) {
+                $.each(this.items.cursos, function (key, value) {
                     ids.push(value.id);
                 });
                 return ids;
             },
             add: function (data) {
-                this.items.materias.push(data);
+                this.items.cursos.push(data);
                 this.list();
             },
             list: function () {
-                tblmaterias = $("#table_materias").DataTable({
+                tblmaterias = $("#table_curso_materias").DataTable({
                     destroy: true,
                     dom: 't',
                     autoWidth: false,
@@ -73,11 +73,11 @@
                     language: {
                         "url": '//cdn.datatables.net/plug-ins/1.10.15/i18n/Spanish.json'
                     },
-                    data: this.items.materias,
+                    data: this.items.cursos,
                     columns: [
-                        {data: "id"},
-                        {data: "materia.nombre"},
-                        {data: "paralelo"},
+                        {data: "curso"},
+                        {data: "materias"},
+                        {data: "paralelos"},
                         {data: "id"}
                     ],
                     columnDefs: [
@@ -86,17 +86,49 @@
                             class: 'text-center',
                             width: '5%',
                             orderable: false,
-                            render: function () {
+                            render: function (data, row) {
                                 return '<a rel="remove" type="button" class="btn btn-danger btn-xs btn-flat rounded-pill" style="color: white" data-toggle="tooltip" title="Quitar Producto"><i class="fa fa-times"></i></a>';
 
                             }
-                        }
+                        },
+                        {
+                            targets: [1],
+                            class: 'text-center',
+                            orderable: false,
+                            render: function (data) {
+                                var element = '<select class="form-control select2 materia">';
+                                    $.each(data, function (key, value) {
+                                        if (value.select===true){
+                                        element+='<option selected value="'+value.id+'">'+value.materia+'</option>'}
+                                        else {element+='<option value="'+value.id+'">'+value.materia+'</option>'}
+                                    });
+                                    element+='</select>';
+                                return element;
+                            }
+                        },
+                        {
+                            targets: [2],
+                            class: 'text-center',
+                            orderable: false,
+                            render: function (data) {
+                                var element = '<select class="form-control select2 paralelos">';
+                                    $.each(data, function (key, value) {
+                                        if (value.select===true){
+                                            element+='<option selected value="'+value.id+'">'+value.paralelo+'</option>'
+                                        } else {element+='<option value="'+value.id+'">'+value.paralelo+'</option>' }
+
+                                     });
+                                    element+='</select>';
+                                return element;
+                            }
+                        },
                     ]
                 });
-            },
+            }
         };
         $(function () {
-            $('#id_curso').select2({
+
+            $('#id_cursos').select2({
                 language: {
                     inputTooShort: function () {
                         return "Ingresa al menos un caracter...";
@@ -131,6 +163,24 @@
                 },
                 placeholder: 'Busca un Curso',
                 minimumInputLength: 1,
+            }).on('select2:select', function (e) {
+                $.ajax({
+                    type: "GET",
+                    url: '/distributivo',
+                    data: {
+                        "id": $('#id_cursos option:selected').val(),
+                        'action': 'get_curso'
+                    },
+                    dataType: 'json',
+                    success: function (data) {
+                        distributivo.add(data);
+                        $('#id_cursos').val(null).trigger('change');
+                    },
+                    error: function (xhr, status, data) {
+                        alert(data);
+                    },
+
+                })
             });
             $('#id_paralelo').select2({
                 language: {
@@ -169,7 +219,79 @@
                 placeholder: 'Busca un Paralelo',
                 minimumInputLength: 1,
             });
-            $('#id_materias').select2({
+
+            $('#table_curso_materias').on('click', 'a[rel="remove"]', function () {
+                var tr = tblmaterias.cell($(this).closest('td, li')).index();
+                borrar_todo_alert('Alerta de Eliminación',
+                    'Esta seguro que desea eliminar esta materia <br> ' +
+                    '<strong>CONTINUAR?</strong>', function () {
+                        distributivo.items.cursos.splice(tr.row, 1);
+                        distributivo.list();
+                    })
+            }).on('change', '.materia', function () {
+                var tr = tblmaterias.cell($(this).closest('td, li')).index();
+                var pk = parseInt($(this).val());
+                $.each(distributivo.items.cursos[tr.row].materias, function (key, value) {
+                   if (parseInt(value.id)===pk){
+                       value.select = true;
+                   } else {value.select = false;}
+                });
+                  console.log(distributivo.items.cursos[tr.row].materias);
+            }).on('change', '.paralelos', function () {
+                var tr = tblmaterias.cell($(this).closest('td, li')).index();
+                var pk = parseInt($(this).val());
+                $.each(distributivo.items.cursos[tr.row].paralelos, function (key, value) {
+                   if (parseInt(value.id)===pk){
+                       value.select = true;
+                   } else {value.select = false;}
+                });
+                console.log(distributivo.items.cursos[tr.row].paralelos);
+            });
+            validador();
+            $("#form").validate({
+                rules: {
+                    periodo: {required: true,},
+                    paralelo: {required: true},
+                    curso: {required: true},
+                    cupo: {required: true, cupominimo:true},
+                },
+                messages: {
+                    periodo: {required: "Por favor elige un periodo"},
+                    paralelo: {required: "Por favor elige un paralelo"},
+                    curso: {required: "Por favor elige un curso"},
+                    cupo: {required: "Por favor ingresa un cupo"},
+                },
+            });
+            $('[data-toggle="tooltip"]').tooltip();
+            $('#form').on('submit', function (e) {
+                e.preventDefault();
+                if ($(this).valid() && distributivo.items.cursos.length > 0) {
+                    distributivo.items.profesor = $('#id_profesor').val();
+                    distributivo.items.periodo = $('#id_periodo').val();
+                    var parametros = {'distributivo': JSON.stringify(distributivo.items)};
+                    parametros['action'] = '{{ action }}';
+                     {% if pk %}parametros['pk'] = '{{ pk }}';{% endif %}
+                    save_with_ajax('Estas seguro?', '/distributivo/', 'Desea guardar esta informacion?', parametros,
+                        function (e) {
+                            menssaje_ok('Todo correcto!', 'Informacion guardada corectamente!', 'success', function (e) {
+                                window.location.replace('/distributivo/');
+                            })
+
+                        })
+                } else {
+                    menssaje_error('Error', 'Debes ingresar al menos 1 materias a impartir para guardar el distributivo', 'error', function () {
+                    })
+                }
+
+            });
+            {% if materias %}
+                apertura.add({{ materias.0|safe }});
+            {% endif %}
+            distributivo.list();
+        });
+
+        function select_materias() {
+            $('.materia').select2({
                 language: {
                     inputTooShort: function () {
                         return "Ingresa al menos un caracter...";
@@ -191,10 +313,9 @@
                         return {
                             term: params.term,
                             action: 'search_materias',
-                            ids: JSON.stringify(distributivo.get_ids()),
+
                             id: $('#id_periodo').val(),
-                            curso: $('#id_curso').val(),
-                            paralelos: $('#id_paralelo').val(),
+                            curso: $(this).parent().data()
                         };
                     },
                     processResults: function (data) {
@@ -207,79 +328,8 @@
                 },
                 placeholder: 'Busca una materia',
                 minimumInputLength: 1,
-            }).on('select2:select', function (e) {
-                $.ajax({
-                    type: "GET",
-                    url: '/distributivo',
-                    data: {
-                        "id": $('#id_materias option:selected').val(),
-                        'action': 'get_materia'
-                    },
-                    dataType: 'json',
-                    success: function (data) {
-                        distributivo.add(data);
-                        $('#id_materias').val(null).trigger('change');
-                    },
-                    error: function (xhr, status, data) {
-                        alert(data);
-                    },
-
-                })
-            });
-            $('#table_materias').on('click', 'a[rel="remove"]', function () {
-                var tr = tblmaterias.cell($(this).closest('td, li')).index();
-                borrar_todo_alert('Alerta de Eliminación',
-                    'Esta seguro que desea eliminar esta materia <br> ' +
-                    '<strong>CONTINUAR?</strong>', function () {
-                        distributivo.items.materias.splice(tr.row, 1);
-                        distributivo.list();
-                    })
-            });
-            validador();
-            $("#form").validate({
-                rules: {
-                    periodo: {required: true,},
-                    paralelo: {required: true},
-                    curso: {required: true},
-                    cupo: {required: true, cupominimo:true},
-                },
-                messages: {
-                    periodo: {required: "Por favor elige un periodo"},
-                    paralelo: {required: "Por favor elige un paralelo"},
-                    curso: {required: "Por favor elige un curso"},
-                    cupo: {required: "Por favor ingresa un cupo"},
-                },
-            });
-            $('[data-toggle="tooltip"]').tooltip();
-            $('#form').on('submit', function (e) {
-                e.preventDefault();
-                if ($(this).valid() && apertura.items.materias.length > 0) {
-                    apertura.items.curso = $('#id_curso').val();
-                    apertura.items.paralelo = $('#id_paralelo').val();
-                    apertura.items.periodo = $('#id_periodo').val();
-                    apertura.items.cupo = $('#id_cupo').val();
-                    apertura.items.cupoindividual = $('#id_cupoindividual').is(':checked');
-                    var parametros = {'apertura': JSON.stringify(apertura.items)};
-                    parametros['action'] = '{{ action }}';
-                     {% if pk %}parametros['pk'] = '{{ pk }}';{% endif %}
-                    save_with_ajax('Estas seguro?', '/cursos/aperturar/', 'Desea guardar esta informacion?', parametros,
-                        function (e) {
-                            menssaje_ok('Todo correcto!', 'Informacion guardada corectamente!', 'success', function (e) {
-                                window.location.replace('/cursos/aperturar/');
-                            })
-
-                        })
-                } else {
-                    menssaje_error('Error', 'Debes ingresar al menos 3 materias a impartir para aperturar el curso', 'error', function () {
-                    })
-                }
-
-            });
-            {% if materias %}
-                apertura.add({{ materias.0|safe }});
-            {% endif %}
-            apertura.list();
-        });
+             });
+        }
 
 
     </script>
