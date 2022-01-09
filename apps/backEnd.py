@@ -96,9 +96,16 @@ class DashboardView(TemplateView):
         except Exception as e:
             pass
 
+    def get_persona_session(self):
+        request = get_current_request()
+        # user = request.user
+
+        request.session['persona'] = request.user.persona_set.first()
+
     def get_context_data(self, **kwargs):
         self.get_group_session()
         self.get_modulos()
+        self.get_persona_session()
         data = super().get_context_data(**kwargs)
         data['titulo'] = 'Menu Principal'
         data['empresa'] = nombre_empresa()

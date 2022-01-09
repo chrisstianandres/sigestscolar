@@ -145,7 +145,7 @@ class Persona(ModeloBase):
         unique_together = ('cedula', 'ruc', 'pasaporte',)
 
     def nombre_completo(self):
-        return '{} {} {}'.format(self.nombres, self.apellido1, self.apellido2)
+        return '{} {}'.format(self.nombres, self.apellido1)
 
     def icono_genero(self):
         if self.genero == 1:
