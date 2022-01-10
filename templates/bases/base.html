@@ -87,26 +87,41 @@
       {% endif %}
       <li class="nav-item dropdown">
         <a class="nav-link" data-toggle="dropdown" href="#">
-            {% if request.session.group %}
-                <span class="badge badge-success" style="color: white">{{ request.session.group|upper }}</span>
+            {% if request.session.perfilactual %}
+                <span class="badge badge-success" style="color: white">{{ request.session.perfilactual|upper }}</span>
               {% elif request.user.is_superuser %}
                 <span class="badge badge-info" style="color: white">SUPER USUARIO</span>
             {% endif %}
 
         </a>
-          {% if request.user.groups.all.count > 1 %}
+{#          {% if request.user.groups.all.count > 1 %}#}
               <div class="dropdown-menu dropdown-menu-lg dropdown-menu-right">
                   <span class="dropdown-item dropdown-header">Perfiles de Usuario</span>
                   <div class="dropdown-divider"></div>
-                  {% for g in request.user.groups.all %}
-                      {% if g.id != request.session.group.id %}
-                          <a href="{% url 'changeprofile' g.id %}" class="dropdown-item">
-                              <i class="fas fa-envelope mr-2"></i> {{ g.name|upper }}
-                          </a>
-                      {% endif %}
-                  {% endfor %}
+{#                  {% for g in request.user.groups.all %}#}
+                  {% if request.session.perfilactual != 'ADMINISTRATIVO' and request.session.perfiles.es_administrativo %}
+                      <a href="{% url 'changeprofile' 1 %}" class="dropdown-item">
+                          <i class="fa fa-user-circle mr-2"></i> ADMINISTRATIVO
+                      </a>
+                  {% endif %}
+                  {% if request.session.perfilactual != 'PROFESOR' and request.session.perfiles.es_profesor %}
+                      <a href="{% url 'changeprofile' 2 %}" class="dropdown-item">
+                          <i class="fa fa-user-circle mr-2"></i> PROFESOR
+                      </a>
+                  {% endif %}
+                  {% if request.session.perfilactual != 'EXTERNO' and request.session.perfiles.es_externo %}
+                      <a href="{% url 'changeprofile' 0 %}" class="dropdown-item">
+                          <i class="fa fa-user-circle mr-2"></i> EXTERNO
+                      </a>
+                  {% endif %}
+                  {% if request.session.perfilactual != 'ALUMNO' and request.session.perfiles.es_alumno %}
+                      <a href="{% url 'changeprofile' 3 %}" class="dropdown-item">
+                          <i class="fa fa-user-circle mr-2"></i> ALUMNO
+                      </a>
+                  {% endif %}
+{#                  {% endfor %}#}
               </div>
-          {% endif %}
+{#          {% endif %}#}
       </li>
       <li class="nav-item dropdown">
         <a class="nav-link" data-toggle="dropdown" href="#">

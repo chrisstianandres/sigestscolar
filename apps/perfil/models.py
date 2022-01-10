@@ -49,7 +49,7 @@ class PerfilUsuario(ModeloBase):
         return null_to_numeric(self.administrativo_id) > 0
 
     def es_externo(self):
-        return null_to_numeric(self.externo_id) > 0
+        return True
 
     def activo(self):
         if self.es_estudiante():
@@ -62,12 +62,14 @@ class PerfilUsuario(ModeloBase):
 
     def tipo(self):
         if self.es_estudiante():
-            return self.inscripcion.carrera.alias
-        elif self.es_administrativo():
-            return "ADMINISTRATIVO"
+            return "ESTUDIANTE"
         elif self.es_profesor():
             return "PROFESOR"
+        elif self.es_administrativo():
+            return "ADMINISTRATIVO"
         elif self.es_externo():
             return "EXTERNO"
         else:
             return "NO DEFINIDO"
+
+

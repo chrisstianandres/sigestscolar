@@ -57,7 +57,12 @@ def calcular_edad(fecha):
     except Exception as ex:
         return 0
 
-
+PERFIL_ACTUAL = (
+    (0, 'EXTERNO'),
+    (1, 'ADMINISTRATIVO'),
+    (2, 'PROFESOR'),
+    (3, 'ALUMNO')
+)
 class DashboardView(TemplateView):
     template_name = 'dashboard.html'
 
@@ -71,40 +76,45 @@ class DashboardView(TemplateView):
     def get_group_session(self):
         try:
             request = get_current_request()
-            groups = self.request.user.groups.all()
-            if groups.exists():
-                if 'group' not in request.session:
-                    request.session['group'] = groups[0]
-                if 'permisos' not in request.session:
-                    permisos = []
-                else:
-                    permisos = []
-                    request.session['permisos'] = []
-                for p in request.session['group'].permissions.all():
-                    permisos.append(p.codename)
-                request.session['permisos'] = permisos
+            persona = request.user.persona_set.first()
+            if persona is not None:
+                perfiles = persona.perfilusuario_set.filter(status=True)
+                if perfiles.exists():
+                    keyperfil = 0
+                    if 'perfiles' not in request.session:
+                        request.session['perfiles'] = perfiles[0]
+                    if 'perfilactualkey' not in request.session:
+                        for key in range(0, 3):
+                            if PERFIL_ACTUAL[key][1] == str(perfiles[0]):
+                                request.session['perfilactualkey'] = keyperfil = PERFIL_ACTUAL[key][0]
+                    if 'perfilactual' not in request.session:
+                        request.session['perfilactual'] = PERFIL_ACTUAL[keyperfil][1]
+                    self.get_modulos()
         except Exception as e:
             pass
 
     def get_modulos(self):
         try:
             request = get_current_request()
-            modulos = Modulo.objects.filter(status=True)
-            if modulos.exists():
-                if 'modulos' not in request.session:
-                    request.session['modulos'] = modulos
+            perfilactual = request.session['perfilactual']
+            grupo = Group.objects.filter(name__icontains=perfilactual)
+            if grupo.exists():
+                modulos = grupo.first().grupomodulo_set.all()
+                if modulos.exists():
+                    request.session['modulos'] = modulos.first().modulos.all()
+            else:
+                request.session['modulos'] = []
         except Exception as e:
+            disconnect(self.request)
             pass
 
     def get_persona_session(self):
         request = get_current_request()
-        # user = request.user
-
-        request.session['persona'] = request.user.persona_set.first()
+        if not 'persona' in request.session:
+            request.session['persona'] = request.user.persona_set.first()
 
     def get_context_data(self, **kwargs):
         self.get_group_session()
-        self.get_modulos()
         self.get_persona_session()
         data = super().get_context_data(**kwargs)
         data['titulo'] = 'Menu Principal'
@@ -291,7 +301,9 @@ class UserChangeGroup(View):
 
     def get(self, request, *args, **kwargs):
         try:
-            request.session['group'] = Group.objects.get(pk=self.kwargs['pk'])
+            # request.session['group'] = Group.objects.get(pk=self.kwargs['pk'])
+            request.session['perfilactual'] = PERFIL_ACTUAL[self.kwargs['pk']][1]
+            request.session['perfilactualkey'] = int(self.kwargs['pk'])
         except:
             pass
         return HttpResponseRedirect(reverse_lazy('dashborad'))
