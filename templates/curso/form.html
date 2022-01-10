@@ -278,7 +278,9 @@
 
             });
             {% if materias %}
-                apertura.add({{ materias.0|safe }});
+                {% for materia in materias %}
+                    apertura.items.materias.push({{ materia|safe }});
+                {% endfor %}
             {% endif %}
             apertura.list();
         });

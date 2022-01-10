@@ -65,24 +65,46 @@ class Listview(TemplateView):
                                     distri.save()
                                 else:
                                     transaction.set_rollback(True)
-                                    data['error'].append('Existe una conbinacion de curso materia y paralelo repetida, por favor corrigela para continuar')
+                                    data['error'].append('Existe una combinacion de curso materia y paralelo repetida, por favor corrigela para continuar')
                                     break
                 elif action == 'edit':
-                    pk = PrimaryKeyEncryptor(SECRET_KEY_ENCRIPT).decrypt(request.POST['pk'])
-                    objeto = Persona.objects.get(pk=pk)
-                    form = self.form(request.POST, initial=model_to_dict(objeto))
-                    if form.is_valid():
-                        if calcular_edad(form.cleaned_data['nacimiento']) >= 18:
-                            form.save()
-                        else:
-                            data['error'] = 'Debe ser mayor de edad para ser docente'
+                    error = []
+                    info = json.loads(request.POST['distributivo'])
+                    if not info['profesor'] or info['profesor'] == '':
+                        error.append('Debe elegir un docente')
+                    if not info['periodo'] or info['periodo'] == '':
+                        error.append('Debe elegir un periodo valido')
+                    if len(error) > 0:
+                        data['error'] = error
                     else:
-                        data['error'] = form.errors
+                        docente = info['profesor']
+                        periodo = info['periodo']
+                        if docente and periodo:
+                            clear = Profesor.objects.get(id=docente)
+                            clear.materiaasignada_set.all().delete()
+                            for dist in info['cursos']:
+                                materia = None
+                                paralelo = None
+                                for m in dist['materias']:
+                                    if m['select']:
+                                        materia = m['id']
+                                for p in dist['paralelos']:
+                                    if p['select']:
+                                        paralelo = p['id']
+                                if not MateriaAsignada.objects.filter(status=True, profesor_id=docente,
+                                                                      materia_id=materia,
+                                                                      paralelo_id=paralelo).exclude(id=dist['id']).exists():
+                                    distri = self.model(profesor_id=docente, materia_id=materia, paralelo_id=paralelo)
+                                    distri.save()
+                                else:
+                                    transaction.set_rollback(True)
+                                    data['error'].append('Existe una combinacion de curso materia y paralelo repetida, por favor corrigela para continuar')
+                                    break
                 elif action == 'delete':
                     pk = PrimaryKeyEncryptor(SECRET_KEY_ENCRIPT).decrypt(request.POST['pk'])
                     objeto = Persona.objects.get(pk=pk)
-                    profesor = self.model.objects.get(persona=objeto)
-                    profesor.delete()
+                    profesor = Profesor.objects.get(persona=objeto)
+                    profesor.materiaasignada_set.all().delete()
                 else:
                     data['error'] = 'No ha seleccionado una opcion'
         except Exception as e:
@@ -106,10 +128,17 @@ class Listview(TemplateView):
                     data['action'] = action
                     data['pk'] = request.GET['pk']
                     pk = PrimaryKeyEncryptor(SECRET_KEY_ENCRIPT).decrypt(request.GET['pk'])
-                    instancia = Persona.objects.get(id=pk)
-                    data['nacimiento'] = instancia.nacimiento.strftime('%Y-%m-%d')
-                    data['form'] = self.form(initial=model_to_dict(instancia))
-                    data['titulo_form'] = 'Editar docente'
+                    instancia = self.model.objects.filter(profesor_id=pk, status=True, materia__curso__periodo_id=request.GET['periodo']).first()
+                    data['form'] = self.form(initial={'profesor': instancia.profesor, 'periodo': instancia.materia.curso.periodo})
+                    cursos = instancia.profesor.cursos_imparte_total(request.GET['periodo'])
+                    cursosdataresult = []
+                    for curso in cursos:
+                        cursosdataresult.append({'curso': curso.materia.curso.curso.nombre, 'id': curso.materia.pk,
+                                'materias': curso.materia.curso.materias_asignadas_curso(curso.materia.pk), 'paralelos':
+                                          curso.materia.curso.get_paralelos(curso.paralelo.pk)})
+                    if len(cursosdataresult) > 0:
+                        data['cursosdata'] = cursosdataresult
+                    data['titulo_form'] = 'Editar distributivo'
                     return render(request, self.template_name_add, data)
                 if action == 'filter_periodo':
                     data = []
@@ -193,7 +222,9 @@ class Listview(TemplateView):
                 data = self.get_context_data()
                 filtros = Q(status=True)
                 if 'per' in request.GET:
-                    filtros = filtros & Q(materia__curso__periodo_id=request.GET['per'])
+                    periodoactual = PeriodoLectivo.objects.get(status=True, actual=True, id=request.GET['per'])
+                    data['periodo'] = periodoactual
+                    filtros = filtros & Q(materia__curso__periodo=periodoactual)
                 elif PeriodoLectivo.objects.filter(status=True, actual=True):
                     periodoactual = PeriodoLectivo.objects.filter(status=True, actual=True).first()
                     data['periodo'] = periodoactual
@@ -208,7 +239,7 @@ class Listview(TemplateView):
                 if 'search' in request.GET:
                     if not request.GET['search'] == '':
                         data['search'] = search = request.GET['search']
-                        list = list.filter(nombre__icontains=search)
+                        list = list.filter(Q(profesor__persona__nombres__icontains=search)| Q(profesor__persona__apellido1__icontains=search) | Q(profesor__persona__apellido2__icontains=search) | Q(profesor__persona__cedula__icontains=search))
                 page_number = request.GET.get('page', 1)
                 paginator = Paginator(list, 10)
                 page_range = paginator.get_elided_page_range(number=page_number)

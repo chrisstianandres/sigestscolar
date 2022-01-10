@@ -45,6 +45,7 @@
 {% endblock %}
 {% block validate_form %}
     <script>
+
         var tblmaterias;
         var distributivo = {
             items: {
@@ -62,6 +63,18 @@
             add: function (data) {
                 this.items.cursos.push(data);
                 this.list();
+            },
+            edit: function (data) {
+                $.each(data, function (key, value) {
+                   $.each(value.materias, function (key2, value2) {
+                       value2.select = value2.select === 'true';
+                   });
+                    $.each(value.paralelos, function (key3, value3) {
+                       value3.select = value3.select === 'true';
+                   });
+                    distributivo.items.cursos.push(value);
+                });
+
             },
             list: function () {
                 tblmaterias = $("#table_curso_materias").DataTable({
@@ -127,7 +140,6 @@
             }
         };
         $(function () {
-
             $('#id_cursos').select2({
                 language: {
                     inputTooShort: function () {
@@ -245,7 +257,6 @@
                        value.select = true;
                    } else {value.select = false;}
                 });
-                console.log(distributivo.items.cursos[tr.row].paralelos);
             });
             validador();
             $("#form").validate({
@@ -284,8 +295,8 @@
                 }
 
             });
-            {% if materias %}
-                apertura.add({{ materias.0|safe }});
+            {% if cursosdata %}
+                distributivo.edit({{ cursosdata|safe }});
             {% endif %}
             distributivo.list();
         });

@@ -1,5 +1,61 @@
 {% extends 'bases/base_list.html' %}
 {% load tags_general %}
+{% block filtros %}
+    <div class="row">
+        <div class="col-sm-12">
+            <form action="{{ request.path }}">
+                <table>
+                    <tbody>
+                    <tr>
+                        <td style="width: 20%">
+                            <select name="periodos" id="id_periodos" class="form-control input-sm">
+                            </select>
+                        </td>
+                        <td style="width: 20%">
+                            <div class="form-group"><br>
+                                <div class="input-group">
+                                    <input type="text" class="form-control input-sm input-search"
+                                           style="border-top-right-radius: 0 !important; border-bottom-right-radius: 0 !important;"
+                                           placeholder="Buscar...." autocomplete="off"
+                                           aria-label="Buscar..." aria-describedby="basic-addon2"
+                                           name="search"
+                                           value="{{ search }}">
+                                    <div class="input-group-append">
+                                        <button class="btn btn-outline-success btn-sm" type="button" id="search"
+                                                data-toggle="tooltip" data-placement="bottom"
+                                                title="Buscar...">
+                                            <i class="fa fa-search"></i></button>
+                                        {% if search %}
+                                            <button class="btn btn-outline-danger btn-sm" type="button"
+                                                    data-toggle="tooltip" data-placement="bottom"
+                                                    title="Mostrar todos"
+                                                    onclick="window.location.href ='{{ request.path }}'"><i
+                                                    class="fas fa-redo-alt"></i></button>
+                                        {% endif %}
+
+                                    </div>
+                                </div>
+
+                            </div>
+                        </td>
+                        <td style="width: 10%">
+                            <div class="form-group float-right">
+                                <button {% if not modal_form %}onclick="window.location.href ={{ url_add }};" {% endif %}type="button"
+                                        class="btn btn-block btn-primary btn-sm"
+                                        {% if modal_form %} data-toggle="modal"
+                                        data-target="#modal_form"{% endif %}
+                                        style="margin-right: 2px;"><i class="fa fa-plus-circle"></i> Agregar
+                                </button>
+                            </div>
+                        </td>
+                    </tr>
+                    </tbody>
+                </table>
+            </form>
+        </div>
+    </div>
+    <br>
+{% endblock %}
 {% block header_tabla %}
 {#    <th class="dt-center" style="width: 10%">Periodo</th>#}
     <th class="dt-center" style="width: 25%">Docente</th>
@@ -44,11 +100,11 @@
                 </div>
             </td>
             <td style="text-align:center; width: 10%">
-                <a type="button" class="btn btn-warning btn-xs editar" pk="{{ elemento.pk }}" style="color: white"
+                <a type="button" class="btn btn-warning btn-xs editar" pk="{{ elemento.profesor.persona.encoded_id }}" style="color: white"
                         {% if not modal_form %}
-                   href="{{ request.path }}?action=edit&pk={{ elemento.persona.encoded_id }}"{% endif %}><i
+                   href="{{ request.path }}?action=edit&pk={{ elemento.profesor.persona.encoded_id }}&periodo={{ periodo.pk }}"{% endif %}><i
                         class="fa fa-edit"></i></a>
-                <a type="button" class="btn btn-danger btn-xs eliminar" pk="{{ elemento.persona.encoded_id }}"><i
+                <a type="button" class="btn btn-danger btn-xs eliminardist" pk="{{ elemento.profesor.persona.encoded_id }}"><i
                         class="fa fa-trash"></i></a>
             </td>
         </tr>
@@ -72,6 +128,69 @@
         }else {
              $(this).find('span').addClass('fa-eye-slash').removeClass('fa-eye');
         }
+    });
+    {% if periodo %}
+        var newOption = new Option('{{ periodo.nombre }}', {{ periodo.id }}, true, true);
+        $('#id_periodos').append(newOption).trigger('change');
+    {% endif %}
+
+    $('#id_periodos').select2({
+        language: {
+            inputTooShort: function () {
+                return "Ingresa al menos un caracter...";
+            },
+            "noResults": function () {
+                return "Sin resultados";
+            },
+            "searching": function () {
+                return "Buscando...";
+            }
+        },
+        theme: 'bootstrap4',
+        allowClear: true,
+        ajax: {
+            delay: 250,
+            type: 'GET',
+            url: '/distributivo/',
+            data: function (params) {
+                return {
+                    term: params.term,
+                    action: 'filter_periodo'
+                };
+            },
+            processResults: function (data) {
+                return {
+                    results: data
+                };
+
+            },
+
+        },
+        placeholder: 'Buscar por periodo',
+        minimumInputLength: 1,
+            });
+
+    $('#search').on('click', function (e) {
+        e.preventDefault();
+        let periodo = '', curso = '', paralelo = '', search = '';
+        if ($('#id_periodos').val() != null) {
+            periodo = $('#id_periodos').val();
+        }
+        if ($('.input-search').val() !== '') {
+            search = $('.input-search').val();
+        }
+        window.location.href = '/distributivo?per=' + periodo +'&search=' + search
+
+    });
+
+    $('.eliminardist').on('click', function (e) {
+        e.preventDefault();
+        var parametros = {'action': 'delete', 'pk': $(this).attr('pk'), 'periodo': '{{ periodo }}'};
+        save_estado('Estas seguro?', window.location.pathname, 'Desea eliminar este registro?', parametros, function (data) {
+            menssaje_ok('Todo correcto!', 'Registro eliminado corectamente!', 'success', function (e) {
+                window.location.reload();
+            })
+        });
     });
 
     </script>

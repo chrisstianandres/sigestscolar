@@ -55,19 +55,29 @@ class CursoParalelo(ModeloBase):
     def total_materias(self):
         return self.cursomateria_set.all().count()
 
-    def materias_asignadas_curso(self):
+    def materias_asignadas_curso(self, id=None):
         data = []
         for m in self.cursomateria_set.filter(status=True):
-            if m == self.cursomateria_set.filter(status=True)[0]:
+            if id is not None:
+                if m.id == id:
+                    data.append({'id': m.id, 'materia': m.materia.nombre, 'select': 'true'})
+                else:
+                    data.append({'id': m.id, 'materia': m.materia.nombre, 'select': 'false'})
+            elif m == self.cursomateria_set.filter(status=True)[0]:
                 data.append({'id': m.id, 'materia': m.materia.nombre, 'select': True})
             else:
                 data.append({'id': m.id, 'materia': m.materia.nombre, 'select': False})
         return data
 
-    def get_paralelos(self):
+    def get_paralelos(self, id=None):
         data = []
         for p in self.paralelo.filter(status=True):
-            if p == self.paralelo.filter(status=True)[0]:
+            if id is not None:
+                if p.id == id:
+                    data.append({'id': p.id, 'paralelo': p.nombre, 'select': 'true'})
+                else:
+                    data.append({'id': p.id, 'paralelo': p.nombre, 'select': 'false'})
+            elif p == self.paralelo.filter(status=True)[0]:
                 data.append({'id': p.id, 'paralelo': p.nombre, 'select': True})
             else:
                 data.append({'id': p.id, 'paralelo': p.nombre, 'select': False})
