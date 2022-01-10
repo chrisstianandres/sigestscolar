@@ -235,6 +235,8 @@ class Listview(TemplateView):
                     filtros = filtros & Q(materia__curso__curso_id=request.GET['cur'])
                 if 'mat' in request.GET:
                     filtros = filtros & Q(materia__materia_id=request.GET['mat'])
+                if self.get_peril(request) == 2:
+                    filtros = filtros & Q(profesor__persona=request.session['persona'])
                 list = self.model.objects.filter(filtros).distinct('profesor')
                 if 'search' in request.GET:
                     if not request.GET['search'] == '':
@@ -254,6 +256,9 @@ class Listview(TemplateView):
                 return render(request, self.template_name, data)
         except Exception as e:
             data['error'] = str(e)
+
+    def get_peril(self, request):
+        return request.session['perfilactualkey']
 
     def get_context_data(self, **kwargs):
         data = super().get_context_data(**kwargs)

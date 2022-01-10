@@ -59,8 +59,8 @@
 {% block header_tabla %}
 {#    <th class="dt-center" style="width: 10%">Periodo</th>#}
     <th class="dt-center" style="width: 25%">Docente</th>
-    <th class="dt-center" style="width: 60%">Detalles</th>
-{#    <th class="dt-center" style="width: 24%">Materia</th>#}
+{#    <th class="dt-center" style="width: 60%">Detalles</th>#}
+    <th class="dt-center" style="width: 24%">Materia</th>
     <th style="text-align:center; width: 5%" class="dt-center"><i class="fa fa-cogs"></i></th>
 {% endblock %}
 {% block body_tabla %}
@@ -115,11 +115,6 @@
         </tr>
     {% endfor %}
 
-    <style>
-        .dropdown-menu {
-            left: -40px !important;
-        }
-    </style>
 {% endblock %}
 {% block validate_form %}
     <script>
@@ -196,3 +191,9 @@
 
     </script>
 {% endblock %}
+
+    <style>
+        .dropdown-menu {
+            left: -40px !important;
+        }
+    </style>
