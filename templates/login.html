@@ -124,7 +124,6 @@
     });
 
     $('#formlogin').on('submit', function (e) {
-        console.log(2);
         e.preventDefault();
         if ($('#username_login').val() === "") {
             menssaje_error('Error!', "Debe ingresar un Username", 'far fa-times-circle');
@@ -148,6 +147,7 @@
                 centerVertical: true,
                 closeButton: false,
             }).on('shown.bs.modal', function(){
+                dialog.modal('hide');
                 login( window.location.pathname, parametros, function (data) {
                     window.location.href = '/dashborad'});
                 return false;
