@@ -61,7 +61,8 @@ PERFIL_ACTUAL = (
     (0, 'EXTERNO'),
     (1, 'ADMINISTRATIVO'),
     (2, 'PROFESOR'),
-    (3, 'ALUMNO')
+    (3, 'ALUMNO'),
+    (4, 'SUPERUSUARIO'),
 )
 class DashboardView(TemplateView):
     template_name = 'dashboard.html'
@@ -84,12 +85,24 @@ class DashboardView(TemplateView):
                     if 'perfiles' not in request.session:
                         request.session['perfiles'] = perfiles[0]
                     if 'perfilactualkey' not in request.session:
-                        for key in range(0, 3):
+                        for key in range(0, 4):
                             if PERFIL_ACTUAL[key][1] == str(perfiles[0]):
                                 request.session['perfilactualkey'] = keyperfil = PERFIL_ACTUAL[key][0]
                     if 'perfilactual' not in request.session:
                         request.session['perfilactual'] = PERFIL_ACTUAL[keyperfil][1]
                     self.get_modulos()
+                elif request.user.is_superuser:
+                    if 'perfilactualkey' not in request.session:
+                        request.session['perfilactualkey'] = keyperfil = PERFIL_ACTUAL[4][0]
+                    if 'perfilactual' not in request.session:
+                        request.session['perfilactual'] = PERFIL_ACTUAL[4][1]
+                    self.get_modulos()
+            elif request.user.is_superuser:
+                if 'perfilactualkey' not in request.session:
+                    request.session['perfilactualkey'] = keyperfil = PERFIL_ACTUAL[4][0]
+                if 'perfilactual' not in request.session:
+                    request.session['perfilactual'] = PERFIL_ACTUAL[4][1]
+                self.get_modulos()
         except Exception as e:
             pass
 
@@ -102,6 +115,8 @@ class DashboardView(TemplateView):
                 modulos = grupo.first().grupomodulo_set.all()
                 if modulos.exists():
                     request.session['modulos'] = modulos.first().modulos.all()
+            elif request.user.is_superuser:
+                request.session['modulos'] = Modulo.objects.filter(status=True).exclude(id=13).order_by('nombre')
             else:
                 request.session['modulos'] = []
         except Exception as e:

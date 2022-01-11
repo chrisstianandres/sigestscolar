@@ -89,8 +89,8 @@
         <a class="nav-link" data-toggle="dropdown" href="#">
             {% if request.session.perfilactual %}
                 <span class="badge badge-success" style="color: white">{{ request.session.perfilactual|upper }}</span>
-              {% elif request.user.is_superuser %}
-                <span class="badge badge-info" style="color: white">SUPER USUARIO</span>
+{#              {% elif request.user.is_superuser %}#}
+{#                <span class="badge badge-info" style="color: white">SUPER USUARIO</span>#}
             {% endif %}
 
         </a>
@@ -133,26 +133,6 @@
             <a href="#" class="dropdown-item">
             <i class="fa fa-user mr-2"></i> Perfil de Usuario
           </a>
-            <div class="dropdown-menu dropdown-menu-lg dropdown-menu-right">
-          <span class="dropdown-item dropdown-header">15 Notifications</span>
-          <div class="dropdown-divider"></div>
-          <a href="#" class="dropdown-item">
-            <i class="fas fa-envelope mr-2"></i> 4 new messages
-            <span class="float-right text-muted text-sm">3 mins</span>
-          </a>
-          <div class="dropdown-divider"></div>
-          <a href="#" class="dropdown-item">
-            <i class="fas fa-users mr-2"></i> 8 friend requests
-            <span class="float-right text-muted text-sm">12 hours</span>
-          </a>
-          <div class="dropdown-divider"></div>
-          <a href="#" class="dropdown-item">
-            <i class="fas fa-file mr-2"></i> 3 new reports
-            <span class="float-right text-muted text-sm">2 days</span>
-          </a>
-          <div class="dropdown-divider"></div>
-          <a href="#" class="dropdown-item dropdown-footer">See All Notifications</a>
-        </div>
           <div class="dropdown-divider"></div>
           <a href="#" class="dropdown-item">
             <i class="fa fa-building mr-2"></i> Configuracion de la empresa
