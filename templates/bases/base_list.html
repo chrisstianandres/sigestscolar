@@ -240,15 +240,24 @@
                             $('#titulo_form').html('<i class="fa fa-edit"></i> Editar Registro');
                             $.each($('#form')[0], function (key, value) {
                                 if (value.name) {
-                                    $('#id_' + value.name).val(data[value.name]).change();
+                                     if (value.type === 'text'){
+                                       $('#id_' + value.name).val(data[value.name]).change();
+                                     } else if (value.type==='select-one') {
+                                         console.log("#id_" + value.name +"option[value="+data[value.name]+"]");
+                                        $("#id_" + value.name +"option[value="+data[value.name]+"]").attr('selected','selected');
+                                     }
                                 }
                             });
+                            $('#id_action').val('edit');
+                            $('#id_pk').val(data['pk']);
                             $('#modal_form').modal('show');
                         });
                     });
                 {% endblock %}
                 $('#modal_form').on('hidden.bs.modal', function () {
                     $('#titulo_form').html('<i class="fa fa-plus"></i> {{ titulo_form}}');
+                    $('#id_action').val('add');
+                    $('#id_pk').val(null);
                     reset_form('#form');
                 });
             })

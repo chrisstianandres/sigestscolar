@@ -24,9 +24,9 @@ class Formulario(forms.ModelForm):
 
     class Meta:
         model = PeriodoLectivo
-        fields = ['nombre', 'desde', 'hasta', 'anio']
-        labels = {'nombre': 'Nombre', 'desde': 'Desde', 'hasta': 'Hasta', 'anio': 'Año'}
-        widgets = {'nombre': forms.TextInput(), 'desde': forms.TextInput(), 'hasta': forms.TextInput()}
+        fields = ['nombre', 'desde', 'hasta', 'anio', 'inicioactividades']
+        labels = {'nombre': 'Nombre', 'desde': 'Desde', 'hasta': 'Hasta', 'anio': 'Año', 'inicioactividades': 'Inicio de actividades'}
+        widgets = {'nombre': forms.TextInput(), 'desde': forms.TextInput(), 'hasta': forms.TextInput(), 'inicioactividades': forms.TextInput()}
 
     def clean(self):
         f = super()
@@ -34,12 +34,15 @@ class Formulario(forms.ModelForm):
         name = self.cleaned_data['nombre']
         start = self.cleaned_data['desde']
         end = self.cleaned_data['hasta']
+        inicioactividades = self.cleaned_data['inicioactividades']
         if u.pk is None:
             if PeriodoLectivo.objects.filter(nombre__iexact=name).exists():
                 self.add_error('nombre', 'Ya existe un periodo con ese nombre')
         else:
             if PeriodoLectivo.objects.filter(nombre__iexact=name).exclude(id=u.pk).exists():
                 self.add_error('nombre', 'Ya existe un periodo con ese nombre')
+        if inicioactividades > end or inicioactividades < start:
+            self.add_error('desde', 'No puede ingresar la fecha de inicio de actividades fuera del rango de fechas del periodo')
         if start >= end:
             self.add_error('desde', 'No puede ingresar la fecha de fin menor o igual a la fecha de inicio')
         else:

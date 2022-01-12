@@ -1,5 +1,5 @@
 import json
-from datetime import datetime
+from datetime import datetime, timedelta
 
 from django.core.paginator import Paginator
 from django.db import transaction
@@ -14,7 +14,7 @@ from apps.alumno.models import Alumno
 from apps.backEnd import nombre_empresa
 from apps.inscripcion.forms import Formulario
 from apps.curso.models import Curso, CursoMateria, CursoParalelo
-from apps.extras import PrimaryKeyEncryptor
+from apps.extras import PrimaryKeyEncryptor, crear_matricula
 from apps.inscripcion.models import Inscripcion
 from apps.paralelo.models import Paralelo
 from apps.periodo.models import PeriodoLectivo
@@ -63,7 +63,8 @@ class Listview(TemplateView):
                         info = {'alumno': alumno, 'curso': curso_id, 'paralelo': paralelo_id, 'fecha': datetime.now().date()}
                         form = self.form(info)
                         if form.is_valid():
-                            form.save()
+                            inscripcion = form.save()
+                            crear_matricula(inscripcion)
                         else:
                             data['error'] = form.errors
                     else:

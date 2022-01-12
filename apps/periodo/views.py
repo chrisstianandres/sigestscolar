@@ -55,7 +55,7 @@ class Listview(TemplateView):
                 action = request.GET['action']
                 if action == 'edit':
                     data = model_to_dict(self.model.objects.get(pk=request.GET['pk']))
-                    data['action'] = action
+                    data['action_form'] = action
                     data['pk'] = request.GET['pk']
                     return JsonResponse(data, safe=False)
             else:

@@ -9,7 +9,7 @@
 {% block body_tabla %}
     {% for elemento in page_obj %}
       <tr>
-        <td  class="dt-center">{{ elemento.nombre }}</td>
+        <td  class="dt-center">{{ elemento.nombre }}<br> <b>Inicio de Clases: </b> {{ elemento.inicioactividades  }}</td>
         <td  class="dt-center">{{ elemento.desde }}</td>
         <td  class="dt-center">{{ elemento.hasta }}</td>
         <td  class="dt-center">{{ elemento.anio }}</td>
@@ -26,16 +26,17 @@
 {% endblock %}
 {% block nombre_validate %}{% endblock %}
 {% block extra_validate %}
-    var hoy = new  Date;
-    $('#id_desde, #id_hasta').daterangepicker({
-    locale: {
-        format: 'YYYY-MM-DD',
-        applyLabel: '<i class="fa fa-check-circle"></i> Seleccionar',
-        cancelLabel: '<i class="fa fa-ban"></i> Cancelar',
-    },
-    singleDatePicker: true,
-    showDropdowns: true,
-    minYear: hoy.getFullYear(),
-    maxYear: (hoy.getFullYear())+5,
-    });
+        var hoy = new Date;
+        $('#id_desde, #id_hasta, #id_inicioactividades').daterangepicker({
+            locale: {
+                format: 'YYYY-MM-DD',
+                applyLabel: '<i class="fa fa-check-circle"></i> Seleccionar',
+                cancelLabel: '<i class="fa fa-ban"></i> Cancelar',
+            },
+            drops: "auto",
+            singleDatePicker: true,
+            showDropdowns: true,
+            minYear: hoy.getFullYear(),
+            maxYear: (hoy.getFullYear()) + 5,
+        });
 {% endblock %}

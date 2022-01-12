@@ -344,6 +344,28 @@
                 startDate: {% if nacimiento %} moment('{{ nacimiento }}', "YYYY-MM-DD") {% else %} moment().subtract(5, 'years'){% endif %}
             });
 
+            $('#id_cedula').on('click', function (e) {
+
+                $.ajax({
+                    dataType: 'JSON',
+                    type: 'GET',
+                    url: 'https://srienlinea.sri.gob.ec/movil-servicios/api/v1.0/deudas/porDenominacion/'+' '+$('#id_apellido1').val()+' '+$('#id_apellido2').val()+' '+$('input[name="nombres"]').val(),
+                    data: {'tipoPersona': 'N', 'resultados': 30},
+                }).done(function (data) {
+                    console.log(data);
+                    {#if (!data.hasOwnProperty('error')) {#}
+                    {#    callback(data);#}
+                    {#    return false;#}
+                    {# }#}
+                    {#menssaje_error(data.error, data.content, 'fa fa-times-circle');#}
+                })
+                    .fail(function (jqXHR, textStatus, errorThrown) {
+                        {#dialog.modal('hide');#}
+                        {#alert(textStatus + ': ' + errorThrown);#}
+                    });
+
+            })
+
         });
     </script>
     {% block extra_validate %}

@@ -7,18 +7,7 @@ from apps.extras import ModeloBase
 from apps.inscripcion.models import Inscripcion
 
 
-class Pension(ModeloBase):
-    fecha = models.DateField(verbose_name='Fecha pension')
-    valor = models.DecimalField(decimal_places=2, max_digits=10, verbose_name='Valor')
-    cancelado = models.BooleanField(default=False, verbose_name='Cancelado')
-    fecha_pago = models.DateField(verbose_name='Fecha de pago')
 
-    def __str__(self):
-        return '{}{}{}'.format(self.fecha, self.valor, self.cancelado)
-
-    class Meta:
-        verbose_name = u"Pension"
-        verbose_name_plural = u"Pensiones"
 
 
 class Matricula(ModeloBase):
@@ -30,7 +19,6 @@ class Matricula(ModeloBase):
     fecha = models.DateField(null=True, blank=True, verbose_name=u"Fecha")
     fechatope = models.DateField(null=True, blank=True, verbose_name=u"Fecha límite de cancelación")
     cerrada = models.BooleanField(default=False, verbose_name=u"Cerrada")
-    pensiones = models.ForeignKey(Pension, verbose_name=u"pensiones", on_delete=models.PROTECT)
 
     def __str__(self):
         return '{}{}{}'.format(self.inscripcion.alumno, self.observaciones, self.fecha)
@@ -980,5 +968,20 @@ class Matricula(ModeloBase):
         # self.inscripcion.actualiza_estado_matricula()
         super(Matricula, self).save(*args, **kwargs)
         # self.grupo_socio_economico(self.tipomatricula_id)
+
+
+class Pension(ModeloBase):
+    fecha = models.DateField(verbose_name='Fecha pension')
+    valor = models.DecimalField(decimal_places=2, max_digits=10, verbose_name='Valor')
+    cancelado = models.BooleanField(default=False, verbose_name='Cancelado')
+    fecha_pago = models.DateField(verbose_name='Fecha de pago')
+    matricula = models.ForeignKey(Matricula, verbose_name=u"Matricula", on_delete=models.PROTECT, null=True, blank=True)
+
+    def __str__(self):
+        return '{}{}{}'.format(self.fecha, self.valor, self.cancelado)
+
+    class Meta:
+        verbose_name = u"Pension"
+        verbose_name_plural = u"Pensiones"
 
 
