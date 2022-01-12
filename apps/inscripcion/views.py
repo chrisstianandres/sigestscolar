@@ -21,7 +21,7 @@ from apps.paralelo.models import Paralelo
 from apps.periodo.models import PeriodoLectivo
 from apps.rubro.models import Rubro
 from sigestscolar.settings import SECRET_KEY_ENCRIPT
-from dateutil.relativedelta import relativedelta
+# from dateutil.relativedelta import relativedelta
 
 
 class Listview(TemplateView):
