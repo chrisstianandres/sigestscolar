@@ -296,7 +296,7 @@ def crear_matricula(inscripcion):
         rubrocreado = crear_rubro(persona=matricula.inscripcion.alumno.persona, matricula=matricula, datos=datos)
         if rubrocreado:
             # fecha_primera_persion = (inscripcion.curso.periodo.inicioactividades.replace(day=1) + relativedelta(months=1))
-            fecha_primera_persion = (inscripcion.curso.periodo.inicioactividades.replace(day=1) + relativedelta(months=1))
+            fecha_primera_persion = last_day_of_month(datetime(inscripcion.curso.periodo.inicioactividades.year, inscripcion.curso.periodo.inicioactividades.month, 1))
             fecha_primera_persion = fecha_primera_persion-timedelta(days=1)
             for cantidad in range(1, valores.numeropensiones+1):
                 pension = Pension(fecha=fecha_primera_persion, valor=valores.pension, matricula=matricula)
@@ -309,7 +309,7 @@ def crear_matricula(inscripcion):
                 rubrocreado = crear_rubro(persona=matricula.inscripcion.alumno.persona, pension=pension, datos=datos)
                 if not rubrocreado:
                     break
-                fecha_primera_persion = fecha_primera_persion + relativedelta(months=1)
+                fecha_primera_persion = last_day_of_month(datetime(fecha_primera_persion.year, fecha_primera_persion.month, 1))
             return True
     except Exception as e:
         return False
@@ -349,3 +349,9 @@ def crear_rubro(persona, pension=None, matricula=None, producto=None, datos=None
             print(e)
             transaction.set_rollback(True)
             return False
+
+
+def last_day_of_month(any_day):
+    next_month = any_day.replace(day=28) + timedelta(days=4)
+    return next_month - timedelta(days=next_month.day)
+
