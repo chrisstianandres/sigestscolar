@@ -22,6 +22,9 @@ class Empresa(ModeloBase):
     def __str__(self):
         return '{}{}'.format(self.nombre, self.direccion)
 
+    def iva_empresa(self):
+        return self.iva.ivaporciento if self.iva else 12
+
     class Meta:
         verbose_name = u"Empresa"
         verbose_name_plural = u"Empresas"

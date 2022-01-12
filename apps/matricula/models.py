@@ -954,10 +954,10 @@ class Matricula(ModeloBase):
 
 
 class Pension(ModeloBase):
-    fecha = models.DateField(verbose_name='Fecha pension')
-    valor = models.DecimalField(decimal_places=2, max_digits=10, verbose_name='Valor')
+    fecha = models.DateField(verbose_name='Fecha pension', null=True, blank=True)
+    valor = models.DecimalField(decimal_places=2, max_digits=10, verbose_name='Valor', default=0)
     cancelado = models.BooleanField(default=False, verbose_name='Cancelado')
-    fecha_pago = models.DateField(verbose_name='Fecha de pago')
+    fecha_pago = models.DateField(verbose_name='Fecha de pago', null=True, blank=True)
     matricula = models.ForeignKey(Matricula, verbose_name=u"Matricula", on_delete=models.PROTECT, null=True, blank=True)
 
     def __str__(self):

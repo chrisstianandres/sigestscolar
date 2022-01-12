@@ -19,7 +19,9 @@ from apps.inscripcion.models import Inscripcion
 from apps.matricula.models import Matricula, Pension
 from apps.paralelo.models import Paralelo
 from apps.periodo.models import PeriodoLectivo
+from apps.rubro.models import Rubro
 from sigestscolar.settings import SECRET_KEY_ENCRIPT
+from dateutil.relativedelta import relativedelta
 
 
 class Listview(TemplateView):
@@ -65,7 +67,10 @@ class Listview(TemplateView):
                         form = self.form(info)
                         if form.is_valid():
                             inscripcion = form.save()
-                            crear_matricula(inscripcion)
+                            mat = crear_matricula(inscripcion)
+                            if not mat:
+                                transaction.set_rollback(True)
+                                data['error'] = 'Error al inscribir al alumno'
                         else:
                             data['error'] = form.errors
                     else:
@@ -280,13 +285,67 @@ class Listview(TemplateView):
 
 
 def crear_matricula(inscripcion):
-    valores = inscripcion.curso.configuracion_valores()
-    # fecha maxima de pago 15 dias despues de la inscripcion
-    fechamaxima = datetime.now() + timedelta(days=15)
-    matricula = Matricula(inscripcion=inscripcion, observaciones='Ninguna', fecha=datetime.now(),
-                          fechatope=fechamaxima)
-    matricula.save()
-    fecha_primera_persion = inscripcion.curso.periodo.inicioactividades
+    try:
+        valores = inscripcion.curso.configuracion_valores()
+        # fecha maxima de pago 15 dias despues de la inscripcion
+        fechamaxima = datetime.now() + timedelta(days=15)
+        matricula = Matricula(inscripcion=inscripcion, observaciones='Ninguna', fecha=datetime.now(), fechatope=fechamaxima)
+        matricula.save()
+        observ = '{} {} {} {}'.format('Matricula de ', matricula.inscripcion.alumno.persona, 'en el curso', matricula.inscripcion.curso, 'en el periodo', matricula.inscripcion.curso.periodo)
+        datos = [{'fechavence': fechamaxima, 'valor': valores.matricula, 'iva': 12, 'observacion': observ}]
+        rubrocreado = crear_rubro(persona=matricula.inscripcion.alumno.persona, matricula=matricula, datos=datos)
+        if rubrocreado:
+            # fecha_primera_persion = (inscripcion.curso.periodo.inicioactividades.replace(day=1) + relativedelta(months=1))
+            fecha_primera_persion = (inscripcion.curso.periodo.inicioactividades.replace(day=1) + relativedelta(months=1))
+            fecha_primera_persion = fecha_primera_persion-timedelta(days=1)
+            for cantidad in range(1, valores.numeropensiones+1):
+                pension = Pension(fecha=fecha_primera_persion, valor=valores.pension, matricula=matricula)
+                pension.save()
+                mes_pension= fecha_primera_persion+timedelta(days=1)
+                observ = '{} {} {} {}'.format('Pension de ', matricula.inscripcion.alumno.persona, 'en del mes de',
+                                              mes_pension.month, 'en el periodo',
+                                              matricula.inscripcion.curso.periodo)
+                datos = [{'fechavence': fecha_primera_persion, 'valor': pension.valor, 'iva': 12, 'observacion': observ}]
+                rubrocreado = crear_rubro(persona=matricula.inscripcion.alumno.persona, pension=pension, datos=datos)
+                if not rubrocreado:
+                    break
+                fecha_primera_persion = fecha_primera_persion + relativedelta(months=1)
+            return True
+    except Exception as e:
+        return False
 
-    for cantidad in valores.numeropensiones:
-        pension = Pension()
+
+def crear_rubro(persona, pension=None, matricula=None, producto=None, datos=None):
+    with transaction.atomic():
+        try:
+            mensaje =''
+            rubro = Rubro(persona=persona, fecha=datetime.now(), iva=nombre_empresa())
+            if pension:
+                rubro.pension = pension
+                mes = pension.fecha+timedelta(days=1)
+                mensaje = '{} {}'.format('Pension del mes de', mes.month)
+            if matricula:
+                rubro.matricula = matricula
+                mensaje = '{} {}'.format('Matricula de ', matricula.inscripcion.alumno.persona)
+            if producto:
+                rubro.producto = producto
+                mensaje = str(producto.nombre)
+            rubro.save()
+
+            if datos is not None:
+                rubro.nombre = mensaje
+                rubro.fechavence = datos[0]['fechavence']
+                rubro.valor = datos[0]['valor']
+                rubro.valoriva = float(datos[0]['valor']) * rubro.iva.iva.ivaporciento
+                rubro.valortotal = float(datos[0]['valor'])+rubro.valoriva
+                rubro.saldo = rubro.valortotal
+                rubro.observacion = datos[0]['observacion']
+                rubro.save()
+                return True
+            else:
+                transaction.set_rollback(True)
+            return False
+        except Exception as e:
+            print(e)
+            transaction.set_rollback(True)
+            return False

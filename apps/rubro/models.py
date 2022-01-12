@@ -13,12 +13,12 @@ from apps.producto.models import Inventario
 
 class Rubro(ModeloBase):
     persona = models.ForeignKey(Persona, verbose_name=u'Cliente', on_delete=models.PROTECT)
-    pension = models.ForeignKey(Pension, verbose_name=u'Pension', on_delete=models.PROTECT)
+    pension = models.ForeignKey(Pension, verbose_name=u'Pension', on_delete=models.PROTECT,  blank=True, null=True)
     matricula = models.ForeignKey(Matricula, blank=True, null=True, verbose_name=u'Matricula', on_delete=models.PROTECT)
     producto = models.ForeignKey(Inventario, blank=True, null=True, verbose_name=u'Producto', on_delete=models.PROTECT)
-    nombre = models.CharField(max_length=300, verbose_name=u'Nombre')
-    fecha = models.DateField(verbose_name=u'Fecha emisión')
-    fechavence = models.DateField(verbose_name=u'Fecha vencimiento')
+    nombre = models.CharField(max_length=300, verbose_name=u'Nombre', blank=True, null=True)
+    fecha = models.DateField(verbose_name=u'Fecha emisión', blank=True, null=True,)
+    fechavence = models.DateField(verbose_name=u'Fecha vencimiento', blank=True, null=True,)
     valor = models.DecimalField(default=0, max_digits=30, decimal_places=2, verbose_name=u'Valor')
     iva = models.ForeignKey(Empresa, verbose_name=u'IVA', on_delete=models.PROTECT)
     valoriva = models.DecimalField(default=0, max_digits=30, decimal_places=2, verbose_name=u'Valor IVA')
@@ -109,15 +109,10 @@ class Rubro(ModeloBase):
         return None
 
     def save(self, *args, **kwargs):
-        self.nombre = self.nombre.upper().strip()
-        self.observacion = self.observacion.upper().strip()
-        if not self.id:
-            if self.iva.porcientoiva:
-                self.valoriva = self.valor_iva()
-            else:
-                self.valoriva = 0
-        self.valortotal = self.valor_total()
-        self.saldo = self.total_adeudado()
+        self.nombre = self.nombre.upper().strip() if self.nombre else ''
+        self.observacion = self.observacion.upper().strip() if self.observacion else ''
+        # self.valortotal = self.valor_total()
+        # self.saldo = self.total_adeudado()
         if self.valor > 0:
             self.cancelado = (self.saldo == 0)
         if self.esta_anulado():
