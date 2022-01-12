@@ -14,8 +14,9 @@ from apps.alumno.models import Alumno
 from apps.backEnd import nombre_empresa
 from apps.inscripcion.forms import Formulario
 from apps.curso.models import Curso, CursoMateria, CursoParalelo
-from apps.extras import PrimaryKeyEncryptor, crear_matricula
+from apps.extras import PrimaryKeyEncryptor
 from apps.inscripcion.models import Inscripcion
+from apps.matricula.models import Matricula, Pension
 from apps.paralelo.models import Paralelo
 from apps.periodo.models import PeriodoLectivo
 from sigestscolar.settings import SECRET_KEY_ENCRIPT
@@ -276,3 +277,16 @@ class Listview(TemplateView):
         data['empresa'] = nombre_empresa()
         data['entidad'] = self.entidad
         return data
+
+
+def crear_matricula(inscripcion):
+    valores = inscripcion.curso.configuracion_valores()
+    # fecha maxima de pago 15 dias despues de la inscripcion
+    fechamaxima = datetime.now() + timedelta(days=15)
+    matricula = Matricula(inscripcion=inscripcion, observaciones='Ninguna', fecha=datetime.now(),
+                          fechatope=fechamaxima)
+    matricula.save()
+    fecha_primera_persion = inscripcion.curso.periodo.inicioactividades
+
+    for cantidad in valores.numeropensiones:
+        pension = Pension()

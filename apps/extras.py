@@ -1,8 +1,7 @@
-from datetime import datetime, timedelta
+from datetime import datetime
 
 from django.db import models
 
-from apps.matricula.models import Matricula, Pension
 from sigestscolar.settings import ADMINISTRADOR_ID
 from cryptography.hazmat.primitives.ciphers.algorithms import AES as Algorithm
 from cryptography.hazmat.primitives.ciphers.modes import ECB as Mode
@@ -91,15 +90,3 @@ class Item:
     def decode_id(self, id):
         import base64
         return base64.b64decode(id)
-
-
-def crear_matricula(inscripcion):
-    valores = inscripcion.curso.configuracion_valores()
-    # fecha maxima de pago 15 dias despues de la inscripcion
-    fechamaxima = datetime.now() + timedelta(days=15)
-    matricula = Matricula(inscripcion=inscripcion, observaciones='Ninguna', fecha=datetime.now(), fechatope=fechamaxima)
-    matricula.save()
-    fecha_primera_persion = inscripcion.curso.periodo.inicioactividades
-
-    for cantidad in valores.numeropensiones:
-        pension = Pension()
