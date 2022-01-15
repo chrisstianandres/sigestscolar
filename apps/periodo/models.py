@@ -12,4 +12,5 @@ class PeriodoLectivo(ModeloBase):
     inicioactividades = models.DateField(verbose_name=u"Fecha de incio de actividades academicas", null=True, blank=True)
 
     def __str__(self):
-        return '{} - Año: {} Dese: {} - Hasta: {}'.format(self.nombre, self.anio, self.desde, self.hasta)
+        # return '{} - Año: {} Dese: {} - Hasta: {}'.format(self.nombre, self.anio, self.desde, self.hasta)
+        return 'Periodo: {} - {}'.format(self.desde.year, self.hasta.year)

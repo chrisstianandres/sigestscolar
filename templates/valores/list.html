@@ -1,0 +1,62 @@
+{% extends 'bases/base_list.html' %}
+{% block filtros %}
+    <div class="row float-right">
+        <form action="{{ request.path }}">
+            <div class="form-group"><br>
+                <div class="input-group">
+                    <input type="text" class="form-control input-sm input-search"
+                           style="border-top-right-radius: 0 !important; border-bottom-right-radius: 0 !important;"
+                           placeholder="Buscar...." autocomplete="off"
+                           aria-label="Buscar..." aria-describedby="basic-addon2"
+                           name="search"
+                           value="{{ search }}">
+                    <div class="input-group-append">
+                        <button class="btn btn-outline-success btn-sm" type="button" id="search"
+                                data-toggle="tooltip" data-placement="bottom"
+                                title="Buscar...">
+                            <i class="fa fa-search"></i></button>
+                        {% if search %}
+                            <button class="btn btn-outline-danger btn-sm" type="button"
+                                    data-toggle="tooltip" data-placement="bottom"
+                                    title="Mostrar todos"
+                                    onclick="window.location.href ='{{ request.path }}'"><i
+                                    class="fas fa-redo-alt"></i></button>
+                        {% endif %}
+
+                    </div>
+                </div>
+
+            </div>
+        </form>
+    </div>
+    <br>
+{% endblock %}
+{% block header_tabla %}
+    <th class="dt-center">Persona</th>
+    <th class="dt-center">Total</th>
+    <th class="dt-center">Total Pagado</th>
+    <th class="dt-center">Total Adeudado</th>
+    <th class="dt-center">Total Vencido</th>
+    <th style="text-align:center; width: 10%" class="dt-center"><i class="fa fa-cogs"></i></th>
+{% endblock %}
+{% block body_tabla %}
+    {% for elemento in page_obj %}
+        <tr>
+            <td class="dt-center">{{ elemento.persona }}<br><b>Cedula: </b>{{ elemento.persona.cedula }}</td>
+            <td class="dt-center"><i class="fa fa-dollar-sign"></i> {{ elemento.total_finanzas }}</td>
+            <td class="dt-center"><i class="fa fa-dollar-sign"></i> {{ elemento.total_pagado_finanzas }}</td>
+            <td class="dt-center"><i class="fa fa-dollar-sign"></i> {{ elemento.total_adeudado_finanzas }}</td>
+            <td class="dt-center"><i class="fa fa-dollar-sign"></i> {{ elemento.total_vencido_finanzas }}</td>
+            <td style="text-align:center; width: 10%" class="dt-center">
+                {% if elemento.tiene_rubros %}
+                    <a type="button" class="btn btn-success btn-xs detalles" href="/valores?action=detalle&id={{ elemento.persona.pk }}" data-toggle="tooltip"  title="Ver Detalle" pk="{{ elemento.pk }}">
+                        <i class="fa fa-eye"></i></a>
+                {% endif %}
+            </td>
+        </tr>
+    {% empty %}
+        <tr>
+            <td colspan="5" style="text-align: center">No existen registros para mostrar</td>
+        </tr>
+    {% endfor %}
+{% endblock %}

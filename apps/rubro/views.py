@@ -65,7 +65,7 @@ class ListviewValores(TemplateView):
                     return JsonResponse(data, safe=False)
                 if action == 'detalle':
                     data = self.get_context_data()
-                    list = self.model.objects.filter(status=True, persona_id=request.GET['id'])
+                    list = self.model.objects.filter(status=True, persona_id=request.GET['id']).order_by('id')
                     data['datos_persona'] = datos_persona = list.first().persona
                     page_number = request.GET.get('page', 1)
                     paginator = Paginator(list, 10)
@@ -80,7 +80,7 @@ class ListviewValores(TemplateView):
                 if 'search' in request.GET:
                     if not request.GET['search'] == '':
                         data['search'] = search = request.GET['search']
-                        list = list.filter(Q(persona__nombre__icontains=search) | Q(persona__apellido1__icontains=search) | Q(persona__apellido2__icontains=search) | Q(persona__cedula__icontains=search) )
+                        list = list.filter(Q(persona__nombre__icontains=search) | Q(persona__apellido1__icontains=search) | Q(persona__apellido2__icontains=search) | Q(persona__cedula__icontains=search)).order_by('persona__apellido1')
                 page_number = request.GET.get('page', 1)
                 paginator = Paginator(list, 10)
                 page_range = paginator.get_elided_page_range(number=page_number)
