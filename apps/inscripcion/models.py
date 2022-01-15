@@ -1,3 +1,5 @@
+from datetime import datetime
+
 from django.db import models
 
 from apps.alumno.models import Alumno
@@ -47,6 +49,10 @@ class Inscripcion(ModeloBase):
         if self.matriculado():
             return self.matricula_set.filter(cerrada=False)[0]
         return None
+
+    def save(self, *args, **kwargs):
+        self.fecha = datetime.now()
+        super(Inscripcion, self).save(*args, **kwargs)
 
 
 # class CursoInscripcion(ModeloBase):

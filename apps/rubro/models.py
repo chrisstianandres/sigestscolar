@@ -60,13 +60,13 @@ class Rubro(ModeloBase):
         return self.pago_set.all().order_by('-fecha')[0].factura().id
 
     def valor_total(self):
-        if self.iva.porcientoiva:
-            return float(self.valor) - self.valordescuento + float(self.valor) - self.valordescuento * float(self.iva.porcientoiva)
-        return float(self.valor) - self.valordescuento
+        if self.iva.iva.ivaporciento:
+            return (float(self.valor) - float(self.valordescuento) )+ ((float(self.valor) - float(self.valordescuento)) * float((self.iva.iva.ivaporciento)/100))
+        return float(self.valor) - float(self.valordescuento)
 
     def valor_iva(self):
-        if self.iva.porcientoiva:
-            return (float(self.valor) - self.valordescuento) * float(self.iva.porcientoiva)
+        if self.iva.iva.ivaporciento:
+            return (float(self.valor) - float(self.valordescuento)) * float(self.iva.iva.ivaporciento/100)
         return 0
 
     def vencido(self):
@@ -100,6 +100,7 @@ class Rubro(ModeloBase):
                 self.save()
         except Exception as ex:
             print(ex)
+            pass
         return saldo
 
     def nombre_usuario(self):
@@ -107,6 +108,28 @@ class Rubro(ModeloBase):
             if not self.usuario_creacion.is_superuser:
                 return self.usuario_creacion
         return None
+
+    def total_finanzas(self):
+        if Rubro.objects.filter(status=True, persona=self.persona).exists():
+            return Rubro.objects.filter(status=True, persona=self.persona).aggregate(Sum('valor')).get('valor__sum')
+        return 0.00
+
+    def total_pagado_finanzas(self):
+        if Pago.objects.filter(status=True, rubro__persona=self.persona).exists():
+            return Pago.objects.filter(status=True, rubro__persona=self.persona).aggregate(Sum('valortotal')).get('valortotal__sum')
+        return 0.00
+
+    def total_adeudado_finanzas(self):
+        return float(self.total_finanzas()) - float(self.total_pagado_finanzas())
+
+    def total_vencido_finanzas(self):
+        if Rubro.objects.filter(status=True, persona=self.persona, fechavence__lt=datetime.now(), cancelado=False).exists():
+            return Rubro.objects.filter(status=True, persona=self.persona, fechavence__lt=datetime.now(), cancelado=False).aggregate(Sum('valor')).get('valor__sum')
+        return 0.00
+
+    def tiene_rubros(self):
+        return Rubro.objects.filter(status=True, persona=self.persona).exists()
+
 
     def save(self, *args, **kwargs):
         self.nombre = self.nombre.upper().strip() if self.nombre else ''

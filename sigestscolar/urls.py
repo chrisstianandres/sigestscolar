@@ -21,6 +21,7 @@ from django.conf import settings
 
 from apps import backEnd
 from apps.profesor.distributivodocente import Listview
+from apps.rubro.views import ListviewValores
 
 urlpatterns = [
                   path('admin/', admin.site.urls),
@@ -29,8 +30,7 @@ urlpatterns = [
                   path('accounts/login', backEnd.LoginFormView.as_view(), name='login_next'),
                   path('logout/', backEnd.disconnect, name='logout'),
                   path('dashborad/', login_required(backEnd.DashboardView.as_view()), name='dashborad'),
-                  path('change_profile/<int:pk>', login_required(backEnd.UserChangeGroup.as_view()),
-                       name='changeprofile'),
+                  path('change_profile/<int:pk>', login_required(backEnd.UserChangeGroup.as_view()), name='changeprofile'),
                   path('cursos/', include('apps.curso.urls', namespace='cursos')),
                   path('paralelos/', include('apps.paralelo.urls', namespace='paralelos')),
                   path('materias/', include('apps.materia.urls', namespace='materias')),
@@ -42,4 +42,5 @@ urlpatterns = [
                   path('alumnos/', include('apps.alumno.urls', namespace='alumnos')),
                   path('inscripciones/', include('apps.inscripcion.urls', namespace='inscripciones')),
                   path('distributivo/', login_required(Listview.as_view()), name='distributivo'),
+                  path('valores', login_required(ListviewValores.as_view()), name='valores'),
               ] + static(settings.STATIC_URL, document_root=settings.STATIC_ROOT)

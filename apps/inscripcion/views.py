@@ -23,6 +23,7 @@ from apps.rubro.models import Rubro
 from sigestscolar.settings import SECRET_KEY_ENCRIPT
 # from dateutil.relativedelta import relativedelta
 
+MESES_EN_LETRAS = ('ENERO', 'FEBRERO', 'MARZO', 'ABRIL', 'MAYO', 'JUNIO', 'JULIO', 'AGOSTO', 'SEPTIEMBRE', 'OCTUBRE', 'NOVIEMBRE', 'DICIEMBRE')
 
 class Listview(TemplateView):
     model = Inscripcion
@@ -95,7 +96,7 @@ class Listview(TemplateView):
                         if not alumno.representante_id == int(representante_id):
                             alumno.representante_id = representante_id
                             alumno.save()
-                        info = {'alumno': alumno, 'curso': curso_id, 'paralelo':paralelo_id, 'fecha': datetime.now().date()}
+                        info = {'alumno': alumno.id, 'curso': curso_id, 'paralelo':paralelo_id, 'fecha': datetime.now().date()}
                         form = self.form(info, instance=instancia)
                         if form.is_valid():
                             form.save()
@@ -291,25 +292,27 @@ def crear_matricula(inscripcion):
         fechamaxima = datetime.now() + timedelta(days=15)
         matricula = Matricula(inscripcion=inscripcion, observaciones='Ninguna', fecha=datetime.now(), fechatope=fechamaxima)
         matricula.save()
-        observ = '{} {} {} {}'.format('Matricula de ', matricula.inscripcion.alumno.persona, 'en el curso', matricula.inscripcion.curso, 'en el periodo', matricula.inscripcion.curso.periodo)
+        observ = 'MATRICULA DE {} EN EL CURSO {} EN EL PERIODO {}'.format(matricula.inscripcion.alumno.persona, matricula.inscripcion.curso,  matricula.inscripcion.curso.periodo)
         datos = [{'fechavence': fechamaxima, 'valor': valores.matricula, 'iva': 12, 'observacion': observ}]
         rubrocreado = crear_rubro(persona=matricula.inscripcion.alumno.persona, matricula=matricula, datos=datos)
         if rubrocreado:
             # fecha_primera_persion = (inscripcion.curso.periodo.inicioactividades.replace(day=1) + relativedelta(months=1))
             fecha_primera_persion = last_day_of_month(datetime(inscripcion.curso.periodo.inicioactividades.year, inscripcion.curso.periodo.inicioactividades.month, 1))
-            fecha_primera_persion = fecha_primera_persion-timedelta(days=1)
+            # fecha_primera_persion = fecha_primera_persion-timedelta(days=1)
             for cantidad in range(1, valores.numeropensiones+1):
                 pension = Pension(fecha=fecha_primera_persion, valor=valores.pension, matricula=matricula)
                 pension.save()
-                mes_pension= fecha_primera_persion+timedelta(days=1)
-                observ = '{} {} {} {}'.format('Pension de ', matricula.inscripcion.alumno.persona, 'en del mes de',
-                                              mes_pension.month, 'en el periodo',
+                # mes_pension= fecha_primera_persion+timedelta(days=1)
+                observ = 'PENSION DE {} EN EL MES DE {} {} EN EL PERIODO {}'.format(matricula.inscripcion.alumno.persona,
+                                              MESES_EN_LETRAS[fecha_primera_persion.month-1], fecha_primera_persion.year,
                                               matricula.inscripcion.curso.periodo)
                 datos = [{'fechavence': fecha_primera_persion, 'valor': pension.valor, 'iva': 12, 'observacion': observ}]
                 rubrocreado = crear_rubro(persona=matricula.inscripcion.alumno.persona, pension=pension, datos=datos)
                 if not rubrocreado:
                     break
-                fecha_primera_persion = last_day_of_month(datetime(fecha_primera_persion.year, fecha_primera_persion.month, 1))
+                month = fecha_primera_persion.month + 1 if fecha_primera_persion.month <= 12 else 1
+                year = fecha_primera_persion.year if fecha_primera_persion.month <= 12 else fecha_primera_persion.year+1
+                fecha_primera_persion = last_day_of_month(datetime(year, month, 1))
             return True
     except Exception as e:
         return False
@@ -323,10 +326,10 @@ def crear_rubro(persona, pension=None, matricula=None, producto=None, datos=None
             if pension:
                 rubro.pension = pension
                 mes = pension.fecha+timedelta(days=1)
-                mensaje = '{} {}'.format('Pension del mes de', mes.month)
+                mensaje = 'PENSION DEL MES DE {} {}'.format(MESES_EN_LETRAS[mes.month-1], pension.fecha.year)
             if matricula:
                 rubro.matricula = matricula
-                mensaje = '{} {}'.format('Matricula de ', matricula.inscripcion.alumno.persona)
+                mensaje = 'MATRICULA DE {} EN EL PERIODO {}'.format(matricula.inscripcion.alumno.persona, matricula.inscripcion.curso.periodo )
             if producto:
                 rubro.producto = producto
                 mensaje = str(producto.nombre)
@@ -336,7 +339,7 @@ def crear_rubro(persona, pension=None, matricula=None, producto=None, datos=None
                 rubro.nombre = mensaje
                 rubro.fechavence = datos[0]['fechavence']
                 rubro.valor = datos[0]['valor']
-                rubro.valoriva = float(datos[0]['valor']) * rubro.iva.iva.ivaporciento
+                rubro.valoriva = float(datos[0]['valor']) * (rubro.iva.iva.ivaporciento/100)
                 rubro.valortotal = float(datos[0]['valor'])+rubro.valoriva
                 rubro.saldo = rubro.valortotal
                 rubro.observacion = datos[0]['observacion']
