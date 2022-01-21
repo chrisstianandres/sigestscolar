@@ -213,21 +213,21 @@ class ListviewFacturacion(TemplateView):
                 if action == 'get_producto':
                     data = {}
                     producto = Producto.objects.get(id=request.GET['id'])
-                    data = {'id': producto.id, 'nombre': producto.nombre_corto(), 'stock': producto.stock_producto(), 'cantidad': 1, 'valor': float(producto.valor), 'saldo': float(producto.valortotal()), 'subtotal': float(producto.valor), 'iva': float(producto.valoriva()), 'total': float(producto.valortotal()), 'producto': True}
+                    data = {'id': producto.id, 'nombre': producto.nombre_corto(), 'stock': producto.stock_producto(), 'valoru': producto.valor, 'cantidad': 1, 'valor': float(producto.valor), 'saldo': float(producto.valortotal()), 'subtotal': float(producto.valor), 'iva': float(producto.valoriva()), 'total': float(producto.valortotal()), 'producto': True}
                     return JsonResponse(data, safe=False)
                 if action == 'get_productos_lista':
                     productos = []
                     ids = json.loads(request.GET['ids'])
                     query = Producto.objects.filter(id__in=ids)
                     for producto in query:
-                        productos.append({'id': producto.id, 'nombre': producto.nombre_corto(), 'stock': producto.stock_producto(), 'cantidad': 1, 'valor': float(producto.valor), 'saldo': float(producto.valortotal()), 'subtotal': float(producto.valor), 'iva': float(producto.valoriva()), 'total': float(producto.valortotal()), 'producto': True})
+                        productos.append({'id': producto.id, 'nombre': producto.nombre_corto(), 'stock': producto.stock_producto(), 'valoru': producto.valor, 'cantidad': 1, 'valor': float(producto.valor), 'saldo': float(producto.valortotal()), 'subtotal': float(producto.valor), 'iva': float(producto.valoriva()), 'total': float(producto.valortotal()), 'producto': True})
                     return JsonResponse(productos, safe=False)
                 if action == 'get_rubros':
                     rubros = []
                     ids = json.loads(request.GET['ids'])
                     query = Rubro.objects.filter(id__in=ids)
                     for r in query:
-                        rubros.append({'id': r.id, 'nombre': r.nombre, 'stock': 0, 'cantidad': int(r.cantidad), 'valor': float(r.valortotal), 'saldo': float(r.saldo), 'subtotal': float(r.subtotal()), 'iva': float(r.valoriva), 'total': float(r.valortotal), 'producto': False})
+                        rubros.append({'id': r.id, 'nombre': r.nombre, 'stock': 0, 'valoru': r.subtotal(), 'cantidad': int(r.cantidad), 'valor': float(r.valortotal), 'saldo': float(r.saldo), 'subtotal': float(r.subtotal()), 'iva': float(r.valoriva), 'total': float(r.valortotal), 'producto': False})
                     return JsonResponse(rubros, safe=False)
             else:
                 data = self.get_context_data()

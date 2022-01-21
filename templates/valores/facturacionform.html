@@ -63,6 +63,7 @@
                         <th class="dt-center">Rubro</th>
                         <th class="dt-center">Stock</th>
                         <th class="dt-center">Cantidad</th>
+                        <th class="dt-center">Valor Unit</th>
                         <th class="dt-center">Valor</th>
                         <th class="dt-center">Saldo</th>
                         <th class="dt-center">Subtotal</th>
@@ -198,7 +199,7 @@
         var iva_emp = 12/100;
         $.each(this.items.rubros_select, function (pos, dict) {
             if (dict.producto===true){
-                dict.subtotal = dict.cantidad * parseFloat(dict.valor);
+                dict.subtotal = dict.cantidad * parseFloat(dict.valoru);
                 dict.iva = dict.subtotal * parseFloat(iva_emp);
                 dict.total = dict.iva + parseFloat(dict.subtotal);
             }
@@ -233,6 +234,7 @@
                 {data: "nombre"},
                 {data: "stock"},
                 {data: "cantidad"},
+                {data: "valoru"},
                 {data: "total"},
                 {data: "saldo"},
                 {data: "subtotal"},
@@ -399,11 +401,11 @@
             var tr = tblventa.cell($(this).closest('td, li')).index();
             ventas.items.rubros_select[tr.row].cantidad = cantidad;
             ventas.calculate();
-            $('td:eq(4)', tblventa.row(tr.row).node()).html('$' + ventas.items.rubros_select[tr.row].total.toFixed(2));
             $('td:eq(5)', tblventa.row(tr.row).node()).html('$' + ventas.items.rubros_select[tr.row].total.toFixed(2));
-            $('td:eq(6)', tblventa.row(tr.row).node()).html('$' + ventas.items.rubros_select[tr.row].subtotal.toFixed(2));
-            $('td:eq(7)', tblventa.row(tr.row).node()).html('$' + ventas.items.rubros_select[tr.row].iva.toFixed(2));
-            $('td:eq(8)', tblventa.row(tr.row).node()).html('$' + ventas.items.rubros_select[tr.row].total.toFixed(2));
+            $('td:eq(6)', tblventa.row(tr.row).node()).html('$' + ventas.items.rubros_select[tr.row].total.toFixed(2));
+            $('td:eq(7)', tblventa.row(tr.row).node()).html('$' + ventas.items.rubros_select[tr.row].subtotal.toFixed(2));
+            $('td:eq(8)', tblventa.row(tr.row).node()).html('$' + ventas.items.rubros_select[tr.row].iva.toFixed(2));
+            $('td:eq(9)', tblventa.row(tr.row).node()).html('$' + ventas.items.rubros_select[tr.row].total.toFixed(2));
         });
         ventas.list();
     });
