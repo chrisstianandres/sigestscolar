@@ -1,0 +1,119 @@
+<div class="row">
+    <button type="button" class="btn btn-info" id="ingresar_productos"><i class="fa fa-check-circle"></i> Ingresar Productos
+    </button>
+</div>
+<hr>
+<div class="row">
+ <table style="width: 100%" class="table table-bordered">
+    <thead>
+    <tr>
+        <th class="dt-center"><input type="checkbox" id="todos_productos"></th>
+        <th class="dt-center">Codigo</th>
+        <th class="dt-center">Nombre</th>
+        <th class="dt-center">Descripcion</th>
+        <th class="dt-center">Alias</th>
+        <th class="dt-center">Talla</th>
+        <th class="dt-center">Valor</th>
+        <th class="dt-center">Stock</th>
+    </tr>
+    </thead>
+    <tbody>
+        {% for elemento in productos %}
+        <tr {% if elemento.stock_producto <= 0 %}style="background-color: rgba(254,0,12,0.28)" {% endif %}>
+            <td class="dt-center" style="width: 5%;"><input type="checkbox" {% if elemento.stock_producto > 0 %}class="check_select_producto" pk="{{ elemento.pk }}" {% endif %}></td>
+            <td class="dt-center" style="width: 5%;">{{ elemento.codigo }}</td>
+            <td class="dt-center" style="width: 10%;">{{ elemento.nombre }}</td>
+            <td class="dt-center" style="width: 20%;">{{ elemento.descripcion }}</td>
+            <td class="dt-center" style="width: 5%;">{{ elemento.alias }}</td>
+            <td class="dt-center"><i class="fa fa-dollar-sign"></i> {{ elemento.talla }}</td>
+            <td class="dt-center"><i class="fa fa-dollar-sign"></i> {{ elemento.valortotal }}</td>
+            <td class="dt-center" style="width: 18%;"> {{ elemento.stock_producto }}</td>
+        </tr>
+    {% empty %}
+        <tr>
+            <td colspan="5" style="text-align: center">No existen registros para mostrar</td>
+        </tr>
+    {% endfor %}
+    </tbody>
+</table>
+</div>
+
+
+<script>
+    $(function () {
+        $('#todos_productos').click(function (event) {
+            if (this.checked) {
+                productos_temporal = [];
+                // Iterate each checkbox
+                $(':checkbox').each(function () {
+                    this.checked = true;
+                    if (this.hasAttribute('pk')){
+                        productos_temporal.push($(this).attr('pk'));
+                    }
+                });
+            } else {
+                $(':checkbox').each(function () {
+                    this.checked = false;
+                    productos_temporal = [];
+                });
+            }
+        });
+
+
+        $('.check_select_producto').click(function (event) {
+            $('#todos_productos').prop('checked', false);
+            if (this.checked) {
+                productos_temporal.push($(this).attr('pk'));
+            } else {
+                var index = productos_temporal.indexOf($(this).attr('pk'));
+                if (index !== -1) {
+                    productos_temporal.splice(index, 1);
+                }
+            }
+        });
+
+        $('#ingresar_productos').on('click', function (e) {
+            if (productos_temporal.length>0){
+                Swal.fire({
+                title: 'Un momento por favor',
+                html: 'Estamos ingresando los productos al detalle!!!',
+                timerProgressBar: true,
+                didOpen: () => {
+                    Swal.showLoading();
+                },
+            });
+                $.ajax({
+                type: "GET",
+                url: '/facturacion',
+                data: {
+                    "ids": JSON.stringify(productos_temporal),
+                    "ids_exclude": JSON.stringify(ventas.get_ids_producto()),
+                    'action': 'get_productos_lista'
+                },
+                dataType: 'json',
+                success: function (data) {
+                    swal.close();
+                    $.each(data, function (key, value) {
+                        ventas.items.rubros_select.push(value);
+                    });
+                    productos_temporal = [];
+                    {#ventas.items.rubros_select = data;#}
+                    $('#modal_productos').modal('hide');
+                    ventas.list();
+                },
+                error: function (xhr, status, data) {
+                    alert(data);
+                },
+
+            });
+            } else { menssaje_error('Error', 'Debe selecionar al menos un producto', 'danger', function () {
+
+            })}
+
+        })
+
+
+
+
+    })
+</script>

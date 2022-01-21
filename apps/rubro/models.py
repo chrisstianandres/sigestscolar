@@ -16,6 +16,7 @@ class Rubro(ModeloBase):
     pension = models.ForeignKey(Pension, verbose_name=u'Pension', on_delete=models.PROTECT,  blank=True, null=True)
     matricula = models.ForeignKey(Matricula, blank=True, null=True, verbose_name=u'Matricula', on_delete=models.PROTECT)
     producto = models.ForeignKey(Inventario, blank=True, null=True, verbose_name=u'Producto', on_delete=models.PROTECT)
+    cantidad = models.IntegerField(default=1, verbose_name=u'Producto')
     nombre = models.CharField(max_length=300, verbose_name=u'Nombre', blank=True, null=True)
     fecha = models.DateField(verbose_name=u'Fecha emisión', blank=True, null=True,)
     fechavence = models.DateField(verbose_name=u'Fecha vencimiento', blank=True, null=True,)
@@ -102,6 +103,9 @@ class Rubro(ModeloBase):
             print(ex)
             pass
         return saldo
+
+    def subtotal(self):
+        return '{:.2f}'.format(float(self.saldo)/(1+(self.iva.iva.ivaporciento/100)))
 
     def nombre_usuario(self):
         if self.usuario_creacion:

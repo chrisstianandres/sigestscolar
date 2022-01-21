@@ -14,6 +14,8 @@ from pathlib import Path
 import django_heroku
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
+from django.conf.global_settings import DATABASES
+
 BASE_DIR = Path(__file__).resolve().parent.parent
 
 
@@ -73,7 +75,7 @@ MIDDLEWARE = [
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
     'crum.CurrentRequestUserMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
-    'whitenoise.middleware.WhiteNoiseMiddleware',
+    # 'whitenoise.middleware.WhiteNoiseMiddleware',
 ]
 
 ROOT_URLCONF = 'sigestscolar.urls'
@@ -100,24 +102,25 @@ WSGI_APPLICATION = 'sigestscolar.wsgi.application'
 
 # Database
 # https://docs.djangoproject.com/en/3.2/ref/settings/#databases
-
-DATABASES = {
-        'default': {
-            'ENGINE': 'django.db.backends.postgresql_psycopg2',
-            'NAME': 'bd_scolar',
-            'USER': 'postgres',
-            'PASSWORD': '1234',
-            'HOST': 'localhost',
-            'PORT': '5432',
-        }
-    }
-# import dj_database_url
-# from decouple import config
+#
+# DATABASES = {
+#         'default': {
+#             'ENGINE': 'django.db.backends.postgresql_psycopg2',
+#             'NAME': 'bd_scolar',
+#             'USER': 'postgres',
+#             'PASSWORD': '1234',
+#             'HOST': 'localhost',
+#             'PORT': '5432',
+#         }
+#     }
+import dj_database_url
+from decouple import config
 # DATABASES = {
 #     'default': {
 #         'ENGINE': dj_database_url.config(default=config('DATABASE_URL')),
 #     }
 # }
+DATABASES['default'] = dj_database_url.config(default='postgres://bxsoroazpjrfbz:f30f5b57a8bd6a62c0d1900cd4744f4224e4890738eabe65e4e7fa7a227143dd@ec2-54-173-2-216.compute-1.amazonaws.com:5432/dfkchsoh541c61', conn_max_age=0)
 # Password validation
 # https://docs.djangoproject.com/en/3.2/ref/settings/#auth-password-validators
 
@@ -171,7 +174,7 @@ STATICFILES_DIRS = [
     os.path.join(BASE_DIR, 'static')
 ]
 
-STATICFILES_STORAGE = 'whitenoise.storage.CompressedManifestStaticFilesStorage'
+# STATICFILES_STORAGE = 'whitenoise.storage.CompressedManifestStaticFilesStorage'
 EMAIL_HOST = 'smtp.gmail.com'
 
 EMAIL_PORT = 587
@@ -194,6 +197,6 @@ CRONJOBS = [
 
 
 #django heroku
-django_heroku.settings(locals())
+# django_heroku.settings(locals())
 
 

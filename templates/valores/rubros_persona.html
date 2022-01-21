@@ -1,0 +1,129 @@
+<div class="row">
+    <button type="button" class="btn btn-info" id="ingresar"><i class="fa fa-check-circle"></i> Ingresar Rubros
+    </button>
+</div>
+<hr>
+<div class="row">
+ <table style="width: 100%" class="table table-bordered">
+    <thead>
+    <tr>
+        <th class="dt-center"><input type="checkbox" id="todos"></th>
+        <th class="dt-center">Rubro</th>
+        <th class="dt-center">Fechas</th>
+        <th class="dt-center">Valor</th>
+        <th class="dt-center">Iva</th>
+        <th class="dt-center">Descto</th>
+        <th class="dt-center">Saldo</th>
+        <th class="dt-center">Observacion</th>
+    </tr>
+    </thead>
+    <tbody>
+        {% for elemento in rubros %}
+        <tr>
+            <td class="dt-center" style="width: 5%;"><input type="checkbox" class="check_select" pk="{{ elemento.pk }}"></td>
+            <td class="dt-center" style="width: 18%;">{{ elemento.nombre }}</td>
+            <td class="dt-center"> <b>Creacion: </b>{{ elemento.fecha|date:'d-m-Y' }}<br>
+            <b>Vence:</b> {{ elemento.fechavence|date:'d-m-Y' }}</td>
+            <td class="dt-center"><i class="fa fa-dollar-sign"></i> {{ elemento.valor_total }}</td>
+            <td class="dt-center"><i class="fa fa-dollar-sign"></i> {{ elemento.valor_iva }}</td>
+            <td class="dt-center"><i class="fa fa-dollar-sign"></i> {{ elemento.valordescuento }}</td>
+            <td class="dt-center"><i class="fa fa-dollar-sign"></i> {{ elemento.saldo }}</td>
+            <td class="dt-center" style="width: 18%;"> {{ elemento.observacion }}</td>
+            <td style="text-align:center; width: 15%" class="dt-center">
+                <b>Cancelado: </b>{% if elemento.cancelado %}<span class="badge badge-success">Si</span>{% else %}<span class="badge badge-danger">No</span>{% endif %}
+                <br>
+                <b>Anulado: </b>{% if not elemento.anulado %}<span class="badge badge-success">No</span>{% else %}<span class="badge badge-danger">Si</span>{% endif %}
+                <br>
+                <b>Vencido: </b>{% if not elemento.vencido %}<span class="badge badge-success">No</span>{% else %}<span class="badge badge-danger">Si</span>{% endif %}
+            </td>
+        </tr>
+    {% empty %}
+        <tr>
+            <td colspan="5" style="text-align: center">No existen registros para mostrar</td>
+        </tr>
+    {% endfor %}
+    </tbody>
+</table>
+</div>
+
+
+<script>
+    $(function () {
+        $('#todos').click(function (event) {
+            if (this.checked) {
+                rubros_temporal = [];
+                // Iterate each checkbox
+                $(':checkbox').each(function () {
+                    this.checked = true;
+                    if (this.hasAttribute('pk')){
+                        rubros_temporal.push($(this).attr('pk'));
+                    }
+                });
+            } else {
+                $(':checkbox').each(function () {
+                    this.checked = false;
+                    rubros_temporal = [];
+                });
+            }
+        });
+
+
+        $('.check_select').click(function (event) {
+            $('#todos').prop('checked', false);
+            if (this.checked) {
+                rubros_temporal.push($(this).attr('pk'));
+            } else {
+                var index = rubros_temporal.indexOf($(this).attr('pk'));
+                if (index !== -1) {
+                    rubros_temporal.splice(index, 1);
+                }
+            }
+        });
+
+        $('#ingresar').on('click', function (e) {
+            if (rubros_temporal.length>0){
+                Swal.fire({
+                title: 'Un momento por favor',
+                html: 'Estamos ingresando los rubros!!!',
+                timerProgressBar: true,
+                didOpen: () => {
+                    Swal.showLoading();
+                },
+            });
+                $.ajax({
+                type: "GET",
+                url: '/facturacion',
+                data: {
+                    "ids": JSON.stringify(rubros_temporal),
+                    "ids_exclude": JSON.stringify(ventas.get_ids_rubros),
+                    'action': 'get_rubros'
+                },
+                dataType: 'json',
+                success: function (data) {
+                    swal.close();
+                    $.each(data, function (key, value) {
+                        ventas.items.rubros_select.push(value);
+                    });
+                    rubros_temporal = [];
+                    {#ventas.items.rubros_select = data;#}
+                    $('#modal_rubros').modal('hide');
+                    ventas.list();
+
+
+                },
+                error: function (xhr, status, data) {
+                    alert(data);
+                },
+
+            });
+            } else { menssaje_error('Error', 'Debe selecionar al unos un rubro', 'danger', function () {
+
+            })}
+
+        })
+
+
+
+
+    })
+</script>

@@ -24,28 +24,28 @@
                         </div>
                         <!-- /.card-header -->
                         <!-- form start -->
-                    {% block  form%}
-                        <form id="form" class="{% block inline %}{% endblock %}">
-                            <div class="card-body">
-                                <div class="form-group">
-                                    <input type="hidden" name="action" value="{{ action }}">
-                                    <input type="hidden" name="pk" value="{{ pk }}">
-                                    {{ form.as_p }}
+                        {% block  form %}
+                            <form id="form" class="{% block inline %}{% endblock %}">
+                                <div class="card-body">
+                                    <div class="form-group">
+                                        <input type="hidden" name="action" value="{{ action }}">
+                                        <input type="hidden" name="pk" value="{{ pk }}">
+                                        {{ form.as_p }}
+                                    </div>
+                                    {% block extra_form %}
+
+                                    {% endblock %}
                                 </div>
-                                {% block extra_form %}
+                                <!-- /.card-body -->
 
-                                {% endblock %}
-                            </div>
-                            <!-- /.card-body -->
-
-                            <div class="card-footer">
-                                <button type="submit" class="btn btn-primary">Guardar</button>
-                                <button type="button" class="btn btn-danger"
-                                        onclick="window.location.href = '{{ request.path }}';">Cancelar
-                                </button>
-                            </div>
-                        </form>
-                    {% endblock %}
+                                <div class="card-footer">
+                                    <button type="submit" class="btn btn-primary">Guardar</button>
+                                    <button type="button" class="btn btn-danger"
+                                            onclick="window.location.href = '{{ request.path }}';">Cancelar
+                                    </button>
+                                </div>
+                            </form>
+                        {% endblock %}
 
                     </div>
                     <!-- /.card -->
@@ -55,6 +55,8 @@
             <!-- /.row -->
         </div><!-- /.container-fluid -->
     </section>
+    {% block modals %}
+    {% endblock %}
 {% endblock %}
 {% block extra_scripts %}
     <script src="{% static 'adminlte/plugins/jquery-validation/jquery.validate.min.js' %}"></script>

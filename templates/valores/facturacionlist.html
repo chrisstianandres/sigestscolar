@@ -1,0 +1,67 @@
+{% extends 'bases/base_list.html' %}
+{% block filtros %}
+    <div class="row float-right">
+        <form action="{{ request.path }}">
+            <div class="form-group"><br>
+                <div class="input-group">
+                    <input type="text" class="form-control input-sm input-search"
+                           style="border-top-right-radius: 0 !important; border-bottom-right-radius: 0 !important;"
+                           placeholder="Buscar...." autocomplete="off"
+                           aria-label="Buscar..." aria-describedby="basic-addon2"
+                           name="search"
+                           value="{{ search }}">
+                    <div class="input-group-append">
+                        <button class="btn btn-outline-success btn-sm" type="button" id="search"
+                                data-toggle="tooltip" data-placement="bottom"
+                                title="Buscar...">
+                            <i class="fa fa-search"></i></button>
+                        {% if search %}
+                            <button class="btn btn-outline-danger btn-sm" type="button"
+                                    data-toggle="tooltip" data-placement="bottom"
+                                    title="Mostrar todos"
+                                    onclick="window.location.href ='{{ request.path }}'"><i
+                                    class="fas fa-redo-alt"></i></button>
+                        {% endif %}
+
+                    </div>
+                </div>
+
+            </div>
+        </form>
+    </div>
+    <br>
+{% endblock %}
+{% block header_tabla %}
+    <th class="dt-center">Persona</th>
+    <th class="dt-center">Numero</th>
+    <th class="dt-center">Fechas</th>
+    <th class="dt-center">Valor</th>
+    <th class="dt-center">Iva</th>
+    <th class="dt-center">Descto</th>
+    <th class="dt-center">Total</th>
+    <th class="dt-center">Observacion</th>
+    <th style="text-align:center; width: 10%" class="dt-center">Detalles</th>
+{% endblock %}
+{% block body_tabla %}
+    {% for elemento in page_obj %}
+        <tr>
+            <td class="dt-center" style="width: 18%;">{{ elemento.nombre }}</td>
+            <td class="dt-center" style="width: 10%;">{{ elemento.numerocompleto }}</td>
+            <td class="dt-center"> <b>Creacion: </b>{{ elemento.fecha|date:'d-m-Y' }}</td>
+            <td class="dt-center"><i class="fa fa-dollar-sign"></i> {{ elemento.subtotal_base_iva }}</td>
+            <td class="dt-center"><i class="fa fa-dollar-sign"></i> {{ elemento.total_iva }}</td>
+            <td class="dt-center"><i class="fa fa-dollar-sign"></i> {{ elemento.total_descuento }}</td>
+            <td class="dt-center"><i class="fa fa-dollar-sign"></i> {{ elemento.total }}</td>
+            <td class="dt-center" style="width: 18%;"> {{ elemento.observacion }}</td>
+            <td style="text-align:center; width: 15%" class="dt-center">
+                <b>Pagada: </b>{% if elemento.pagada %}<span class="badge badge-success">Si</span>{% else %}<span class="badge badge-danger">No</span>{% endif %}
+                <br>
+                <b>Estado: </b>{% if elemento.estado == 1 %}<span class="badge badge-success">{{elemento.get_estado_display}}</span>{% else %}<span class="badge badge-danger">{{elemento.get_estado_display}}</span>{% endif %}
+            </td>
+        </tr>
+    {% empty %}
+        <tr>
+            <td colspan="5" style="text-align: center">No existen registros para mostrar</td>
+        </tr>
+    {% endfor %}
+{% endblock %}

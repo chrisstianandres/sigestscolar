@@ -1,0 +1,498 @@
+{% extends 'bases/base_form.html' %}
+{% load static %}
+
+{% block  form %}
+    <form id="form">
+        <div class="card-body">
+            <input type="hidden" name="action" value="{{ action }}">
+            <input type="hidden" name="pk" value="{{ pk }}">
+
+            <div class="row">
+                <div class=" col-md-12">
+                    <div class="form-group float-right">
+                    {{ form.fecha.label_tag }}
+                    {{ form.fecha }}
+                </div>
+                </div>
+            </div>
+            <div class="row ">
+                <div class="col-md-6">
+                    <div class="form-group">{{ form.cliente.label_tag }}
+                        <div class="input-group">
+
+                            {{ form.cliente }}<div class="input-group-append"> <button type="button" class="btn btn-info" id="rubros_detalle"> <i class="fas fa-comment-dollar"></i> Rubros</button></div>
+                        </div>
+                </div>
+                </div>
+                <div class="col-md-6">
+                    <p><b>Estado de Cuenta</b></p>
+                    <table style="width: 100%" class="table table-bordered">
+                        <thead>
+                        <tr>
+                            <th class="dt-center">Total Vencido</th>
+                            <th class="dt-center">Total Adeudado</th>
+                            <th class="dt-center">Total Cancelado</th>
+                        </tr>
+                        </thead>
+                        <tbody>
+                        <tr>
+                            <td class="dt-center" id="totalvencido"><i class="fa fa-dollar-sign"></i> 00.00</td>
+                            <td class="dt-center" id="saldototal"><i class="fa fa-dollar-sign"></i> 00.00</td>
+                            <td class="dt-center" id="totalpagado"><i class="fa fa-dollar-sign"></i> 00.00</td>
+                        </tr>
+                        </tbody>
+                    </table>
+                </div>
+        </div>
+        <div class="row">
+            <div class="col-md-6">
+                    <div class="form-group"><b>Buscar productos:</b>
+                        <div class="input-group">
+                            <select name="producto" class="select2 form-control border_busqueda" id="producto"></select><div class="input-group-append"> <button type="button" class="btn btn-info" id="btnproductolista"> <i class="fa fa-search"></i></button></div>
+                        </div>
+                </div>
+                </div>
+        </div><br><br><br>
+            <div class="row">
+                <p><b>Detalle de Rubros</b></p>
+                <div class="col-sm-12">
+                    <table style="width: 100%" class="table table-bordered" id="table_detalle">
+                    <thead>
+                    <tr>
+                        <th class="dt-center"><i class="fa fa-trash"></i></th>
+                        <th class="dt-center">Rubro</th>
+                        <th class="dt-center">Stock</th>
+                        <th class="dt-center">Cantidad</th>
+                        <th class="dt-center">Valor</th>
+                        <th class="dt-center">Saldo</th>
+                        <th class="dt-center">Subtotal</th>
+                        <th class="dt-center">Iva</th>
+                        <th class="dt-center">Total</th>
+                    </tr>
+                    </thead>
+                    <tbody>
+                    </tbody>
+                </table>
+                </div>
+
+            </div>
+            <div class="row">
+                <div class="col-md-9">
+
+                </div>
+                <div class="col-md-3">
+                    <table style="width: 100%" class="table table-bordered">
+                        <tbody>
+                        <tr>
+                            <td class="dt-center"><b>Subtotal: </b></td>
+                            <td class="dt-center" id="subtotal"><i class="fa fa-dollar-sign"></i> 00.00</td>
+                        </tr>
+                        <tr>
+                            <td class="dt-center"><b>I.V.A.: </b></td>
+                            <td class="dt-center" id="iva"><i class="fa fa-dollar-sign"></i> 00.00</td>
+                        </tr>
+                        <tr>
+                            <td class="dt-center"><b>TOTAL: </b></td>
+                            <td class="dt-center" id="total"><i class="fa fa-dollar-sign"></i> 00.00</td>
+                        </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+        <div class="card-footer">
+            <button type="submit" class="btn btn-primary">Guardar</button>
+            <button type="button" class="btn btn-danger"
+                    onclick="window.location.href = '{{ request.path }}';">Cancelar
+            </button>
+        </div>
+
+    </form>
+{% endblock %}
+{% block modals %}
+    <div class="modal fade" id="modal_rubros" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel"
+         aria-hidden="true">
+        <div class="modal-dialog modal-xl" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="titulo_form"><i
+                            class="fas fa-book"></i> Rubros Pendientes de Pago
+                    </h5>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                <div class="modal-body">
+
+                    <div class="card-body">
+                        <div id="rubros_body">
+
+                        </div>
+                    </div>
+
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-danger" data-dismiss="modal"> Cerrar</button>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="modal fade" id="modal_productos" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel"
+         aria-hidden="true">
+        <div class="modal-dialog modal-xl" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title"><i class="fas fa-book"></i> Lista de Productos
+                    </h5>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                <div class="modal-body">
+
+                    <div class="card-body">
+                        <div id="productos_body">
+
+                        </div>
+                    </div>
+
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-danger" data-dismiss="modal"> Cerrar</button>
+                </div>
+            </div>
+        </div>
+    </div>
+{% endblock %}
+{% block validate_form %}
+    <script>
+    var datatable, rubros_temporal = [], productos_temporal=[];
+    var ventas = {
+    items: {
+        cliente: '',
+        subtotal: 0.00,
+        iva: 0.00,
+        total: 0.00,
+        rubros_select: [],
+    },
+    get_ids_rubros: function () {
+        var ids = [];
+        $.each(this.items.rubros_select, function (key, value) {
+            if(value.producto===false){
+                ids.push(value.id);
+            }
+        });
+        return ids;
+    },
+    get_ids_producto: function () {
+        var ids = [];
+        $.each(this.items.rubros_select, function (key, value) {
+            if(value.producto===true){
+                ids.push(value.id);
+            }
+        });
+        return ids;
+    },
+    calculate: function () {
+        var subtotal = 0.00;
+        var iva_emp = 12/100;
+        $.each(this.items.rubros_select, function (pos, dict) {
+            if (dict.producto===true){
+                dict.subtotal = dict.cantidad * parseFloat(dict.valor);
+                dict.iva = dict.subtotal * parseFloat(iva_emp);
+                dict.total = dict.iva + parseFloat(dict.subtotal);
+            }
+            subtotal += dict.subtotal;
+            iva_emp = (12 / 100);
+        });
+        this.items.subtotal = subtotal;
+        this.items.iva = this.items.subtotal * iva_emp;
+        this.items.total = this.items.subtotal + this.items.iva;
+        $('#subtotal').html('<i class="fa fa-dollar-sign"></i> ' + this.items.subtotal.toFixed(2));
+        $('#iva').html('<i class="fa fa-dollar-sign"></i> ' + this.items.iva.toFixed(2));
+        $('#total').html('<i class="fa fa-dollar-sign"></i> ' + this.items.total.toFixed(2));
+    },
+    add: function (data) {
+        this.items.rubros_select.push(data);
+        this.list();
+    },
+    list: function () {
+        ventas.calculate();
+        tblventa = $("#table_detalle").DataTable({
+            destroy: true,
+            autoWidth: false,
+            dataSrc: "",
+            dom: 't',
+            responsive: true,
+            language: {
+                "url": '//cdn.datatables.net/plug-ins/1.10.15/i18n/Spanish.json'
+            },
+            data: this.items.rubros_select,
+            columns: [
+                {data: 'id'},
+                {data: "nombre"},
+                {data: "stock"},
+                {data: "cantidad"},
+                {data: "total"},
+                {data: "saldo"},
+                {data: "subtotal"},
+                {data: "iva"},
+                {data: "total"}
+            ],
+            columnDefs: [
+                {
+                    targets: [0],
+                    class: 'text-center',
+                    width: '5%',
+                    orderable: false,
+                    render: function (data, type, row) {
+                        return '<a rel="remove" type="button" class="btn btn-danger btn-xs btn-flat rounded-pill" style="color: white" data-toggle="tooltip" title="Quitar Producto"><i class="fa fa-times"></i></a>';
+                    }
+                },
+                {
+                    targets: [-1, -2, -3, -4, -5],
+                    class: 'text-center',
+                    orderable: false,
+                    render: function (data, type, row) {
+                        return '$' + parseFloat(data).toFixed(2);
+                    }
+                },
+                {
+                    targets: [2],
+                    class: 'text-center',
+                    orderable: false,
+                    render: function (data, type, row) {
+                        if (row.producto===false){
+                        return 'No aplica';
+                        } return data;
+
+                    }
+                },
+                {
+                    targets: [3],
+                    class: 'text-center',
+                    orderable: false,
+                    render: function (data, type, row) {
+                        if (row.producto===true){
+                        return '<input type="number" min="1" max="'+row.stock+'" name="cantidad" class="form-control form-control-sm input-sm" autocomplete="off" value="' + data + '">';
+                        } return data;
+
+                    }
+                }
+            ]
+        });
+    },
+};
+    $(function () {
+        validador();
+            $("#form").validate({
+                rules: {
+                    cantidad: {
+                        required: true,
+                        minlength: 1,
+                    },
+                },
+                messages: {
+                    cantidad: {
+                        required: "Por favor ingresa una cantidad",
+                        minlength: "Debe ingresar un numero mayor a 0",
+                        max: "Este numero supera el stock disponible",
+                        min: 'Debe ingresar un numero mayor a 0'
+                    }
+                },
+            });
+        $('#id_cliente').select2({
+            language: {
+                inputTooShort: function () {
+                    return "Ingresa al menos un caracter...";
+                },
+                "noResults": function () {
+                    return "Sin resultados";
+                },
+                "searching": function () {
+                    return "Buscando...";
+                }
+            },
+            theme: 'bootstrap4',
+            allowClear: true,
+            ajax: {
+                delay: 250,
+                type: 'GET',
+                url: '/facturacion',
+                data: function (params) {
+                    return {
+                        term: params.term,
+                        action: 'search_cliente'
+                    };
+                },
+                processResults: function (data) {
+                    return {
+                        results: data
+                    };
+
+                },
+
+            },
+            placeholder: 'Busca un cliente por nombres, apellidos o cedula',
+            minimumInputLength: 1,
+        }).on('select2:select', function (e) {
+            traer_rubros([]);
+        });
+        $('#producto').select2({
+            language: {
+                inputTooShort: function () {
+                    return "Ingresa al menos un caracter...";
+                },
+                "noResults": function () {
+                    return "Sin resultados";
+                },
+                "searching": function () {
+                    return "Buscando...";
+                }
+            },
+            theme: 'bootstrap4',
+            allowClear: true,
+            ajax: {
+                delay: 250,
+                type: 'GET',
+                url: '/facturacion',
+                data: function (params) {
+                    return {
+                        term: params.term,
+                        action: 'search_producto',
+                        ids: JSON.stringify(ventas.get_ids_producto())
+                    };
+                },
+                processResults: function (data) {
+                    return {
+                        results: data
+                    };
+
+                },
+
+            },
+            placeholder: 'Busca un producto',
+            minimumInputLength: 1,
+        }).on('select2:select', function (e) {
+            traer_producto($('#producto option:selected').val());
+            $('#producto').val(null).trigger('change');
+        });
+        $('#rubros_detalle').on('click', function (e) {
+           traer_rubros(ventas.get_ids_rubros());
+
+        });
+        $('#btnproductolista').click(function () {
+            lista_productos(ventas.get_ids_producto());
+        });
+        $('#table_detalle tbody')
+        .on('click', 'a[rel="remove"]', function () {
+            var tr = tblventa.cell($(this).closest('td, li')).index();
+            borrar_todo_alert('Alerta de Eliminación',
+                'Esta seguro que desea eliminar este rurbo de tu detalle <br> ' +
+                '<strong>CONTINUAR?</strong>', function () {
+                    ventas.items.rubros_select.splice(tr.row, 1);
+                    ventas.list();
+                })
+        })
+        .on('change keyup', 'input[name="cantidad"]', function () {
+            var cantidad = parseInt($(this).val());
+            var tr = tblventa.cell($(this).closest('td, li')).index();
+            ventas.items.rubros_select[tr.row].cantidad = cantidad;
+            ventas.calculate();
+            $('td:eq(4)', tblventa.row(tr.row).node()).html('$' + ventas.items.rubros_select[tr.row].total.toFixed(2));
+            $('td:eq(5)', tblventa.row(tr.row).node()).html('$' + ventas.items.rubros_select[tr.row].total.toFixed(2));
+            $('td:eq(6)', tblventa.row(tr.row).node()).html('$' + ventas.items.rubros_select[tr.row].subtotal.toFixed(2));
+            $('td:eq(7)', tblventa.row(tr.row).node()).html('$' + ventas.items.rubros_select[tr.row].iva.toFixed(2));
+            $('td:eq(8)', tblventa.row(tr.row).node()).html('$' + ventas.items.rubros_select[tr.row].total.toFixed(2));
+        });
+        ventas.list();
+    });
+
+    function traer_rubros(ids) {
+        if ($('#id_cliente').val() > 0){
+            Swal.fire({
+            title: 'Un momento por favor',
+            html: 'Estamos caragdo el estado de cuenta!!!',
+            timer: 2000,
+            timerProgressBar: true,
+            didOpen: () => {
+                Swal.showLoading();
+            },
+        });
+        $.ajax({
+            type: "GET",
+            url: '/facturacion',
+            data: {
+                "id": $('#id_cliente option:selected').val(),
+                'action': 'rubros_cliente',
+                'ids': JSON.stringify(ids)
+            },
+            dataType: 'json',
+            success: function (data) {
+                swal.close();
+                if (!data.hasOwnProperty('resp')) {
+                    $('#rubros_body').html(data.data);
+                    $('#modal_rubros').modal('show');
+                } else {
+                    menssaje_ok('Sin rubros', data.mensaje, 'success', function () {})
+                }
+                $('#totalvencido').html('<i class="fa fa-dollar-sign"></i> ' + parseFloat(data.totalvencido).toFixed(2));
+                $('#totalpagado').html('<i class="fa fa-dollar-sign"></i> ' + parseFloat(data.totalpagado).toFixed(2));
+                $('#saldototal').html('<i class="fa fa-dollar-sign"></i> ' + parseFloat(data.totaldeuda).toFixed(2));
+            },
+            error: function (xhr, status, data) {
+                alert(data);
+            },
+
+        });
+        } return false;
+
+
+    }
+    function traer_producto(id){
+        ajax_sin_confirmar('/facturacion', {'id': id, 'action': 'get_producto'}, function (data) {
+            ventas.add(data);
+        })
+    }
+
+    function lista_productos(ids) {
+        Swal.fire({
+            title: 'Un momento por favor',
+            html: 'Estamos caragdo la lista de productos!!!',
+            timer: 2000,
+            timerProgressBar: true,
+            didOpen: () => {
+                Swal.showLoading();
+            },
+        });
+        $.ajax({
+            type: "GET",
+            url: '/facturacion',
+            data: {
+                'action': 'lista_productos',
+                'ids': JSON.stringify(ids)
+            },
+            dataType: 'json',
+            success: function (data) {
+                swal.close();
+                if (!data.hasOwnProperty('resp')) {
+                    $('#productos_body').html(data.data);
+                    $('#modal_productos').modal('show');
+                } else {
+                    menssaje_ok('Sin productos', data.mensaje, 'success', function () {
+                    })
+                }
+            },
+            error: function (xhr, status, data) {
+                alert(data);
+            },
+
+        });
+
+
+
+    }
+    </script>
+
+
+{% endblock %}
