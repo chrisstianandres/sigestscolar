@@ -567,19 +567,20 @@
                 var forma = parseInt($('#id_formapago').val());
                 ventas.items.tipopago = forma;
                 if (forma===2){
-                    ventas.items.referencia_transferencia = $('#referencia_transferencia').val()
+                    ventas.items.referencia_transferencia = $('#id_referencia_transferencia').val()
                 }
                 if (forma===3){
-                    ventas.items.referencia_deposito = $('#referencia_deposito').val()
+                    ventas.items.referencia_deposito = $('#id_referencia_deposito').val()
                 }
                 if (forma===4){
-                    ventas.items.boucher = $('#boucher').val()
+                    ventas.items.boucher = $('#id_boucher').val();
+                     console.log(ventas.items.boucher);
                 }
                 var parametros = {'factura': JSON.stringify(ventas.items), 'action': 'add'};
                 save_with_ajax('Alerta',
                     '/facturacion', 'Esta seguro que desea realizar esta accion?', parametros, function (response) {
                         printpdf('Alerta!', '¿Desea generar el comprobante en PDF?', function (tipo) {
-                            window.open('/facturacion/exportcomprobante/' + response['id']+'?tipo='+tipo, '_blank');
+                            window.open('/exportcomprobante/' + response['id']+'?tipo='+tipo, '_blank');
                             location.href = '/facturacion';
                         }, function () {
                             location.href = '/facturacion';

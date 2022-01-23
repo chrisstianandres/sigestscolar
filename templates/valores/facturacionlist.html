@@ -1,70 +1,65 @@
 {% extends 'bases/base_list.html' %}
-{#{% block filtros %}#}
-{#    <div class="row float-right">#}
-{#        <div class="form-group">#}
-{#            <form action="{{ request.path }}">#}
-{#                <div class="input-group">#}
-{#                    <input type="text" class="form-control input-sm input-search"#}
-{#                           style="border-top-right-radius: 0 !important; border-bottom-right-radius: 0 !important;"#}
-{#                           placeholder="Buscar...." autocomplete="off"#}
-{#                           aria-label="Buscar..." aria-describedby="basic-addon2"#}
-{#                           name="search"#}
-{#                           value="{{ search }}">#}
-{#                    <div class="input-group-append">#}
-{#                        <button class="btn btn-outline-success btn-sm" type="button" id="search"#}
-{#                                data-toggle="tooltip" data-placement="bottom"#}
-{#                                title="Buscar...">#}
-{#                            <i class="fa fa-search"></i></button>#}
-{#                        {% if search %}#}
-{#                            <button class="btn btn-outline-danger btn-sm" type="button"#}
-{#                                    data-toggle="tooltip" data-placement="bottom"#}
-{#                                    title="Mostrar todos"#}
-{#                                    onclick="window.location.href ='{{ request.path }}'"><i#}
-{#                                    class="fas fa-redo-alt"></i></button>#}
-{#                        {% endif %}#}
-{##}
-{#                    </div>#}
-{#                </div>#}
-{#            </form>#}
-{#        </div> &nbsp;&nbsp;#}
-{#        <div class="form-group">#}
-{#            <button {% if not modal_form %}onclick="window.location.href ={{ url_add }};" {% endif %}type="button"#}
-{#                    class="btn btn-block btn-primary btn-sm"#}
-{#                    {% if modal_form %} data-toggle="modal"#}
-{#                    data-target="#modal_form"{% endif %}#}
-{#                    style="margin-right: 2px;"><i class="fa fa-plus-circle"></i> Agregar#}
-{#            </button>#}
-{#        </div>#}
-{#    </div>#}
-{#{% endblock %}#}
+{% load tags_general %}
 {% block header_tabla %}
     <th class="dt-center">Persona</th>
     <th class="dt-center">Numero</th>
     <th class="dt-center">Fecha</th>
-    <th class="dt-center">Subtotal base 0</th>
-    <th class="dt-center">Subtotal base IVA</th>
+    <th class="dt-center">Subtotal <br>base 0</th>
+    <th class="dt-center">Subtotal <br>base IVA</th>
     <th class="dt-center">IVA</th>
     <th class="dt-center">Descto</th>
     <th class="dt-center">Total</th>
-    <th class="dt-center">Observacion</th>
-    <th style="text-align:center; width: 10%" class="dt-center">Detalles</th>
+    <th class="dt-center" style="width: 10%;">Forma de Pago</th>
+    <th style="text-align:center; width: 12%" class="dt-center">Detalles</th>
 {% endblock %}
 {% block body_tabla %}
     {% for elemento in page_obj %}
         <tr>
-            <td class="dt-center" style="width: 18%;">{{ elemento.nombre }}</td>
-            <td class="dt-center" style="width: 10%;">{{ elemento.numerocompleto }}</td>
-            <td class="dt-center"> <b>Creacion: </b>{{ elemento.fecha|date:'d-m-Y' }}</td>
+            <td class="dt-center" style="width: 20%;"><b><i class="fa fa-user-check"></i> {{ elemento.nombre }}</b>
+                {% if elemento.identificacion %}
+                    <br><b><i class="fas fa-id-card-alt"></i> {{ elemento.cliente.tipo_identificacion }}</b>
+                    {{ elemento.identificacion }}
+                {% endif %}
+                {% if elemento.direccion %}
+                    <br><b><i class="fas fa-map-marked-alt"></i> Direccion:</b> {{ elemento.direccion }}
+                {% endif %}
+                {% if elemento.telefono %}
+                    <br><b><i class="fas fa-phone-alt"></i> Telefono:</b> {{ elemento.telefono }}
+                {% endif %}
+                {% if elemento.email %}
+                    <br><b><i class="fas fa-at"></i> Email:</b> {{ elemento.email }}
+                {% endif %}
+            </td>
+            <td class="dt-center" style="width: 12%;">{{ elemento.numerocompleto }}</td>
+            <td class="dt-center"> {{ elemento.fecha|date:'d-m-Y' }}</td>
             <td class="dt-center"><i class="fa fa-dollar-sign"></i> {{ elemento.subtotal_base0 }}</td>
             <td class="dt-center"><i class="fa fa-dollar-sign"></i> {{ elemento.subtotal_base_iva }}</td>
-            <td class="dt-center"><i class="fa fa-dollar-sign"></i> {{ elemento.total_iva }}</td>
+            <td class="dt-center"><i class="fa fa-dollar-sign"></i> {{ elemento.total_iva }}<br>
+            {% if elemento.ivaaplicado %}
+            <b>Iva aplicado: </b><br>
+                {{ elemento.ivaaplicado.ivaporciento }} %
+            {% endif %} </td>
             <td class="dt-center"><i class="fa fa-dollar-sign"></i> {{ elemento.total_descuento }}</td>
             <td class="dt-center"><i class="fa fa-dollar-sign"></i> {{ elemento.total }}</td>
-            <td class="dt-center" style="width: 18%;"> {{ elemento.observacion }}</td>
-            <td style="text-align:center; width: 15%" class="dt-center">
-                <b>Pagada: </b>{% if elemento.pagada %}<span class="badge badge-success">Si</span>{% else %}<span class="badge badge-danger">No</span>{% endif %}
-                <br>
-                <b>Estado: </b>{% if elemento.estado == 1 %}<span class="badge badge-success">{{elemento.get_estado_display}}</span>{% else %}<span class="badge badge-danger">{{elemento.get_estado_display}}</span>{% endif %}
+            <td class="dt-center" style="width: 10%;"><span class="badge badge-{{ elemento.formapago_span }}">
+                {{ elemento.get_formapago_display }} </span><br>
+            {% if elemento.formapago == 2 %}
+                <b>Referencia N°:</b> {{ elemento.referencia_transferencia }}
+             {% elif elemento.formapago == 3 %}
+                <b>Referencia N°:</b> {{ elemento.referencia_deposito }}
+             {% elif elemento.formapago == 4 %}
+                <b>N° Boucher:</b> {{ elemento.boucher }}
+            {% endif %}
+
+            </td>
+            <td style="text-align:left; width: 12%" class="dt-center">
+                <b>Pagada: </b>{% if elemento.pagada %}<span class="badge badge-success">Si</span>{% else %}<span class="badge badge-danger">No</span>{% endif %}<br>
+                <b>Estado: </b>{% if elemento.estado == 1 %}<span class="badge badge-success">{{elemento.get_estado_display}}</span>{% else %}<span class="badge badge-danger">{{elemento.get_estado_display}}</span>{% endif %}<br>
+                <b>Valida: </b> {% if elemento.valida %}<span class="badge badge-success">Si</span>{% else %}<span class="badge badge-danger">No</span>{% endif %}<br>
+                <b>Comprobante: </b><a class="btn btn-danger btn-xs comprobante"  data-toggle="tooltip" title="Imprimir comprobante" pk="{{ elemento.pk }}"  style="border-radius: 5px"><i class="fa fa-file-pdf"></i></a><br>
+                <b>Pagos: </b><a class="btn btn-info btn-xs detallerubro"  data-toggle="tooltip" title="Detalle de Pagos" pk="{{ elemento.pk }}" num="{{ elemento.numerocompleto }}" style="border-radius: 5px"><i class="far fa-money-bill-alt"></i></a><br>
+                <b>Verificada: </b>{% if elemento.verificada %}<span class="badge badge-success">Si</span>{% else %}<span class="badge badge-danger">No</span>
+                <br> <a class="btn btn-primary btn-xs verificar" pk="{{ elemento.pk }}" num="{{ elemento.numerocompleto }}"><i class="fa fa-check-circle"></i> Verificar </a><br>{% endif %}
             </td>
         </tr>
     {% empty %}
@@ -72,4 +67,97 @@
             <td colspan="5" style="text-align: center">No existen registros para mostrar</td>
         </tr>
     {% endfor %}
+{% endblock %}
+{% block modal %}
+<div class="modal fade" id="modal_rubros" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel"
+         aria-hidden="true">
+        <div class="modal-dialog modal-lg" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="titulo_form"><i class="far fa-money-bill-alt"></i> Detalles de la factura N° <b id="factura_num"></b>
+                    </h5>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                <div class="modal-body">
+
+                    <div class="card-body">
+                        <div id="rubros_body">
+
+                        </div>
+                    </div>
+
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-danger" data-dismiss="modal"> Cerrar</button>
+                </div>
+            </div>
+        </div>
+    </div>
+{% endblock %}
+{% block validate_form %}
+    <script>
+     $(function (){
+    $('.sidebar-mini').addClass('sidebar-closed sidebar-collapse').removeClass('sidebar-open');
+         $('.verificar').click(function (e) {
+             let num = $(this).attr('num');
+             let pk = $(this).attr('pk');
+             save_with_ajax('Verificacion de Factura','/facturacion',
+                 '¿Esta seguro que la factura numero ' + num + ' fue verificada correctamente?',
+                 {'action': 'verificar', 'pk': pk},
+                 function (data) {menssaje_ok('Todo correcto', data.mensaje, 'success',function () {
+                         window.location.reload();
+                     })},
+                 function () {
+                 })
+         });
+         $('.comprobante').click(function (e) {
+             let pk = $(this).attr('pk');
+             printpdf('Imprimir comprobante!', '¿Desea generar el comprobante en PDF?', function (tipo) {
+                            window.open('/exportcomprobante/' + pk+'?tipo='+tipo, '_blank');
+                            swal.close();
+                        }, function () {});
+         });
+         $('.detallerubro').click(function (e) {
+             let pk = $(this).attr('pk');
+             let num = $(this).attr('num');
+             Swal.fire({
+                 title: 'Un momento por favor',
+                 html: 'Estamos cargando los detalles de la factura!!!',
+                 timer: 2000,
+                 timerProgressBar: true,
+                 didOpen: () => {
+                     Swal.showLoading();
+                 },
+             });
+             $.ajax({
+            type: "GET",
+            url: '/facturacion',
+            data: {
+                "id": pk,
+                'action': 'rubros_factura'
+            },
+            dataType: 'json',
+            success: function (data) {
+                swal.close();
+                if (!data.hasOwnProperty('resp')) {
+                    $('#rubros_body').html(data.data);
+                    $('#factura_num').html(num);
+                    $('#modal_rubros').modal('show');
+                } else {
+                    menssaje_ok('Sin detalles', data.mensaje, 'success', function () {})
+                }
+            },
+            error: function (xhr, status, data) {
+                alert(data);
+            },
+
+        });
+
+         })
+     });
+
+    </script>
+
 {% endblock %}

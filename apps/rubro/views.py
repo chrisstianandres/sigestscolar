@@ -170,6 +170,7 @@ class ListviewFacturacion(TemplateView):
                                     for st in stock:
                                         if st.cantidad >= cant:
                                             st.cantidad -= cant
+                                            st.save(request)
                                         else:
                                             st.cantidad = 0
                                             cant = cant-st.cantidad
@@ -193,15 +194,19 @@ class ListviewFacturacion(TemplateView):
                             factura.generar_numero_completo()
                             if self.genera_tipo_pago(factura, datos):
                                 factura.save(request)
+                                data['resp'] = True
+                                data['id'] = factura.pk
                             else:
                                 transaction.set_rollback(True)
                                 data['error'] = 'Error al generar la factura'
                     else:
                         data['error'] = 'Datos Incompletos'
 
-            elif action == 'delete':
+            elif action == 'verificar':
                 objeto = self.model.objects.get(pk=request.POST['pk'])
-                objeto.delete()
+                objeto.verificada = True
+                objeto.save(request)
+                data['mensaje'] = 'Factura N° '+str(objeto.numerocompleto)+' fue verificada correctamente'
             else:
                 data['error'] = 'No ha seleccionado una opcion'
         except Exception as e:
@@ -316,16 +321,24 @@ class ListviewFacturacion(TemplateView):
                                        'saldo': float(r.saldo), 'subtotal': float(r.subtotal()),
                                        'iva': float(r.valoriva), 'total': float(r.valortotal), 'producto': False})
                     return JsonResponse(rubros, safe=False)
+                if action == 'rubros_factura':
+                    data = {}
+                    id = request.GET['id']
+                    factura = self.model.objects.get(id=id)
+                    template = get_template('valores/rubros_factura.html')
+                    data = {'data': template.render({'factura': factura})}
+                    return JsonResponse(data, safe=False)
             else:
                 data = self.get_context_data()
-                list = self.model.objects.filter(status=True)
+                list = self.model.objects.filter(status=True).order_by('-fecha')
                 if 'search' in request.GET:
                     if not request.GET['search'] == '':
                         data['search'] = search = request.GET['search']
                         list = list.filter(Q(cliente__persona__nombre__icontains=search) | Q(
                             cliente__persona__apellido1__icontains=search) | Q(
                             cliente__persona__apellido2__icontains=search) | Q(
-                            cliente__persona__cedula__icontains=search)).order_by('fecha')
+                            cliente__persona__cedula__icontains=search) | Q(numerocompleto__icontains=search)
+                                           ).order_by('-fecha')
                 page_number = request.GET.get('page', 1)
                 paginator = Paginator(list, 10)
                 page_range = paginator.get_elided_page_range(number=page_number)
@@ -429,12 +442,13 @@ class PrintFactura(View):
 
     def get(self, request, *args, **kwargs):
         try:
+            tipo = int(request.GET['tipo'])
             template = get_template('bases/factura.html')
             context = {'title': 'Comprobante de Venta',
                        'factura': Factura.objects.get(pk=self.kwargs['pk']),
-                       'tipo_comprobante': request.GET['tipo'],
-                       'icon': 'media/logo_don_chuta.png',
-                       'empresa': nombre_empresa()
+                       'tipo_comprobante': True if tipo == 1 else False,
+                       'icon': 'media/logo.png' if not tipo == 1 else 'media/logo_b_n.png',
+                       'empresa': nombre_empresa(),
                        }
             html = template.render(context)
             response = HttpResponse(content_type='application/pdf')

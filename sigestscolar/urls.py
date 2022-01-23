@@ -21,7 +21,7 @@ from django.conf import settings
 
 from apps import backEnd
 from apps.profesor.distributivodocente import Listview
-from apps.rubro.views import ListviewValores, ListviewFacturacion
+from apps.rubro.views import ListviewValores, ListviewFacturacion, PrintFactura
 
 urlpatterns = [
                   path('admin/', admin.site.urls),
@@ -44,4 +44,5 @@ urlpatterns = [
                   path('distributivo/', login_required(Listview.as_view()), name='distributivo'),
                   path('valores', login_required(ListviewValores.as_view()), name='valores'),
                   path('facturacion', login_required(ListviewFacturacion.as_view()), name='facturacion'),
+                  path('exportcomprobante/<int:pk>', login_required(PrintFactura.as_view()), name='imprimirfactura'),
               ] + static(settings.STATIC_URL, document_root=settings.STATIC_ROOT)

@@ -44,9 +44,9 @@ class Factura(ModeloBase):
     pagada = models.BooleanField(default=True, verbose_name=u"Pagada")
     estado = models.IntegerField(choices=ESTADO_COMPROBANTE, default=1, verbose_name=u'Estado Factura')
     formapago = models.IntegerField(choices=FORMA_PAGO, default=1, verbose_name=u'Forma de pago')
-    referencia_deposito = models.TextField(default='', verbose_name=u"Referencia deposito")
-    referencia_transferencia = models.TextField(default='', verbose_name=u"Referencia deposito")
-    boucher = models.TextField(default='', verbose_name=u"Numero de Boucher")
+    referencia_deposito = models.TextField(default='', verbose_name=u"Referencia deposito", null=True, blank=True)
+    referencia_transferencia = models.TextField(default='', verbose_name=u"Referencia deposito", null=True, blank=True)
+    boucher = models.TextField(default='', verbose_name=u"Numero de Boucher", null=True, blank=True)
     verificada = models.BooleanField(default=False, verbose_name=u"Verificada")
 
     def __str__(self):
@@ -92,6 +92,9 @@ class Factura(ModeloBase):
         self.total_descuento = null_to_decimal(self.pagos.aggregate(valor=Sum('valordescuento'))['valor'], 2)
         self.total_iva = null_to_decimal(self.pagos.aggregate(valor=Sum('iva'))['valor'], 2)
         self.total = null_to_decimal(self.pagos.aggregate(valor=Sum('valortotal'))['valor'], 2)
+
+    def detalle_rubros(self):
+        return self.pagos.filter(status=True)
     #
     # def restaurarrubros(self, observacion):
     #     for pago in self.pagos.all():
@@ -205,7 +208,19 @@ class Factura(ModeloBase):
         return str(self.numero).zfill(9)
 
     def generar_numero_completo(self):
-        return str(str('001-001-')+self.numero_secuencial())
+        self.numerocompleto = str(str('001-001-')+self.numero_secuencial())
+
+    def formapago_span(self):
+        span = ''
+        if self.formapago == 1:
+            span = 'success'
+        elif self.formapago == 2:
+            span = 'info'
+        elif self.formapago == 3:
+            span = 'primary'
+        else:
+            span = 'dark'
+        return span
     #
     # def tipo_pago(self):
     #     lista = []

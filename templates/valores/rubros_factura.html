@@ -1,0 +1,135 @@
+<div class="row">
+ <table style="width: 100%" class="table">
+    <thead>
+    <tr>
+        <th style="width: 6%; text-align: center;">&nbsp;Cant</th>
+        <th style="width: 30%; text-align: center;"> Descripcion</th>
+        <th style="width: 12%; text-align: right;"> P.Unit</th>
+        <th style="width: 14%; text-align: right;"> Subtotal <br>Base 0</th>
+        <th style="width: 14%; text-align: right;"> Subtotal <br>Base Iva</th>
+        <th style="width: 12%; text-align: right;"> Iva</th>
+        <th style="width: 12%; text-align: right;"> Total</th>
+    </tr>
+    </thead>
+    <tbody>
+        {% if factura.detalle_rubros %}
+        {% for d in factura.detalle_rubros %}
+            <tr {% if forloop.first %}style="padding-top: 3px;" {% endif %}>
+                <td>{{ d.rubro.cantidad }}</td>
+                <td>{{ d.rubro.nombre }}</td>
+                <td style="text-align: right;">{{ d.rubro.valor }}</td>
+                <td style="text-align: right;">{{ d.subtotal0 }}</td>
+                <td style="text-align: right;">{{ d.subtotaliva }}</td>
+                <td style="text-align: right;">{{ d.iva }}</td>
+                <td style="text-align: right;">{{ d.valortotal }}</td>
+            </tr>
+            <tr style="border-top: 1px solid black;"><td colspan="7"></td></tr>
+        {% endfor %}
+    {% endif %}
+    <tr><td colspan="7"></tr>
+    <tr style="padding-top: 0;">
+        <td colspan="6" style="text-align: right"><b>SUBTOTAL BASE 0</b></td>
+        <td style="text-align: right">${{ factura.subtotal_base0 }}</td>
+    </tr>
+    <tr style="padding-top: 0;">
+        <td colspan="6" style="text-align: right"><b>SUBTOTAL BASE IVA</b></td>
+        <td style="text-align: right">${{ factura.subtotal_base_iva }}</td>
+    </tr>
+    <tr style="padding-top: 0;">
+        <td colspan="6" style="text-align: right"><b>IVA {% if factura.ivaaplicado %}
+            {{ factura.ivaaplicado.ivaporciento }}{% endif %} %</b></td>
+        <td style="text-align: right">${{ factura.total_iva }}</td>
+    </tr>
+    <tr style="padding-top: 0;">
+        <td colspan="6" style="text-align: right"><b>DESC</b></td>
+        <td style="text-align: right">${{ factura.total_descuento }}</td>
+    </tr>
+    <tr style="padding-top: 0;">
+        <td colspan="6" style="text-align: right"><b>TOTAL</b></td>
+        <td style="text-align: right">${{ factura.total }}</td>
+    </tr>
+    </tbody>
+</table>
+</div>
+
+
+<script>
+    $(function () {
+        $('#todos').click(function (event) {
+            if (this.checked) {
+                rubros_temporal = [];
+                // Iterate each checkbox
+                $(':checkbox').each(function () {
+                    this.checked = true;
+                    if (this.hasAttribute('pk')){
+                        rubros_temporal.push($(this).attr('pk'));
+                    }
+                });
+            } else {
+                $(':checkbox').each(function () {
+                    this.checked = false;
+                    rubros_temporal = [];
+                });
+            }
+        });
+
+
+        $('.check_select').click(function (event) {
+            $('#todos').prop('checked', false);
+            if (this.checked) {
+                rubros_temporal.push($(this).attr('pk'));
+            } else {
+                var index = rubros_temporal.indexOf($(this).attr('pk'));
+                if (index !== -1) {
+                    rubros_temporal.splice(index, 1);
+                }
+            }
+        });
+
+        $('#ingresar').on('click', function (e) {
+            if (rubros_temporal.length>0){
+                Swal.fire({
+                title: 'Un momento por favor',
+                html: 'Estamos ingresando los rubros!!!',
+                timerProgressBar: true,
+                didOpen: () => {
+                    Swal.showLoading();
+                },
+            });
+                $.ajax({
+                type: "GET",
+                url: '/facturacion',
+                data: {
+                    "ids": JSON.stringify(rubros_temporal),
+                    "ids_exclude": JSON.stringify(ventas.get_ids_rubros),
+                    'action': 'get_rubros'
+                },
+                dataType: 'json',
+                success: function (data) {
+                    swal.close();
+                    $.each(data, function (key, value) {
+                        ventas.items.rubros_select.push(value);
+                    });
+                    rubros_temporal = [];
+                    {#ventas.items.rubros_select = data;#}
+                    $('#modal_rubros').modal('hide');
+                    ventas.list();
+
+
+                },
+                error: function (xhr, status, data) {
+                    alert(data);
+                },
+
+            });
+            } else { menssaje_error('Error', 'Debe selecionar al unos un rubro', 'danger', function () {
+
+            })}
+
+        })
+
+
+
+
+    })
+</script>
