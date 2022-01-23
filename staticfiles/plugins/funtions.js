@@ -158,11 +158,33 @@ function printpdf(title, content, callback, cancel) {
         showCancelButton: true,
         confirmButtonColor: '#3085d6',
         cancelButtonColor: '#d33',
-        confirmButtonText: 'si',
-        cancelButtonText: 'no'
+        confirmButtonText: '<i class= "fa fa-check-circle"></i> Si',
+        cancelButtonText: '<i class= "fa fa-times-circle"></i> No'
     }).then((result) => {
         if (result.isConfirmed) {
-            callback();
+            const {value: fruit} = Swal.fire({
+                confirmButtonColor: '#3085d6',
+                cancelButtonColor: '#d33',
+                confirmButtonText: '<i class= "fa fa-check-circle"></i> Seleccionar',
+                cancelButtonText: '<i class= "fa fa-times-circle"></i> Cancelar',
+                title: 'Tipos de comprobante',
+                input: 'select',
+                inputOptions: {
+                    '1': 'Ticket',
+                    '2': 'Factura',
+                },
+                inputPlaceholder: 'Selecciona un tipo de comprobante',
+                showCancelButton: true,
+                inputValidator: (value) => {
+                    return new Promise((resolve) => {
+                        if (value) {
+                            callback(value);
+                        } else {
+                            resolve('Debe elegir un tipo de comprobante');
+                        }
+                    })
+                }
+            });
         } else {
             cancel();
         }
