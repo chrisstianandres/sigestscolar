@@ -443,16 +443,17 @@ class PrintFactura(View):
     def get(self, request, *args, **kwargs):
         try:
             tipo = int(request.GET['tipo'])
+            factura = Factura.objects.get(pk=self.kwargs['pk'])
             template = get_template('bases/factura.html')
             context = {'title': 'Comprobante de Venta',
-                       'factura': Factura.objects.get(pk=self.kwargs['pk']),
+                       'factura': factura,
                        'tipo_comprobante': True if tipo == 1 else False,
                        'icon': 'media/logo.png' if not tipo == 1 else 'media/logo_b_n.png',
                        'empresa': nombre_empresa(),
                        }
             html = template.render(context)
             response = HttpResponse(content_type='application/pdf')
-            response['Content-Disposition'] = 'attachment; filename="report.pdf"'
+            response['Content-Disposition'] = 'attachment; filename="Factura_No._'+factura.numerocompleto+'.pdf"'
             pisa_status = pisa.CreatePDF(html, dest=response, link_callback=self.link_callback)
             return response
         except:
