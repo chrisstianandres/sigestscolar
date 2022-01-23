@@ -325,10 +325,12 @@ def crear_rubro(persona, pension=None, matricula=None, producto=None, datos=None
             rubro = Rubro(persona=persona, fecha=datetime.now(), iva=nombre_empresa())
             if pension:
                 rubro.pension = pension
+                rubro.iva = nombre_empresa().pk
                 mes = pension.fecha+timedelta(days=1)
                 mensaje = 'PENSION DEL MES DE {} {}'.format(MESES_EN_LETRAS[mes.month-1], pension.fecha.year)
             if matricula:
                 rubro.matricula = matricula
+                rubro.iva = nombre_empresa().pk
                 mensaje = 'MATRICULA DE {} EN EL PERIODO {}'.format(matricula.inscripcion.alumno.persona, matricula.inscripcion.curso.periodo )
             if producto:
                 rubro.producto = producto
@@ -339,17 +341,17 @@ def crear_rubro(persona, pension=None, matricula=None, producto=None, datos=None
                 rubro.nombre = mensaje
                 rubro.fechavence = datos[0]['fechavence']
                 rubro.valor = datos[0]['valor']
-                rubro.valoriva = float(datos[0]['valor']) * (rubro.iva.iva.ivaporciento/100)
+                rubro.valoriva = 0 if not rubro.iva else rubro.valor * (rubro.iva.iva.ivaporciento/100)
                 rubro.valortotal = float(datos[0]['valor'])+rubro.valoriva
                 rubro.saldo = rubro.valortotal
                 rubro.observacion = datos[0]['observacion']
+                rubro.cantidad = 1 if not  'cantidad' in datos[0] else int(datos[0]['cantidad'])
                 rubro.save()
-                return True
+                return rubro
             else:
                 transaction.set_rollback(True)
             return False
         except Exception as e:
-            print(e)
             transaction.set_rollback(True)
             return False
 

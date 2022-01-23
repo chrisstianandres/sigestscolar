@@ -1,42 +1,49 @@
 {% extends 'bases/base_list.html' %}
-{% block filtros %}
-    <div class="row float-right">
-        <form action="{{ request.path }}">
-            <div class="form-group"><br>
-                <div class="input-group">
-                    <input type="text" class="form-control input-sm input-search"
-                           style="border-top-right-radius: 0 !important; border-bottom-right-radius: 0 !important;"
-                           placeholder="Buscar...." autocomplete="off"
-                           aria-label="Buscar..." aria-describedby="basic-addon2"
-                           name="search"
-                           value="{{ search }}">
-                    <div class="input-group-append">
-                        <button class="btn btn-outline-success btn-sm" type="button" id="search"
-                                data-toggle="tooltip" data-placement="bottom"
-                                title="Buscar...">
-                            <i class="fa fa-search"></i></button>
-                        {% if search %}
-                            <button class="btn btn-outline-danger btn-sm" type="button"
-                                    data-toggle="tooltip" data-placement="bottom"
-                                    title="Mostrar todos"
-                                    onclick="window.location.href ='{{ request.path }}'"><i
-                                    class="fas fa-redo-alt"></i></button>
-                        {% endif %}
-
-                    </div>
-                </div>
-
-            </div>
-        </form>
-    </div>
-    <br>
-{% endblock %}
+{#{% block filtros %}#}
+{#    <div class="row float-right">#}
+{#        <div class="form-group">#}
+{#            <form action="{{ request.path }}">#}
+{#                <div class="input-group">#}
+{#                    <input type="text" class="form-control input-sm input-search"#}
+{#                           style="border-top-right-radius: 0 !important; border-bottom-right-radius: 0 !important;"#}
+{#                           placeholder="Buscar...." autocomplete="off"#}
+{#                           aria-label="Buscar..." aria-describedby="basic-addon2"#}
+{#                           name="search"#}
+{#                           value="{{ search }}">#}
+{#                    <div class="input-group-append">#}
+{#                        <button class="btn btn-outline-success btn-sm" type="button" id="search"#}
+{#                                data-toggle="tooltip" data-placement="bottom"#}
+{#                                title="Buscar...">#}
+{#                            <i class="fa fa-search"></i></button>#}
+{#                        {% if search %}#}
+{#                            <button class="btn btn-outline-danger btn-sm" type="button"#}
+{#                                    data-toggle="tooltip" data-placement="bottom"#}
+{#                                    title="Mostrar todos"#}
+{#                                    onclick="window.location.href ='{{ request.path }}'"><i#}
+{#                                    class="fas fa-redo-alt"></i></button>#}
+{#                        {% endif %}#}
+{##}
+{#                    </div>#}
+{#                </div>#}
+{#            </form>#}
+{#        </div> &nbsp;&nbsp;#}
+{#        <div class="form-group">#}
+{#            <button {% if not modal_form %}onclick="window.location.href ={{ url_add }};" {% endif %}type="button"#}
+{#                    class="btn btn-block btn-primary btn-sm"#}
+{#                    {% if modal_form %} data-toggle="modal"#}
+{#                    data-target="#modal_form"{% endif %}#}
+{#                    style="margin-right: 2px;"><i class="fa fa-plus-circle"></i> Agregar#}
+{#            </button>#}
+{#        </div>#}
+{#    </div>#}
+{#{% endblock %}#}
 {% block header_tabla %}
     <th class="dt-center">Persona</th>
     <th class="dt-center">Numero</th>
-    <th class="dt-center">Fechas</th>
-    <th class="dt-center">Valor</th>
-    <th class="dt-center">Iva</th>
+    <th class="dt-center">Fecha</th>
+    <th class="dt-center">Subtotal base 0</th>
+    <th class="dt-center">Subtotal base IVA</th>
+    <th class="dt-center">IVA</th>
     <th class="dt-center">Descto</th>
     <th class="dt-center">Total</th>
     <th class="dt-center">Observacion</th>
@@ -48,6 +55,7 @@
             <td class="dt-center" style="width: 18%;">{{ elemento.nombre }}</td>
             <td class="dt-center" style="width: 10%;">{{ elemento.numerocompleto }}</td>
             <td class="dt-center"> <b>Creacion: </b>{{ elemento.fecha|date:'d-m-Y' }}</td>
+            <td class="dt-center"><i class="fa fa-dollar-sign"></i> {{ elemento.subtotal_base0 }}</td>
             <td class="dt-center"><i class="fa fa-dollar-sign"></i> {{ elemento.subtotal_base_iva }}</td>
             <td class="dt-center"><i class="fa fa-dollar-sign"></i> {{ elemento.total_iva }}</td>
             <td class="dt-center"><i class="fa fa-dollar-sign"></i> {{ elemento.total_descuento }}</td>

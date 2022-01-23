@@ -41,6 +41,12 @@ def null_to_numeric(valor, decimales=None):
     return valor if valor else 0
 
 
+def null_to_decimal(valor, decimales=None):
+    if decimales:
+        return round((valor if valor else 0), decimales)
+    return valor if valor else 0
+
+
 class PrimaryKeyEncryptor:
     def __init__(self, secret: str):
         secret_bytes = bytes.fromhex(secret)

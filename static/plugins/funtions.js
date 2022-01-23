@@ -162,7 +162,23 @@ function printpdf(title, content, callback, cancel) {
         cancelButtonText: 'no'
     }).then((result) => {
         if (result.isConfirmed) {
-            callback();
+            const {value: fruit} = Swal.fire({
+                title: 'Select field validation',
+                input: 'select',
+                inputOptions: {
+                    '1': 'Ticket',
+                    '2': 'Factura',
+                },
+                inputPlaceholder: 'Selecciona un tipo de comprobante',
+                showCancelButton: true,
+                inputValidator: (value) => {
+                    return new Promise((resolve) => {
+                        if (value) {
+                            callback(value);
+                        }
+                    })
+                }
+            });
         } else {
             cancel();
         }

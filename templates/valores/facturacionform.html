@@ -17,15 +17,30 @@
             </div>
             <div class="row ">
                 <div class="col-md-6">
-                    <div class="form-group">{{ form.cliente.label_tag }}
+                    <div class="form-group">
+                        <i class="fas fa-user-tag"></i> {{ form.cliente.label_tag }}
                         <div class="input-group">
-
-                            {{ form.cliente }}<div class="input-group-append"> <button type="button" class="btn btn-info" id="rubros_detalle"> <i class="fas fa-comment-dollar"></i> Rubros</button></div>
+                            {{ form.cliente }}
+                            <div class="input-group-append">
+                                <button type="button" class="btn btn-info" id="rubros_detalle"><i
+                                        class="fas fa-comment-dollar"></i> Rubros
+                                </button>
+                            </div>
                         </div>
+                    </div>
+                    <div class="form-group">
+                       <i class="far fa-address-card"></i> <label for="cedula"> Documento: </label>
+                        <br><b id="tipo_doc"></b>
+                        <input type="text" disabled="disabled" id="cedula" class="form-control">
+                    </div>
+                    <div class="form-group">
+                        <i class="fas fa-phone-alt"></i> <label for="telefono"> Telefono: </label><br>
+                        <input type="text" disabled="disabled" id="telefono" class="form-control">
+                    </div>
                 </div>
-                </div>
+
                 <div class="col-md-6">
-                    <p><b>Estado de Cuenta</b></p>
+                    <p><b><i class="fas fa-comment-dollar"></i> Estado de Cuenta</b></p>
                     <table style="width: 100%" class="table table-bordered">
                         <thead>
                         <tr>
@@ -44,17 +59,19 @@
                     </table>
                 </div>
         </div>
+            <br><br><br>
         <div class="row">
             <div class="col-md-6">
-                    <div class="form-group"><b>Buscar productos:</b>
+                    <div class="form-group"><b><i class="fa fa-search"></i> Buscar productos:</b>
                         <div class="input-group">
-                            <select name="producto" class="select2 form-control border_busqueda" id="producto"></select><div class="input-group-append"> <button type="button" class="btn btn-info" id="btnproductolista"> <i class="fa fa-search"></i></button></div>
+                            <select name="producto" class="select2 form-control" style="border-top-right-radius: 2px!important; border-bottom-right-radius: 2px!important;" id="producto"></select><div class="input-group-append"> <button type="button" class="btn btn-info" id="btnproductolista"> <i class="fa fa-search"></i></button></div>
                         </div>
                 </div>
                 </div>
-        </div><br><br><br>
+        </div>
+            <br>
             <div class="row">
-                <p><b>Detalle de Rubros</b></p>
+                <p><b><i class="fa fa-list"></i> Detalle de Rubros</b></p>
                 <div class="col-sm-12">
                     <table style="width: 100%" class="table table-bordered" id="table_detalle">
                     <thead>
@@ -100,14 +117,75 @@
                     </table>
                 </div>
             </div>
+            <div class="row">
+                <div class="col-md-6">
+                    <p><b><i class="fas fa-comment-dollar"></i> Ingresar pago: </b></p>
+                    <table style="width: 100%" class="table table-bordered">
+                        <tbody>
+                        <tr>
+                            <th class="dt-center">
+                                Forma de pago
+                            </th>
+                            <th>
+                                {{ form.formapago }}
+                            </th>
+                        </tr>
+                        <tr id="trrecibido">
+                            <th class="dt-center">Valor Recibido: </th>
+                            <th class="dt-center">
+                                <div class="input-group mb-3">
+                                     <div class="input-group-prepend">
+                                        <span class="input-group-text"><i class="fa fa-dollar-sign"></i></span>
+                                    </div>
+                                    <input type="number" class="form-control" id="ingresado" step="0.01" min="0.00" max="100000000000000000000" style="border-top-left-radius: 2px!important; border-bottom-left-radius: 2px!important;" value="0.00">
+                                </div>
+                            </th>
+                        </tr>
+                        <tr id="trcambio">
+                            <th class="dt-center">Su cambio es: </th>
+                            <th class="dt-center"> <div class="input-group mb-3">
+                                     <div class="input-group-prepend">
+                                        <span class="input-group-text"><i class="fa fa-dollar-sign"></i></span>
+                                    </div>
+                                    <input type="text" readonly class="form-control" id="cambio"
+                                           style="border-top-left-radius: 2px!important; border-bottom-left-radius: 2px!important;"
+                                           value="0.00">
+                                </div></th>
+                        </tr>
+                         <tr id="trdeposito" style="display: none">
+                            <th class="dt-center">Referencia N°: </th>
+                            <th class="dt-center">
+                            {{ form.referencia_deposito }}
+                            </th>
+                        </tr>
+                        <tr id="trtransferencia" style="display: none">
+                            <th class="dt-center">Referencia N°: </th>
+                            <th class="dt-center">
+                            {{ form.referencia_transferencia }}
+                            </th>
+                        </tr>
+                        <tr id="trtarjeta" style="display: none">
+                            <th class="dt-center">Boucher N°: </th>
+                            <th class="dt-center">
+                            {{ form.boucher }}
+                            </th>
+                        </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
         </div>
         <div class="card-footer">
-            <button type="submit" class="btn btn-primary">Guardar</button>
-            <button type="button" class="btn btn-danger"
-                    onclick="window.location.href = '{{ request.path }}';">Cancelar
-            </button>
+            <div class="float-left">
+                <button type="button" class="btn btn-success btn-lg" id="facturar" style="font-size: 2.25rem;"><i class="far fa-money-bill-alt"></i> FACTURAR
+                </button>
+            </div>
+            <div class="float-right">
+                <button type="button" class="btn btn-danger"
+                        onclick="window.location.href = '{{ request.path }}';">Cancelar
+                </button>
+            </div>
         </div>
-
     </form>
 {% endblock %}
 {% block modals %}
@@ -196,18 +274,21 @@
     },
     calculate: function () {
         var subtotal = 0.00;
-        var iva_emp = 12/100;
+        var iva = 0.00;
+        var iva_emp = 0;
         $.each(this.items.rubros_select, function (pos, dict) {
+            iva_emp = 0;
             if (dict.producto===true){
+                iva_emp = (12 / 100);
                 dict.subtotal = dict.cantidad * parseFloat(dict.valoru);
                 dict.iva = dict.subtotal * parseFloat(iva_emp);
                 dict.total = dict.iva + parseFloat(dict.subtotal);
             }
             subtotal += dict.subtotal;
-            iva_emp = (12 / 100);
+            iva += dict.iva;
         });
         this.items.subtotal = subtotal;
-        this.items.iva = this.items.subtotal * iva_emp;
+        this.items.iva = iva;
         this.items.total = this.items.subtotal + this.items.iva;
         $('#subtotal').html('<i class="fa fa-dollar-sign"></i> ' + this.items.subtotal.toFixed(2));
         $('#iva').html('<i class="fa fa-dollar-sign"></i> ' + this.items.iva.toFixed(2));
@@ -287,12 +368,27 @@
 };
     $(function () {
         validador();
-            $("#form").validate({
+        $("#form").validate({
                 rules: {
                     cantidad: {
                         required: true,
                         minlength: 1,
                     },
+                    cliente: {
+                        required: true
+                    },
+                    referencia_deposito: {
+                        required: true,
+                        minlength: 5
+                    },
+                    referencia_transferencia: {
+                        required: true,
+                        minlength: 5
+                    },
+                    boucher: {
+                        required: true,
+                        minlength: 5
+                    }
                 },
                 messages: {
                     cantidad: {
@@ -300,7 +396,22 @@
                         minlength: "Debe ingresar un numero mayor a 0",
                         max: "Este numero supera el stock disponible",
                         min: 'Debe ingresar un numero mayor a 0'
-                    }
+                    },
+                     cliente: {
+                        required: "Por favor selecciona un cliente"
+                    },
+                     referencia_deposito: {
+                        required: "Por favor ingresa un numero de referencia del deposito",
+                         minlength: "Ingresa un numero valido"
+                    },
+                     referencia_transferencia: {
+                        required: "Por favor ingresa un numero de referencia de la transferencia",
+                         minlength: "Ingresa un numero valido"
+                    },
+                     boucher: {
+                        required: "Por favor ingresa el numero del bocuher cobrado",
+                         minlength: "Ingresa un numero valido"
+                    },
                 },
             });
         $('#id_cliente').select2({
@@ -339,6 +450,15 @@
             minimumInputLength: 1,
         }).on('select2:select', function (e) {
             traer_rubros([]);
+        }).change(function () {
+            if ($(this).val()==='' || $(this).val()===null){
+                $('#cedula').val(null);
+                $('#telefono').val(null);
+                $('#totalvencido').html('<i class="fa fa-dollar-sign"></i> 0.00');
+                $('#totalpagado').html('<i class="fa fa-dollar-sign"></i> 0.00');
+                $('#saldototal').html('<i class="fa fa-dollar-sign"></i> 0.00');
+            }
+
         });
         $('#producto').select2({
             language: {
@@ -408,13 +528,75 @@
             $('td:eq(9)', tblventa.row(tr.row).node()).html('$' + ventas.items.rubros_select[tr.row].total.toFixed(2));
         });
         ventas.list();
+
+        $('#ingresado').on('change blur', function (e) {
+            validar_valor_ingresado();
+        });
+
+
+        $('#id_formapago').on('change', function () {
+            let ingresado = $('#trrecibido'), cambio = $('#trcambio'), deposito=$('#trdeposito'),
+                transferencia= $('#trtransferencia'), boucher=$('#trtarjeta');
+            ingresado.hide();
+            cambio.hide();
+            deposito.hide();
+            transferencia.hide();
+            boucher.hide();
+            let forma = parseInt($(this).val());
+            if (forma===1){
+                ingresado.fadeIn();
+                cambio.fadeIn();
+            }
+            if(forma===3){
+                deposito.fadeIn();
+            }
+             if(forma===2){
+                transferencia.fadeIn();
+            }
+             if(forma===4){
+                boucher.fadeIn();
+            }
+
+
+        });
+        $('#facturar').click(function () {
+            let ingresado = validar_valor_ingresado();
+            let formulario_valido = $('#form').valid();
+            if (ingresado && formulario_valido) {
+                ventas.items.cliente = $('#id_cliente option:selected').val();
+                var forma = parseInt($('#id_formapago').val());
+                ventas.items.tipopago = forma;
+                if (forma===2){
+                    ventas.items.referencia_transferencia = $('#referencia_transferencia').val()
+                }
+                if (forma===3){
+                    ventas.items.referencia_deposito = $('#referencia_deposito').val()
+                }
+                if (forma===4){
+                    ventas.items.boucher = $('#boucher').val()
+                }
+                var parametros = {'factura': JSON.stringify(ventas.items), 'action': 'add'};
+                save_with_ajax('Alerta',
+                    '/facturacion', 'Esta seguro que desea realizar esta accion?', parametros, function (response) {
+                        printpdf('Alerta!', '¿Desea generar el comprobante en PDF?', function (tipo) {
+                            window.open('/facturacion/exportcomprobante/' + response['id']+'?tipo='+tipo, '_blank');
+                            location.href = '/facturacion';
+                        }, function () {
+                            location.href = '/facturacion';
+                        })
+
+                    });
+            }
+
+
+        })
     });
 
     function traer_rubros(ids) {
         if ($('#id_cliente').val() > 0){
             Swal.fire({
             title: 'Un momento por favor',
-            html: 'Estamos caragdo el estado de cuenta!!!',
+            html: 'Estamos cargando el estado de cuenta!!!',
             timer: 2000,
             timerProgressBar: true,
             didOpen: () => {
@@ -441,6 +623,9 @@
                 $('#totalvencido').html('<i class="fa fa-dollar-sign"></i> ' + parseFloat(data.totalvencido).toFixed(2));
                 $('#totalpagado').html('<i class="fa fa-dollar-sign"></i> ' + parseFloat(data.totalpagado).toFixed(2));
                 $('#saldototal').html('<i class="fa fa-dollar-sign"></i> ' + parseFloat(data.totaldeuda).toFixed(2));
+                $('#cedula').val(data.cedula);
+                $('#tipo_doc').html(data.tipo_doc);
+                $('#telefono').val(data.telefono);
             },
             error: function (xhr, status, data) {
                 alert(data);
@@ -460,7 +645,7 @@
     function lista_productos(ids) {
         Swal.fire({
             title: 'Un momento por favor',
-            html: 'Estamos caragdo la lista de productos!!!',
+            html: 'Estamos cargando la lista de productos!!!',
             timer: 2000,
             timerProgressBar: true,
             didOpen: () => {
@@ -492,6 +677,28 @@
         });
 
 
+
+    }
+
+    function validar_valor_ingresado() {
+        if ($('#id_formapago').val()==='1'){
+                if (ventas.items.total > 0) {
+                    if ($('#ingresado').val() >= ventas.items.total) {
+                        var cambio = $('#ingresado').val() - ventas.items.total;
+                        $('#cambio').val(cambio);
+                        return true
+                    } else {
+                        menssaje_error('Error', 'Debe ingresar un valor recibido mayor o igual al valor a cancelar', 'danger', function () {
+                        });
+                        return false;
+                    }
+                } else {
+                    menssaje_error('Error', 'Debe ingresar al menos un rubro para poder cobrar', 'danger', function () {
+                    });
+                    $('#ingresado').val(0.00);
+                    return false;
+                }
+            } return true;
 
     }
     </script>

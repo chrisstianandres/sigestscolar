@@ -8,20 +8,20 @@ from apps.empresa.models import Empresa
 from apps.extras import ModeloBase, null_to_numeric
 from apps.matricula.models import Matricula, Pension
 from apps.persona.models import Persona
-from apps.producto.models import Inventario
+from apps.producto.models import Producto
 
 
 class Rubro(ModeloBase):
     persona = models.ForeignKey(Persona, verbose_name=u'Cliente', on_delete=models.PROTECT)
     pension = models.ForeignKey(Pension, verbose_name=u'Pension', on_delete=models.PROTECT,  blank=True, null=True)
     matricula = models.ForeignKey(Matricula, blank=True, null=True, verbose_name=u'Matricula', on_delete=models.PROTECT)
-    producto = models.ForeignKey(Inventario, blank=True, null=True, verbose_name=u'Producto', on_delete=models.PROTECT)
+    producto = models.ForeignKey(Producto, blank=True, null=True, verbose_name=u'Producto', on_delete=models.PROTECT)
     cantidad = models.IntegerField(default=1, verbose_name=u'Producto')
     nombre = models.CharField(max_length=300, verbose_name=u'Nombre', blank=True, null=True)
     fecha = models.DateField(verbose_name=u'Fecha emisión', blank=True, null=True,)
     fechavence = models.DateField(verbose_name=u'Fecha vencimiento', blank=True, null=True,)
     valor = models.DecimalField(default=0, max_digits=30, decimal_places=2, verbose_name=u'Valor')
-    iva = models.ForeignKey(Empresa, verbose_name=u'IVA', on_delete=models.PROTECT)
+    iva = models.ForeignKey(Empresa, verbose_name=u'IVA', on_delete=models.PROTECT, null=True, blank=True)
     valoriva = models.DecimalField(default=0, max_digits=30, decimal_places=2, verbose_name=u'Valor IVA')
     valortotal = models.DecimalField(default=0, max_digits=30, decimal_places=2, verbose_name=u'Valor total')
     valordescuento = models.DecimalField(default=0, max_digits=30, decimal_places=2, verbose_name=u'Valor descuento')
@@ -61,14 +61,14 @@ class Rubro(ModeloBase):
         return self.pago_set.all().order_by('-fecha')[0].factura().id
 
     def valor_total(self):
-        if self.iva.iva.ivaporciento:
+        if self.iva:
             return (float(self.valor) - float(self.valordescuento) )+ ((float(self.valor) - float(self.valordescuento)) * float((self.iva.iva.ivaporciento)/100))
         return float(self.valor) - float(self.valordescuento)
 
     def valor_iva(self):
-        if self.iva.iva.ivaporciento:
+        if self.iva:
             return (float(self.valor) - float(self.valordescuento)) * float(self.iva.iva.ivaporciento/100)
-        return 0
+        return float(0)
 
     def vencido(self):
         return not self.cancelado and self.fechavence < datetime.now().date()
@@ -105,7 +105,9 @@ class Rubro(ModeloBase):
         return saldo
 
     def subtotal(self):
-        return '{:.2f}'.format(float(self.saldo)/(1+(self.iva.iva.ivaporciento/100)))
+        if self.iva:
+            return '{:.2f}'.format(float(self.saldo)/(1+(self.iva.iva.ivaporciento/100)))
+        return self.saldo*self.cantidad
 
     def nombre_usuario(self):
         if self.usuario_creacion:

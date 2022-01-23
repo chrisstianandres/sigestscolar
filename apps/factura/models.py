@@ -1,7 +1,8 @@
 from django.db import models
+from django.db.models import Sum
 
 from apps.empresa.models import Iva
-from apps.extras import ModeloBase
+from apps.extras import ModeloBase, null_to_decimal
 from apps.persona.models import Persona
 from apps.rubro.models import Pago
 
@@ -9,6 +10,13 @@ ESTADO_COMPROBANTE = {
     (1, 'CORRECTA'),
     (2, 'INCORRECTA'),
     (3, 'ANULADA'),
+}
+
+FORMA_PAGO = {
+    (1, 'EFECTIVO'),
+    (2, 'TRANSFERENCIA'),
+    (3, 'DEPOSITO'),
+    (4, 'TARJETA DE CREDITO/DEBITO'),
 }
 
 
@@ -35,6 +43,11 @@ class Factura(ModeloBase):
     electronica = models.BooleanField(default=False, verbose_name=u"Electrónica")
     pagada = models.BooleanField(default=True, verbose_name=u"Pagada")
     estado = models.IntegerField(choices=ESTADO_COMPROBANTE, default=1, verbose_name=u'Estado Factura')
+    formapago = models.IntegerField(choices=FORMA_PAGO, default=1, verbose_name=u'Forma de pago')
+    referencia_deposito = models.TextField(default='', verbose_name=u"Referencia deposito")
+    referencia_transferencia = models.TextField(default='', verbose_name=u"Referencia deposito")
+    boucher = models.TextField(default='', verbose_name=u"Numero de Boucher")
+    verificada = models.BooleanField(default=False, verbose_name=u"Verificada")
 
     def __str__(self):
         return u'Factura No. %s' % self.numero
@@ -73,12 +86,12 @@ class Factura(ModeloBase):
     #     from sga.models import TIPOS_IDENTIFICACION
     #     return TIPOS_IDENTIFICACION[self.tipo - 1][1]
     #
-    # def actualiza_subtotales(self):
-    #     self.subtotal_base0 = null_to_decimal(self.pagos.aggregate(valor=Sum('subtotal0'))['valor'], 2)
-    #     self.subtotal_base_iva = null_to_decimal(self.pagos.aggregate(valor=Sum('subtotaliva'))['valor'], 2)
-    #     self.total_descuento = null_to_decimal(self.pagos.aggregate(valor=Sum('valordescuento'))['valor'], 2)
-    #     self.total_iva = null_to_decimal(self.pagos.aggregate(valor=Sum('iva'))['valor'], 2)
-    #     self.total = null_to_decimal(self.pagos.aggregate(valor=Sum('valortotal'))['valor'], 2)
+    def actualiza_subtotales(self):
+        self.subtotal_base0 = null_to_decimal(self.pagos.aggregate(valor=Sum('subtotal0'))['valor'], 2)
+        self.subtotal_base_iva = null_to_decimal(self.pagos.aggregate(valor=Sum('subtotaliva'))['valor'], 2)
+        self.total_descuento = null_to_decimal(self.pagos.aggregate(valor=Sum('valordescuento'))['valor'], 2)
+        self.total_iva = null_to_decimal(self.pagos.aggregate(valor=Sum('iva'))['valor'], 2)
+        self.total = null_to_decimal(self.pagos.aggregate(valor=Sum('valortotal'))['valor'], 2)
     #
     # def restaurarrubros(self, observacion):
     #     for pago in self.pagos.all():
@@ -188,8 +201,11 @@ class Factura(ModeloBase):
     #         verificador = 1
     #     return verificador
     #
-    # def numero_secuencial(self):
-    #     return str(self.numero).zfill(9)
+    def numero_secuencial(self):
+        return str(self.numero).zfill(9)
+
+    def generar_numero_completo(self):
+        return str(str('001-001-')+self.numero_secuencial())
     #
     # def tipo_pago(self):
     #     lista = []
@@ -322,13 +338,13 @@ class Factura(ModeloBase):
     #         return PagoCuentaporCobrar.objects.filter(pagos__factura=self)[0]
     #     return None
     #
-    # def save(self, *args, **kwargs):
-    #     self.numerocompleto = self.numerocompleto.upper().strip()
-    #     self.identificacion = self.identificacion.upper().strip()
-    #     self.nombre = self.nombre.upper().strip()
-    #     self.direccion = self.direccion.upper().strip()
-    #     self.telefono = self.telefono.upper().strip()
-    #     self.observacion = self.observacion.upper().strip() if self.observacion else ""
-    #     if self.id:
-    #         self.actualiza_subtotales()
-    #     super(Factura, self).save(*args, **kwargs)
+    def save(self, *args, **kwargs):
+        self.numerocompleto = self.numerocompleto.upper().strip()
+        self.identificacion = self.identificacion.upper().strip()
+        self.nombre = self.nombre.upper().strip()
+        self.direccion = self.direccion.upper().strip()
+        self.telefono = self.telefono.upper().strip()
+        self.observacion = self.observacion.upper().strip() if self.observacion else ""
+        if self.id:
+            self.actualiza_subtotales()
+        super(Factura, self).save(*args, **kwargs)

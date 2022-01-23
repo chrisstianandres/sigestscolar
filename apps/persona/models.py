@@ -245,12 +245,22 @@ class Persona(ModeloBase):
 
     def tipo_identificacion(self):
         if self.cedula:
-            return 'C'
+            return 'Cedula'
         elif self.pasaporte:
-            return 'P'
+            return 'Pasaporte'
         elif self.ruc:
-            return 'R'
+            return 'RUC'
         return ''
+
+    def documento(self):
+        if self.cedula:
+            return self.cedula
+        elif self.pasaporte:
+            return self.pasaporte
+        elif self.ruc:
+            return self.ruc
+        return ''
+
 
     def telefonos(self):
         if self.telefono_conv and self.telefono:
