@@ -2,7 +2,7 @@
 {% block content %}
     <!-- Main content -->
     <section class="content">
-    {% if request.session.perfilactual == 'ADMINISTRATIVO' and request.session.perfiles.es_administrativo %}
+    {% if request.session.perfilactual == 'ADMINISTRATIVO' and request.session.perfiles.es_administrativo or request.user.is_superuser %}
     <div class="container-fluid">
         <!-- Small boxes (Stat box) -->
         <div class="row">
