@@ -8,6 +8,7 @@ from crum import get_current_request
 from django.contrib.auth.models import Group, User
 from django.contrib.auth.views import LoginView
 from django.core.exceptions import ObjectDoesNotExist
+from django.db.models import Sum, Count
 from django.shortcuts import render, HttpResponseRedirect, redirect
 from django.contrib.auth import *
 from django.http import HttpResponse
@@ -26,9 +27,13 @@ from django.views.decorators.csrf import csrf_exempt
 # from apps.user.models import User
 from django.views.generic.base import View
 
+from apps.curso.models import MateriaAsignada, CursoParalelo
 from apps.empresa.models import Empresa
+from apps.inscripcion.models import Inscripcion
 from apps.models import Modulo
 from apps.perfil.models import PerfilUsuario
+from apps.periodo.models import PeriodoLectivo
+from apps.rubro.models import Pago
 
 
 def nombre_empresa():
@@ -71,8 +76,70 @@ class DashboardView(TemplateView):
     def dispatch(self, request, *args, **kwargs):
         return super().dispatch(request, *args, **kwargs)
 
-    # def get(self, request, *args, **kwargs):
+    def get_context_data(self, **kwargs):
+        data = super().get_context_data(**kwargs)
+        data['anioactual'] = anio = datetime.now().year
+        persona = self.request.session['persona']
+        perfilactual = self.request.session['perfilactual']
+        data['titulo'] = 'Menu Principal'
+        data['empresa'] = nombre_empresa()
+        data['icono'] = 'fas fa-tachometer-alt'
+        data['entidad'] = 'Menu Principal'
+        if persona.es_administrativo() and perfilactual == 'ADMINISTRATIVO':
+            data['periodoactual'] = periodoactual = PeriodoLectivo.objects.filter(status=True, actual=True).first()
+            data['recaudado'] = Pago.objects.filter(status=True, fecha__year=anio, factura__valida=True, factura__verificada=True).aggregate(recaudado=Sum('valortotal')).get('recaudado')
+            data['inscritos'] = Inscripcion.objects.filter(status=True, curso__periodo=periodoactual).count()
+            data['docentes'] = MateriaAsignada.objects.filter(status=True, materia__curso__periodo=periodoactual).distinct('profesor').count()
+            data['cursos'] = CursoParalelo.objects.filter(status=True, periodo=periodoactual).count()
+        return data
 
+
+def generar_usuario(persona, g):
+    usuario = User(username=persona.cedula)
+    usuario.set_password(persona.cedula)
+    usuario.save()
+    persona.usuario = usuario
+    persona.save()
+    return usuario
+
+
+def crear_perfil_usuario(persona, administrativo=None, inscripcion=None, profesor=None):
+    if inscripcion:
+        perfil = PerfilUsuario(persona=persona, inscripcion=inscripcion)
+        perfil.save()
+    elif administrativo:
+        perfil = PerfilUsuario(persona=persona, administrativo=administrativo)
+        perfil.save()
+    elif profesor:
+        perfil = PerfilUsuario(persona=persona, profesor=profesor)
+        perfil.save()
+
+
+class LoginFormView(LoginView):
+    template_name = 'login.html'
+
+    @method_decorator(csrf_exempt)
+    def dispatch(self, request, *args, **kwargs):
+        if request.user.is_authenticated:
+            return redirect(settings.LOGIN_REDIRECT_URL)
+        return super().dispatch(request, *args, **kwargs)
+
+    def post(self, request, *args, **kwargs):
+        data = {}
+        username = request.POST['username']
+        password = request.POST['password']
+        user = authenticate(username=username, password=password)
+        if user is not None:
+            if user.is_active:
+                login(request, user)
+                self.get_group_session()
+                self.get_persona_session()
+                data['resp'] = True
+            else:
+                data['error'] = '<strong>Usuario Inactivo </strong>'
+        else:
+            data['error'] = '<strong>Usuario no valido </strong><br> Verifica las credenciales de acceso y vuelve a intentarlo.'
+        return JsonResponse(data)
 
     def get_group_session(self):
         try:
@@ -127,62 +194,6 @@ class DashboardView(TemplateView):
         request = get_current_request()
         if not 'persona' in request.session:
             request.session['persona'] = request.user.persona_set.first()
-
-    def get_context_data(self, **kwargs):
-        self.get_group_session()
-        self.get_persona_session()
-        data = super().get_context_data(**kwargs)
-        data['titulo'] = 'Menu Principal'
-        data['empresa'] = nombre_empresa()
-        data['icono'] = 'fas fa-tachometer-alt'
-        data['entidad'] = 'Menu Principal'
-        return data
-
-
-def generar_usuario(persona, g):
-    usuario = User(username=persona.cedula)
-    usuario.set_password(persona.cedula)
-    usuario.save()
-    persona.usuario = usuario
-    persona.save()
-    return usuario
-
-
-def crear_perfil_usuario(persona, administrativo=None, inscripcion=None, profesor=None):
-    if inscripcion:
-        perfil = PerfilUsuario(persona=persona, inscripcion=inscripcion)
-        perfil.save()
-    elif administrativo:
-        perfil = PerfilUsuario(persona=persona, administrativo=administrativo)
-        perfil.save()
-    elif profesor:
-        perfil = PerfilUsuario(persona=persona, profesor=profesor)
-        perfil.save()
-
-
-class LoginFormView(LoginView):
-    template_name = 'login.html'
-
-    @method_decorator(csrf_exempt)
-    def dispatch(self, request, *args, **kwargs):
-        if request.user.is_authenticated:
-            return redirect(settings.LOGIN_REDIRECT_URL)
-        return super().dispatch(request, *args, **kwargs)
-
-    def post(self, request, *args, **kwargs):
-        data = {}
-        username = request.POST['username']
-        password = request.POST['password']
-        user = authenticate(username=username, password=password)
-        if user is not None:
-            if user.is_active:
-                login(request, user)
-                data['resp'] = True
-            else:
-                data['error'] = '<strong>Usuario Inactivo </strong>'
-        else:
-            data['error'] = '<strong>Usuario no valido </strong><br> Verifica las credenciales de acceso y vuelve a intentarlo.'
-        return JsonResponse(data)
 
     def get_context_data(self, **kwargs):
         data = super().get_context_data(**kwargs)
@@ -319,9 +330,65 @@ class UserChangeGroup(View):
             # request.session['group'] = Group.objects.get(pk=self.kwargs['pk'])
             request.session['perfilactual'] = PERFIL_ACTUAL[self.kwargs['pk']][1]
             request.session['perfilactualkey'] = int(self.kwargs['pk'])
+            self.get_group_session()
+            self.get_persona_session()
         except:
             pass
         return HttpResponseRedirect(reverse_lazy('dashborad'))
+
+    def get_group_session(self):
+        try:
+            request = get_current_request()
+            persona = request.user.persona_set.first()
+            if persona is not None:
+                perfiles = persona.perfilusuario_set.filter(status=True)
+                if perfiles.exists():
+                    keyperfil = 0
+                    if 'perfiles' not in request.session:
+                        request.session['perfiles'] = perfiles[0]
+                    if 'perfilactualkey' not in request.session:
+                        for key in range(0, 4):
+                            if PERFIL_ACTUAL[key][1] == str(perfiles[0]):
+                                request.session['perfilactualkey'] = keyperfil = PERFIL_ACTUAL[key][0]
+                    if 'perfilactual' not in request.session:
+                        request.session['perfilactual'] = PERFIL_ACTUAL[keyperfil][1]
+                    self.get_modulos()
+                elif request.user.is_superuser:
+                    if 'perfilactualkey' not in request.session:
+                        request.session['perfilactualkey'] = keyperfil = PERFIL_ACTUAL[4][0]
+                    if 'perfilactual' not in request.session:
+                        request.session['perfilactual'] = PERFIL_ACTUAL[4][1]
+                    self.get_modulos()
+            elif request.user.is_superuser:
+                if 'perfilactualkey' not in request.session:
+                    request.session['perfilactualkey'] = keyperfil = PERFIL_ACTUAL[4][0]
+                if 'perfilactual' not in request.session:
+                    request.session['perfilactual'] = PERFIL_ACTUAL[4][1]
+                self.get_modulos()
+        except Exception as e:
+            pass
+
+    def get_modulos(self):
+        try:
+            request = get_current_request()
+            perfilactual = request.session['perfilactual']
+            grupo = Group.objects.filter(name__icontains=perfilactual)
+            if grupo.exists():
+                modulos = grupo.first().grupomodulo_set.all()
+                if modulos.exists():
+                    request.session['modulos'] = modulos.first().modulos.all()
+            elif request.user.is_superuser:
+                request.session['modulos'] = Modulo.objects.filter(status=True).exclude(id=13).order_by('nombre')
+            else:
+                request.session['modulos'] = []
+        except Exception as e:
+            disconnect(self.request)
+            pass
+
+    def get_persona_session(self):
+        request = get_current_request()
+        if not 'persona' in request.session:
+            request.session['persona'] = request.user.persona_set.first()
 
 
 def disconnect(request):

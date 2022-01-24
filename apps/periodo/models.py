@@ -14,3 +14,6 @@ class PeriodoLectivo(ModeloBase):
     def __str__(self):
         # return '{} - Año: {} Dese: {} - Hasta: {}'.format(self.nombre, self.anio, self.desde, self.hasta)
         return 'Periodo: {} - {}'.format(self.desde.year, self.hasta.year)
+
+    def nombre_corto(self):
+        return '{} - {}'.format(self.desde.year, self.hasta.year)
