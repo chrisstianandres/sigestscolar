@@ -85,7 +85,7 @@ class DashboardView(TemplateView):
         data['empresa'] = nombre_empresa()
         data['icono'] = 'fas fa-tachometer-alt'
         data['entidad'] = 'Menu Principal'
-        if persona.es_administrativo() and perfilactual == 'ADMINISTRATIVO':
+        if persona.es_administrativo() and perfilactual == 'ADMINISTRATIVO' or persona.usuario.is_superuser():
             data['periodoactual'] = periodoactual = PeriodoLectivo.objects.filter(status=True, actual=True).first()
             data['recaudado'] = Pago.objects.filter(status=True, fecha__year=anio, factura__valida=True, factura__verificada=True).aggregate(recaudado=Sum('valortotal')).get('recaudado')
             data['inscritos'] = Inscripcion.objects.filter(status=True, curso__periodo=periodoactual).count()
