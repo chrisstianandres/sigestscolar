@@ -101,3 +101,17 @@ class FormularioNotas(forms.Form):
     materia = forms.ModelChoiceField(queryset=Materia.objects.none(), widget=forms.Select(attrs={'class': 'form-control select2'}))
     quimestre = forms.ModelChoiceField(queryset=Quimestre.objects.none(), widget=forms.Select(attrs={'class': 'form-control select2'}))
     parcial = forms.ModelChoiceField(queryset=ModeloParcial.objects.none(), widget=forms.Select(attrs={'class': 'form-control select2'}))
+
+    def edit(self, info):
+        self.fields['periodo'].queryset = PeriodoLectivo.objects.filter(status=True, id=info['periodo'].pk)
+        self.fields['curso'].queryset = Curso.objects.filter(status=True, id=info['curso'].pk)
+        self.fields['paralelo'].queryset = Paralelo.objects.filter(status=True, id=info['paralelo'].pk)
+        self.fields['materia'].queryset = Materia.objects.filter(status=True, id=info['materia'].pk)
+        self.fields['quimestre'].queryset = Quimestre.objects.filter(status=True, id=info['quimestre'].pk)
+        # self.fields['parcial'].queryset = ModeloParcial.objects.filter(status=True, id=info['parcial'].pk)
+        self.fields['periodo'].initial = info['periodo']
+        self.fields['curso'].initial = info['curso']
+        self.fields['paralelo'].initial = info['paralelo']
+        self.fields['materia'].initial = info['materia']
+        self.fields['quimestre'].initial = info['quimestre']
+        # self.fields['parcial'].initial = info['parcial']

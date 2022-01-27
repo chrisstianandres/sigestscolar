@@ -38,15 +38,15 @@
 
                             </div>
                         </td>
-                        <td style="width: 10%">
-                            <div class="form-group float-right">
-                                <button {% if not modal_form %}onclick="window.location.href ={{ url_add }};" {% endif %}type="button"
-                                        class="btn btn-block btn-primary btn-sm"
-                                        {% if modal_form %} data-toggle="modal"
-                                        data-target="#modal_form"{% endif %}
-                                        style="margin-right: 2px;"><i class="fa fa-plus-circle"></i> Agregar
-                                </button>
-                        </td>
+{#                        <td style="width: 10%">#}
+{#                            <div class="form-group float-right">#}
+{#                                <button {% if not modal_form %}onclick="window.location.href ={{ url_add }};" {% endif %}type="button"#}
+{#                                        class="btn btn-block btn-primary btn-sm"#}
+{#                                        {% if modal_form %} data-toggle="modal"#}
+{#                                        data-target="#modal_form"{% endif %}#}
+{#                                        style="margin-right: 2px;"><i class="fa fa-plus-circle"></i> Agregar#}
+{#                                </button>#}
+{#                        </td>#}
                     </tr>
                     </tbody>
                 </table>
@@ -81,7 +81,9 @@
                         {% with materias=elemento.profesor|args:elemento.materia.curso.curso.pk|args:curso.paralelo.pk|call:'materias_imparte' %}
                             {% for materia in  materias %}
                                 &nbsp;&nbsp;&nbsp;&nbsp; <i class="fas fa-spell-check"></i>
-                                {{ materia.materia.materia }}<br><br>
+                                {{ materia.materia.materia }} {% if materia.puede_exportar_acta %}
+                                <a href="/generaractaindividual/{{ materia.pk }}?action=actageneral" class="btn btn-danger btn-xs" data-toggle="tooltip" title="Generar Acta de Notas"><i class="far fa-file-pdf"></i></a><br><br>
+                                {% endif %}
                                 <table>
                                 <thead>
                                 <tr>
@@ -93,9 +95,11 @@
                                     {% for par in materia.modelo_eval_parcial %}
                                         <td>{{ par.parcial.nombre }}<br>
                                         {% if par.actacerrada %}
-                                        <span class="badge badge-danger">Acta Cerrada</span>
+                                        <span class="badge badge-danger">Acta Cerrada</span><br>
+                                            <a href="/notas?action=vernotas&pk={{ par.pk }}" class="btn btn-success btn-xs" data-toggle="tooltip" title="Ver Notas"><i class="far fa-clipboard"></i></a>
+                                            <a href="/generaractaindividual/{{ par.pk }}?action=actaindividual" class="btn btn-danger btn-xs" data-toggle="tooltip" title="Generar Acta de Notas"><i class="far fa-file-pdf"></i></a>
                                         {% elif par.tiene_notas %}
-                                            <a href="" class="btn btn-info btn-xs" data-toggle="tooltip" title="Actualizar Notas"><i class="fa fa-edit"></i></a>
+                                            <a href="/notas?action=edit&pk={{ par.pk }}" class="btn btn-info btn-xs" data-toggle="tooltip" title="Actualizar Notas"><i class="fa fa-edit"></i></a>
                                         {% endif %}
 
                                         </td>

@@ -1,0 +1,113 @@
+{% load tags_general %}
+<!DOCTYPE html>
+<html lang="es">
+<title>{{ title }}</title>
+<meta http-equiv="Content-Type" content="multipart/mixed; charset=UTF-8"/>
+<style>
+    @page {
+        size: letter landscape;
+        margin: 2cm;
+    }
+    .img-invoice {
+        width: 100%;
+        text-align: center;
+        margin: 0 auto;
+    }
+
+    .head {
+        text-align: center;
+        text-transform: uppercase;
+    {#font-size: xx-large#}
+    }
+
+    #invoice thead tr th {
+        text-align: left;
+        border: 1px solid black;
+        {#border-top: 1px solid black;#}
+        padding: 2px;
+    }
+    #invoice tbody tr td {
+        text-align: left;
+        border: 1px solid black;
+        padding: 2px;
+    }
+
+    #invoice thead tr {
+        margin-bottom: 0;
+        padding-bottom: 0;
+    }
+
+    #invoice tbody tr {
+        padding: 0;
+    }
+
+    .text-center {
+        text-align: center;
+    }
+
+    table th {
+        color: #000000;
+        {#background-color: #1d4061;#}
+    }
+</style>
+<body><br>
+<img src="{{ icon }}" class="img-invoice" style="filter: grayscale(100%)!important;" alt="logo" width="250" height="70">
+<p class="head">
+    <b>{{ empresa.nombre|upper }}</b>
+</p>
+<p class="head">
+    <b>ACTA DE NOTAS DEL CURSO {{ modeloeval.materia.curso.curso.nombre }} {{ modeloeval.paralelo }}</b>
+</p>
+<p>
+    <b>MATERIA: </b>{{ modeloeval.materia.materia.nombre }}<br>
+    <b>PERIODO: </b>{{ modeloeval.materia.curso.periodo.nombre_corto }}
+</p>
+<p class="head"><b>LISTA DE ALUMNOS</b><br></p>
+<table id="invoice" style="width: 500px">
+    <thead>
+        <tr>
+            <th rowspan="2" style="width: 25%;">ALUMNO</th>
+            {% for p in modeloeval.modelo_eval_quimestres %}
+                <th colspan="{{ modeloeval.modelo_eval_parcial_totalacta }}" style="text-align: center">{{ p.parcial.quimestre.nombre }}</th>
+            {% endfor %}
+            <th rowspan="2">NOTA FINAL</th>
+        </tr>
+        <tr>
+            {% for par in modeloeval.modelo_eval_parcial %}
+                {% if par.parcial.nombre == 'Examen' %}
+                    <th>{{ par.parcial.nombre }}</th>
+                    <th><b>PROMEDIO</b></th>
+                {% else %}
+                    <th>{{ par.parcial.nombre }}</th>
+                {% endif %}
+            {% endfor %}
+        </tr>
+    </thead>
+    <tbody>
+    {% if alumnos %}
+        {% for alumno in alumnos %}
+            <tr {% if forloop.first %}style="padding-top: 3px;" {% endif %}>
+                <td>{{ alumno.alumno.persona.nombre_completo }}</td>
+                {% with notas=alumno|args:modeloeval|call:'notas_generales' %}
+                    {% for nota in notas %}
+                        <td>{{ nota }}</td>
+                    {% endfor %}
+                {% endwith %}
+            </tr>
+        {% endfor %}
+    {% endif %}
+    </tbody>
+</table>
+{#<table>#}
+{#    <tbody>#}
+{#    <tr>#}
+{#        <th><br>*GRACIAS POR SU PAGO*</th>#}
+{#    </tr>#}
+{#    <tr>#}
+{#        <th><br><br>............................................................................#}
+{#            <br>RECIBI COMFORME</th>#}
+{#    </tr>#}
+{#    </tbody>#}
+{#</table>#}
+</body>
+</html>

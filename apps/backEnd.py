@@ -81,7 +81,7 @@ class DashboardView(TemplateView):
     def get_context_data(self, **kwargs):
         data = super().get_context_data(**kwargs)
         data['anioactual'] = anio = datetime.now().year
-        persona = self.request.session['persona']
+        data['persona'] = persona = self.request.session['persona']
         perfilactual = self.request.session['perfilactual']
         data['titulo'] = 'Menu Principal'
         data['empresa'] = nombre_empresa()
@@ -94,8 +94,10 @@ class DashboardView(TemplateView):
             data['docentes'] = MateriaAsignada.objects.filter(status=True, materia__curso__periodo=periodoactual).distinct('profesor').count()
             data['cursos'] = CursoParalelo.objects.filter(status=True, periodo=periodoactual).count()
             data['personas'] = self.personas_recientes()
-            # data['vencidomes'] = self.vencido_por_mes()
-            # data['cabrarmes'] = self.porcobrar_por_mes()
+        elif persona.es_profesor() and perfilactual == 'PROFESOR':
+            data['periodoactual'] = periodoactual = PeriodoLectivo.objects.filter(status=True, actual=True).first()
+            data['materias'] = persona.profesor_set.all().first().materias_imparte_total(periodoactual)
+            data['cursos'] = persona.profesor_set.all().first().cursos_imparte_total(periodoactual).count()
 
         return data
 

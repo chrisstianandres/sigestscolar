@@ -1,4 +1,5 @@
 from django.db import models
+from django.db.models import Avg
 from django.forms import model_to_dict
 
 from apps.extras import ModeloBase, PrimaryKeyEncryptor
@@ -59,7 +60,7 @@ class CursoParalelo(ModeloBase):
 
     def materias_asignadas_curso(self, id=None):
         data = []
-        keys =[]
+        keys = []
         for m in self.cursomateria_set.filter(status=True):
             if id is not None:
                 if m.id == id:
@@ -92,7 +93,7 @@ class CursoParalelo(ModeloBase):
                     if not MateriaAsignada.objects.filter(materia=c, paralelo=p).exists():
                         if p.id not in keys:
                             keys.append(p.id)
-                            data.append({'id': p.id, 'paralelo': p.nombre, 'select': len(keys)==1})
+                            data.append({'id': p.id, 'paralelo': p.nombre, 'select': len(keys) == 1})
         return data
 
     def encoded_id(self):
@@ -108,7 +109,9 @@ class CursoParalelo(ModeloBase):
 
     def configuro_quimestres(self):
         if CursoQuimestre.objects.filter(status=True, cursoasignado__materia__curso=self).exists():
-            return CursoQuimestre.objects.filter(status=True, cursoasignado__materia__curso=self).count() == (self.quimestres*(self.parciales+1)) * (self.paralelo.count()) * self.cursomateria_set.count()
+            return CursoQuimestre.objects.filter(status=True, cursoasignado__materia__curso=self).count() == (
+                        self.quimestres * (self.parciales + 1)) * (
+                       self.paralelo.count()) * self.cursomateria_set.count()
         return False
 
     def cupo_total(self):
@@ -123,7 +126,6 @@ class CursoParalelo(ModeloBase):
     def cupo_disponible_por_paralelo(self, paralelo):
         if self.cupoindividual:
             return self.cupo_individual() > self.inscripcion_set.filter(paralelo_id=paralelo).count()
-
 
     class Meta:
         verbose_name = u"Curso Paralelo"
@@ -181,7 +183,15 @@ class MateriaAsignada(ModeloBase):
         return self.cursoquimestre_set.filter(status=True).distinct('parcial')
 
     def modelo_eval_parcial_total(self):
-        return int(self.cursoquimestre_set.filter(status=True).distinct('parcial').count() / self.modelo_eval_quimestres().count())
+        return int(self.cursoquimestre_set.filter(status=True).distinct(
+            'parcial').count() / self.modelo_eval_quimestres().count())
+
+    def modelo_eval_parcial_totalacta(self):
+        return int(self.cursoquimestre_set.filter(status=True).distinct(
+            'parcial').count() / self.modelo_eval_quimestres().count()) + 1
+
+    def puede_exportar_acta(self):
+        return self.cursoquimestre_set.filter(status=True).first().tiene_notas()
 
 
 class Quimestre(ModeloBase):
@@ -192,7 +202,7 @@ class Quimestre(ModeloBase):
         return '{}'.format(self.nombre)
 
 
-TIPO_PARCIAL =(
+TIPO_PARCIAL = (
     (0, 'PARCIAL'),
     (1, 'EXAMEN')
 )
@@ -210,7 +220,8 @@ class ModeloParcial(ModeloBase):
 
 class CursoQuimestre(ModeloBase):
     cursoasignado = models.ForeignKey(MateriaAsignada, on_delete=models.PROTECT, verbose_name='Curso y Materia')
-    parcial = models.ForeignKey(ModeloParcial, on_delete=models.PROTECT, verbose_name='Quimestre y Parcial', null=True, blank=True)
+    parcial = models.ForeignKey(ModeloParcial, on_delete=models.PROTECT, verbose_name='Quimestre y Parcial', null=True,
+                                blank=True)
     actacerrada = models.BooleanField(default=False)
 
     def __str__(self):
@@ -219,11 +230,20 @@ class CursoQuimestre(ModeloBase):
     def tiene_notas(self):
         return self.notasalumno_set.filter(status=True).exists()
 
+    def alumnos_notas(self):
+        return self.notasalumno_set.filter(status=True)
+
 
 class NotasAlumno(ModeloBase):
     curso = models.ForeignKey(CursoQuimestre, on_delete=models.PROTECT, verbose_name='Curso Quimestre parcial')
-    alumno = models.ForeignKey('inscripcion.Inscripcion', on_delete=models.PROTECT, verbose_name='Inscripcion de Alumno')
+    alumno = models.ForeignKey('inscripcion.Inscripcion', on_delete=models.PROTECT,
+                               verbose_name='Inscripcion de Alumno')
     nota = models.DecimalField(decimal_places=2, max_digits=5, default=0, verbose_name='Nota')
 
     def __str__(self):
         return '{} {}'.format(self.curso, self.alumno, self.nota)
+
+    # def promedio_parciales(self, quimestre, materia):
+    #     promedio = NotasAlumno.objects.filter(curso__parcial__quimestre=quimestre,
+    #                                           curso__cursoasignado=materia, alumno=self).aggregate(promedio=Avg('nota'))
+    #     return promedio

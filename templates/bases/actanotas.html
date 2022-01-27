@@ -1,0 +1,94 @@
+<!DOCTYPE html>
+<html lang="es">
+<title>{{ title }}</title>
+<meta http-equiv="Content-Type" content="multipart/mixed; charset=UTF-8"/>
+<style>
+    .img-invoice {
+        width: 100%;
+        text-align: center;
+        margin: 0 auto;
+    }
+
+    .head {
+        text-align: center;
+        text-transform: uppercase;
+    {#font-size: xx-large#}
+    }
+
+    #invoice thead tr th {
+        text-align: left;
+        border: 1px solid black;
+        {#border-top: 1px solid black;#}
+        padding: 2px;
+    }
+    #invoice tbody tr td {
+        text-align: left;
+        border: 1px solid black;
+        padding: 2px;
+    }
+
+    #invoice thead tr {
+        margin-bottom: 0;
+        padding-bottom: 0;
+    }
+
+    #invoice tbody tr {
+        padding: 0;
+    }
+
+    .text-center {
+        text-align: center;
+    }
+
+    table th {
+        color: #000000;
+        {#background-color: #1d4061;#}
+    }
+</style>
+<body><br>
+<img src="{{ icon }}" class="img-invoice" style="filter: grayscale(100%)!important;" alt="logo" width="250" height="70">
+<p class="head">
+    <b>{{ empresa.nombre|upper }}</b>
+</p>
+<p class="head">
+    <b>ACTA DE NOTAS DEL CURSO {{ modeloeval.cursoasignado.materia.curso.curso }} {{ modeloeval.cursoasignado.paralelo }}</b>
+</p>
+<p>
+    <b>MATERIA: </b>{{ modeloeval.cursoasignado.materia.materia.nombre }}<br>
+    <b>PERIODO: </b>{{ modeloeval.cursoasignado.materia.curso.periodo.nombre_corto }}
+</p>
+<p class="head"><b>LISTA DE ALUMNOS</b><br></p>
+<table id="invoice" style="width: 500px">
+    <thead>
+    <tr>
+        <th rowspan="2" style="width: 70%;"><p>ALUMNO</p></th>
+        <th style="text-align: center; width: 30%">{{ modeloeval.parcial.quimestre.nombre|upper }}</th>
+    </tr>
+    <tr>
+        <th>{{ modeloeval.parcial.nombre|upper }}</th>
+    </tr>
+    </thead>
+    <tbody>
+    {% if modeloeval.alumnos_notas %}
+        {% for alumno in modeloeval.alumnos_notas %}
+            <tr {% if forloop.first %}style="padding-top: 3px;" {% endif %}>
+                <td>{{ alumno.alumno.alumno.persona.nombre_completo }}</td>
+                <td>{{ alumno.nota }}</td>
+            </tr>
+        {% endfor %}
+    {% endif %}
+    </tbody>
+</table>
+{#<table>#}
+{#    <tbody>#}
+{#    <tr>#}
+{#        <th><br>*GRACIAS POR SU PAGO*</th>#}
+{#    </tr>#}
+{#    <tr>#}
+{#        <th><br><br>............................................................................#}
+{#            <br>RECIBI COMFORME</th>#}
+{#    </tr>#}
+{#    </tbody>#}
+{#</table>#}
+</body>
+</html>

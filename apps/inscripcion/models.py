@@ -50,6 +50,28 @@ class Inscripcion(ModeloBase):
             return self.matricula_set.filter(cerrada=False)[0]
         return None
 
+    def notas_generales(self, materiaasignada):
+        notas = []
+        promedio1 = 0.00
+        promedio2 = 0.00
+        for a in materiaasignada.cursoquimestre_set.filter(status=True).distinct('parcial'):
+            if a.notasalumno_set.filter(status=True, alumno=self).exists():
+                notas.append(float(a.notasalumno_set.filter(status=True, alumno=self).first().nota))
+                promedio1 += float(a.notasalumno_set.filter(status=True, alumno=self).first().nota)
+                if a.parcial.nombre == 'Examen':
+                    promedio1 = float(promedio1) / (float(materiaasignada.modelo_eval_parcial_total())*float(materiaasignada.modelo_eval_quimestres().count()))
+                    promedio2 += promedio1
+                    notas.append(round(promedio1, 2))
+            else:
+                notas.append(float(0.00))
+                promedio1 += 0.00
+                if a.parcial.nombre == 'Examen':
+                    promedio1 = float(promedio1) / (float(materiaasignada.modelo_eval_parcial_total())*float(materiaasignada.modelo_eval_quimestres().count()))
+                    promedio2 += promedio1
+                    notas.append(round(promedio1, 2))
+        notas.append(round(promedio2/float(materiaasignada.modelo_eval_quimestres().count()), 2))
+        return notas
+
     def save(self, *args, **kwargs):
         self.fecha = datetime.now()
         super(Inscripcion, self).save(*args, **kwargs)

@@ -99,11 +99,14 @@
         <!-- /.card-body -->
 
         <div class="card-footer">
+            {% if not pantallaver %}
             <button type="submit" class="btn btn-primary">Guardar</button>
             <button type="button" id="clear" class="btn btn-success" style="display:none;"
                     onclick="window.location.reload();"><i class="fas fa-broom"></i> Limpiar Formulario</button>
+            {% endif %}
+
             <button type="button" class="btn btn-danger"
-                    onclick="window.location.href = '{{ request.path }}';">Cancelar
+                    onclick="window.location.href = '{{ request.path }}';">{% if not pantallaver %}Cancelar{% else %}Regresar{% endif %}
             </button>
         </div>
     </form>
@@ -148,7 +151,7 @@
                             orderable: false,
                             render: function (data, type, row) {
                                 console.log(data);
-                                return '<input type="number" min="1" max="10" name="nota" class="form-control form-control-sm input-sm" autocomplete="off" value="' + data + '">';
+                                return '<input type="number" min="1" max="10" name="nota" step="0.01" class="form-control form-control-sm input-sm" autocomplete="off" value="' + data + '">';
                             }
                         }
                     ]
@@ -156,6 +159,7 @@
             },
         };
         $(function () {
+            {% if not alumnos %}
             var periodo = new Option('{{ periodolec.nombre }}' , {{ periodolec.pk }} , true, true);
             $('#id_periodo').append(periodo).trigger('change');
             var curso = new Option('{{ cursoper.nombre }}' , {{ cursoper.pk }} , true, true);
@@ -319,12 +323,7 @@
                     dataType: 'json',
                     success: function (data) {
                         notas.add(data);
-                        $('#id_curso').prop('disabled', true);
-                        $('#id_paralelo').prop('disabled', true);
-                        $('#id_materia').prop('disabled', true);
-                        $('#id_quimestre').prop('disabled', true);
-                        $('#id_parcial').prop('disabled', true);
-                        $('#id_periodo').prop('disabled', true);
+                        bloquearform();
                         $('#clear').fadeIn('slow');
                     },
                     error: function (xhr, status, data) {
@@ -333,9 +332,10 @@
 
                 })
              });
+            {% endif %}
 
             $('#table_alumnos').on('change keyup', 'input[name="nota"]', function () {
-            var nota = parseInt($(this).val());
+            var nota = parseFloat($(this).val());
             var tr = tblalumnos.cell($(this).closest('td, li')).index();
             notas.items.alumnos[tr.row].nota = nota;
         });
@@ -389,13 +389,25 @@
                     }
                 }
             });
-            {% if materias %}
-                {% for materia in materias %}
-                    apertura.items.materias.push({{ materia|safe }});
+            {% if alumnos %}
+                var parcial = new Option('{{ parcial.nombre }}' , {{ parcial.pk }} , true, true);
+                $('#id_parcial').append(parcial).trigger('change');
+                bloquearform();
+                {% for alumno in alumnos %}
+                    notas.items.alumnos.push({{ alumno|safe }});
                 {% endfor %}
             {% endif %}
             notas.list();
         });
+
+        function bloquearform() {
+            $('#id_curso').prop('disabled', true);
+            $('#id_paralelo').prop('disabled', true);
+            $('#id_materia').prop('disabled', true);
+            $('#id_quimestre').prop('disabled', true);
+            $('#id_parcial').prop('disabled', true);
+            $('#id_periodo').prop('disabled', true);
+        }
 
     </script>
 

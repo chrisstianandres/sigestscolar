@@ -1,14 +1,20 @@
 import json
+import os
 
 from django.contrib.contenttypes.models import ContentType
+from django.contrib.staticfiles import finders
 from django.core.paginator import Paginator
 from django.db import transaction
 from django.db.models import Q
 from django.forms import model_to_dict
-from django.http import JsonResponse
+from django.http import JsonResponse, HttpResponse, HttpResponseRedirect
 from django.shortcuts import render
+from django.template.loader import get_template
+from django.urls import reverse_lazy
+from django.views import View
 from django.views.decorators.csrf import csrf_exempt
 from django.views.generic import ListView, TemplateView
+from xhtml2pdf import pisa
 
 from apps.backEnd import nombre_empresa
 from apps.curso.forms import Formulario, FormularioApertura, FormularioConfiguracionValores, FormularioNotas
@@ -19,6 +25,7 @@ from apps.inscripcion.models import Inscripcion
 from apps.materia.models import Materia
 from apps.paralelo.models import Paralelo
 from apps.periodo.models import PeriodoLectivo
+from sigestscolar import settings
 from sigestscolar.settings import SECRET_KEY_ENCRIPT
 
 
@@ -144,7 +151,8 @@ class ListviewAperutar(TemplateView):
                     form = self.form(info, instance=objeto)
                     if form.is_valid():
                         form.save()
-                        for m in objeto.cursomateria_set.all().exclude(id__in=objeto.cursomateria_set.all().values_list('materia_id', flat=True)):
+                        for m in objeto.cursomateria_set.all().exclude(
+                                id__in=objeto.cursomateria_set.all().values_list('materia_id', flat=True)):
                             m.delete()
                         for materia in info['materias']:
                             curso = CursoMateria(curso=objeto, materia_id=materia['id'])
@@ -189,9 +197,11 @@ class ListviewAperutar(TemplateView):
                 configuracion = FormularioConfiguracionValores(request.POST)
                 if configuracion.is_valid():
                     configuracionindividual = ConfiguracionValoresCurso(curso_id=request.POST['pk'],
-                                                                        matricula=configuracion.cleaned_data['matricula'],
+                                                                        matricula=configuracion.cleaned_data[
+                                                                            'matricula'],
                                                                         pension=configuracion.cleaned_data['pension'],
-                                                                        numeropensiones=configuracion.cleaned_data['numeropensiones'])
+                                                                        numeropensiones=configuracion.cleaned_data[
+                                                                            'numeropensiones'])
                     configuracionindividual.save(request)
                     data['resp'] = True
                 else:
@@ -203,11 +213,14 @@ class ListviewAperutar(TemplateView):
                     try:
                         curso = self.model.objects.get(id=request.POST['id'])
                         if curso.quimestres >= 2 and curso.parciales >= 3:
-                            for q in Quimestre.objects.filter(status=True, numero__lte=curso.quimestres).order_by('numero'):
-                                for p in ModeloParcial.objects.filter(status=True, quimestre=q, numero__lte=curso.parciales + 1):
+                            for q in Quimestre.objects.filter(status=True, numero__lte=curso.quimestres).order_by(
+                                    'numero'):
+                                for p in ModeloParcial.objects.filter(status=True, quimestre=q,
+                                                                      numero__lte=curso.parciales + 1):
                                     for m in CursoMateria.objects.filter(status=True, curso=curso):
                                         if not MateriaAsignada.objects.filter(materia=m).exists():
-                                            data['error'] = 'Este curso aun no tiene todos los docentes asigandos para configurar el modelo de calificacion'
+                                            data[
+                                                'error'] = 'Este curso aun no tiene todos los docentes asigandos para configurar el modelo de calificacion'
                                             transaction.set_rollback(True)
                                             return JsonResponse(data, safe=False)
                                         for m in MateriaAsignada.objects.filter(materia=m):
@@ -216,7 +229,7 @@ class ListviewAperutar(TemplateView):
                         else:
                             data['error'] = 'Numero de Quimestres y/o Parciales Incorrecto'
                     except Exception as e:
-                        data['error'] = 'Error en la transaccion: '+str(e)
+                        data['error'] = 'Error en la transaccion: ' + str(e)
                         transaction.set_rollback(True)
                 return JsonResponse(data, safe=False)
 
@@ -247,7 +260,8 @@ class ListviewAperutar(TemplateView):
                     if instancia.total_materias() > 0:
                         materias = []
                         for m in instancia.cursomateria_set.all():
-                            materias.append({'identificacion': m.materia.identificacion, 'nombre': m.materia.nombre, 'alias': m.materia.alias, 'id': m.materia.id})
+                            materias.append({'identificacion': m.materia.identificacion, 'nombre': m.materia.nombre,
+                                             'alias': m.materia.alias, 'id': m.materia.id})
                         data['materias'] = materias
                     data['titulo_form'] = 'Editar curso aperturado'
                     return render(request, self.template_name_add, data)
@@ -280,11 +294,14 @@ class ListviewAperutar(TemplateView):
                         filtros.add(Q(curso_id=request.GET['curso_id']), Q.AND)
                     ids = self.model.objects.values_list('paralelo_id').filter(filtros)
                     f = Q(status=True)
-                    if 'id' in request.GET and not request.GET['id'] == '' or 'curso_id' in request.GET and not request.GET['curso_id'] == '':
+                    if 'id' in request.GET and not request.GET['id'] == '' or 'curso_id' in request.GET and not \
+                    request.GET['curso_id'] == '':
                         f.add(Q(id__in=ids), Q.AND)
-                    for objeto in Paralelo.objects.filter(f, Q(nombre__icontains=term) | Q(descripcion__icontains=term))[:10]:
-                            item = {'id': objeto.pk, 'text': objeto.nombre}
-                            data.append(item)
+                    for objeto in Paralelo.objects.filter(f,
+                                                          Q(nombre__icontains=term) | Q(descripcion__icontains=term))[
+                                  :10]:
+                        item = {'id': objeto.pk, 'text': objeto.nombre}
+                        data.append(item)
                     return JsonResponse(data, safe=False)
                 if action == 'search_curso':
                     data = []
@@ -331,7 +348,8 @@ class ListviewAperutar(TemplateView):
                     filtros.add(Q(curso_id=request.GET['curso']), Q.AND)
                     data['curso'] = Curso.objects.get(id=request.GET['curso'])
                 if 'search' in request.GET and not request.GET['search'] == '':
-                    filtros.add((Q(curso__nombre__icontains=request.GET['search']) | Q(paralelo__nombre__icontains=request.GET['search'])), Q.AND)
+                    filtros.add((Q(curso__nombre__icontains=request.GET['search']) | Q(
+                        paralelo__nombre__icontains=request.GET['search'])), Q.AND)
                     # filtros.add(, Q.OR)
                     data['search'] = search = request.GET['search']
                 list = list.filter(filtros)
@@ -373,7 +391,7 @@ class IngresoNotasView(TemplateView):
     template_name = 'curso/list_notas.html'
     template_name_add = 'curso/formnotas.html'
     icon = 'fas fa-file-signature'
-    entidad = 'Ingreso de Notas'
+    entidad = 'Notas'
     form = FormularioNotas
 
     @csrf_exempt
@@ -383,15 +401,17 @@ class IngresoNotasView(TemplateView):
     def post(self, request, *args, **kwargs):
         data = {}
         try:
-            action = request.POST['action']
-            if action == 'add':
-                with transaction.atomic():
+            with transaction.atomic():
+                action = request.POST['action']
+                if action == 'add':
                     try:
                         info = json.loads(request.POST['notas'])
                         if 'curso' in info and not info['curso'] == '':
                             for alm in info['alumnos']:
-                                if not NotasAlumno.objects.filter(curso_id=int(info['curso']), alumno_id=alm['id'], nota=round(float(alm['nota']))).exists():
-                                    notas = NotasAlumno(curso_id=int(info['curso']), alumno_id=alm['id'], nota=round(float(alm['nota']), 2))
+                                if not NotasAlumno.objects.filter(curso_id=int(info['curso']), alumno_id=alm['id'],
+                                                                  nota=round(float(alm['nota']))).exists():
+                                    notas = NotasAlumno(curso_id=int(info['curso']), alumno_id=alm['id'],
+                                                        nota=round(float(alm['nota']), 2))
                                     notas.save(request)
                                     data['id'] = notas.curso.pk
                                     return JsonResponse(data, safe=False)
@@ -402,78 +422,84 @@ class IngresoNotasView(TemplateView):
                     except Exception as e:
                         data['error'] = 'Error en la transaccion:' + str(e)
                         transaction.set_rollback(True)
-            elif action == 'edit':
-                with transaction.atomic():
-                    pk = PrimaryKeyEncryptor(SECRET_KEY_ENCRIPT).decrypt(request.POST['pk'])
-                    info = json.loads(request.POST['apertura'])
-                    objeto = self.model.objects.get(pk=pk)
-                    form = self.form(info, instance=objeto)
-                    if form.is_valid():
-                        form.save()
-                        for m in objeto.cursomateria_set.all().exclude(id__in=objeto.cursomateria_set.all().values_list('materia_id', flat=True)):
-                            m.delete()
-                        for materia in info['materias']:
-                            curso = CursoMateria(curso=objeto, materia_id=materia['id'])
-                            curso.save()
+                elif action == 'edit':
+                    try:
+                        info = json.loads(request.POST['notas'])
+                        if 'curso' in info and not info['curso'] == '':
+                            for alm in info['alumnos']:
+                                notas = NotasAlumno.objects.get(curso_id=int(info['curso']), alumno_id=alm['id'])
+                                notas.nota = round(float(alm['nota']), 3)
+                                notas.save(request)
+                                data['id'] = notas.curso.pk
+                                return JsonResponse(data, safe=False)
+                            else:
+                                data['error'] = 'Ya existe notas para este alumno'
+                        else:
+                            data['error'] = 'Debe ingresar una materia, quimestre y parcial valido'
+                    except Exception as e:
+                        data['error'] = 'Error en la transaccion:' + str(e)
+                        transaction.set_rollback(True)
+                elif action == 'delete':
+                    objeto = self.model.objects.get(pk=request.POST['pk'])
+                    objeto.cursomateria_set.all().delete()
+                    objeto.delete()
+                elif action == 'detalle':
+                    data = []
+                    num = 0
+                    objeto = self.model.objects.get(pk=request.POST['pk'])
+                    for materia in objeto.cursomateria_set.all():
+                        item = {'nombre': materia.materia.nombre, 'alias': materia.materia.alias,
+                                'identificacion': materia.materia.identificacion,
+                                'id': num + 1}
+                        data.append(item)
+                elif action == 'configuraciongeneral':
+                    if ConfiguracionValoresGeneral.objects.exists():
+                        confi = ConfiguracionValoresGeneral.objects.first()
+                        configuracion = FormularioConfiguracionValores(request.POST, instance=confi)
                     else:
-                        data['error'] = form.errors
-            elif action == 'delete':
-                objeto = self.model.objects.get(pk=request.POST['pk'])
-                objeto.cursomateria_set.all().delete()
-                objeto.delete()
-            elif action == 'detalle':
-                data = []
-                num = 0
-                objeto = self.model.objects.get(pk=request.POST['pk'])
-                for materia in objeto.cursomateria_set.all():
-                    item = {'nombre': materia.materia.nombre, 'alias': materia.materia.alias,
-                            'identificacion': materia.materia.identificacion,
-                            'id': num + 1}
-                    data.append(item)
-            elif action == 'configuraciongeneral':
-                if ConfiguracionValoresGeneral.objects.exists():
-                    confi = ConfiguracionValoresGeneral.objects.first()
-                    configuracion = FormularioConfiguracionValores(request.POST, instance=confi)
-                else:
+                        configuracion = FormularioConfiguracionValores(request.POST)
+                    if configuracion.is_valid():
+                        configuracion.save(request)
+                elif action == 'configurarcomogeneral':
+                    if ConfiguracionValoresGeneral.objects.filter(status=True).exists():
+                        configuraciongeneral = ConfiguracionValoresGeneral.objects.first()
+                        configuracionindividual = ConfiguracionValoresCurso(curso_id=request.POST['pk'],
+                                                                            matricula=configuraciongeneral.matricula,
+                                                                            pension=configuraciongeneral.pension,
+                                                                            numeropensiones=configuraciongeneral.numeropensiones)
+                        configuracionindividual.save(request)
+                        data['resp'] = True
+                    else:
+                        data['resp'] = False
+                        data['mensaje'] = 'No existe la confguracion General'
+                    return JsonResponse(data, safe=False)
+                elif action == 'configurarindividual':
                     configuracion = FormularioConfiguracionValores(request.POST)
-                if configuracion.is_valid():
-                    configuracion.save(request)
-            elif action == 'configurarcomogeneral':
-                if ConfiguracionValoresGeneral.objects.filter(status=True).exists():
-                    configuraciongeneral = ConfiguracionValoresGeneral.objects.first()
-                    configuracionindividual = ConfiguracionValoresCurso(curso_id=request.POST['pk'],
-                                                                        matricula=configuraciongeneral.matricula,
-                                                                        pension=configuraciongeneral.pension,
-                                                                        numeropensiones=configuraciongeneral.numeropensiones)
-                    configuracionindividual.save(request)
-                    data['resp'] = True
-                else:
-                    data['resp'] = False
-                    data['mensaje'] = 'No existe la confguracion General'
-                return JsonResponse(data, safe=False)
-            elif action == 'configurarindividual':
-                configuracion = FormularioConfiguracionValores(request.POST)
-                if configuracion.is_valid():
-                    configuracionindividual = ConfiguracionValoresCurso(curso_id=request.POST['pk'],
-                                                                        matricula=configuracion.cleaned_data['matricula'],
-                                                                        pension=configuracion.cleaned_data['pension'],
-                                                                        numeropensiones=configuracion.cleaned_data['numeropensiones'])
-                    configuracionindividual.save(request)
-                    data['resp'] = True
-                else:
-                    data['resp'] = False
-                    data['mensaje'] = 'No existe la confguracion General'
-                return JsonResponse(data, safe=False)
-            elif action == 'configuraparciales':
-                with transaction.atomic():
+                    if configuracion.is_valid():
+                        configuracionindividual = ConfiguracionValoresCurso(curso_id=request.POST['pk'],
+                                                                            matricula=configuracion.cleaned_data[
+                                                                                'matricula'],
+                                                                            pension=configuracion.cleaned_data['pension'],
+                                                                            numeropensiones=configuracion.cleaned_data[
+                                                                                'numeropensiones'])
+                        configuracionindividual.save(request)
+                        data['resp'] = True
+                    else:
+                        data['resp'] = False
+                        data['mensaje'] = 'No existe la confguracion General'
+                    return JsonResponse(data, safe=False)
+                elif action == 'configuraparciales':
                     try:
                         curso = self.model.objects.get(id=request.POST['id'])
                         if curso.quimestres >= 2 and curso.parciales >= 3:
-                            for q in Quimestre.objects.filter(status=True, numero__lte=curso.quimestres).order_by('numero'):
-                                for p in ModeloParcial.objects.filter(status=True, quimestre=q, numero__lte=curso.parciales + 1):
+                            for q in Quimestre.objects.filter(status=True, numero__lte=curso.quimestres).order_by(
+                                    'numero'):
+                                for p in ModeloParcial.objects.filter(status=True, quimestre=q,
+                                                                      numero__lte=curso.parciales + 1):
                                     for m in CursoMateria.objects.filter(status=True, curso=curso):
                                         if not MateriaAsignada.objects.filter(materia=m).exists():
-                                            data['error'] = 'Este curso aun no tiene todos los docentes asigandos para configurar el modelo de calificacion'
+                                            data[
+                                                'error'] = 'Este curso aun no tiene todos los docentes asigandos para configurar el modelo de calificacion'
                                             transaction.set_rollback(True)
                                             return JsonResponse(data, safe=False)
                                         for m in MateriaAsignada.objects.filter(materia=m):
@@ -482,11 +508,10 @@ class IngresoNotasView(TemplateView):
                         else:
                             data['error'] = 'Numero de Quimestres y/o Parciales Incorrecto'
                     except Exception as e:
-                        data['error'] = 'Error en la transaccion: '+str(e)
+                        data['error'] = 'Error en la transaccion: ' + str(e)
                         transaction.set_rollback(True)
-                return JsonResponse(data, safe=False)
-            elif action == 'cerraracta':
-                with transaction.atomic():
+                    return JsonResponse(data, safe=False)
+                elif action == 'cerraracta':
                     try:
                         id = request.POST['acta']
                         nota = CursoQuimestre.objects.get(id=id)
@@ -495,9 +520,9 @@ class IngresoNotasView(TemplateView):
                     except Exception as e:
                         data['error'] = 'Error al cerrar el acta' + str(e)
                         transaction.set_rollback(True)
-
-            else:
-                data['error'] = 'No ha seleccionado una opcion'
+                else:
+                    data['error'] = 'No ha seleccionado una opcion'
+                    transaction.set_rollback(True)
         except Exception as e:
             data['error'] = str(e)
         return JsonResponse(data, safe=False)
@@ -518,16 +543,22 @@ class IngresoNotasView(TemplateView):
                 if action == 'edit':
                     data = self.get_context_data()
                     data['action'] = action
-                    data['pk'] = request.GET['pk']
-                    pk = PrimaryKeyEncryptor(SECRET_KEY_ENCRIPT).decrypt(request.GET['pk'])
-                    instancia = self.model.objects.get(id=pk)
-                    data['form'] = self.form(instance=instancia)
-                    if instancia.total_materias() > 0:
-                        materias = []
-                        for m in instancia.cursomateria_set.all():
-                            materias.append({'identificacion': m.materia.identificacion, 'nombre': m.materia.nombre, 'alias': m.materia.alias, 'id': m.materia.id})
-                        data['materias'] = materias
-                    data['titulo_form'] = 'Editar curso aperturado'
+                    data['pk'] = pk = request.GET['pk']
+                    instancia = CursoQuimestre.objects.get(id=pk)
+                    info = {'periodo': instancia.cursoasignado.materia.curso.periodo,
+                            'curso': instancia.cursoasignado.materia.curso.curso,
+                            'paralelo': instancia.cursoasignado.paralelo,
+                            'materia': instancia.cursoasignado.materia.materia,
+                            'quimestre': instancia.parcial.quimestre}
+                    data['form'] = form = self.form()
+                    form.edit(info)
+                    data['parcial'] = {'pk': instancia.pk, 'nombre': instancia.parcial.nombre}
+                    alumnos = []
+                    for a in instancia.notasalumno_set.filter(status=True):
+                        alumnos.append({'id': a.alumno.pk, 'nombre': a.alumno.alumno.persona.nombre_completo(),
+                                        'identificacion': a.alumno.alumno.persona.identificacion(), 'nota': round(float(a.nota), 3)})
+                    data['alumnos'] = alumnos
+                    data['titulo_form'] = 'Editar Notas'
                     return render(request, self.template_name_add, data)
                 if action == 'filter_periodo':
                     data = []
@@ -558,11 +589,14 @@ class IngresoNotasView(TemplateView):
                         filtros.add(Q(curso_id=request.GET['curso_id']), Q.AND)
                     ids = self.model.objects.values_list('paralelo_id').filter(filtros)
                     f = Q(status=True)
-                    if 'id' in request.GET and not request.GET['id'] == '' or 'curso_id' in request.GET and not request.GET['curso_id'] == '':
+                    if 'id' in request.GET and not request.GET['id'] == '' or 'curso_id' in request.GET and not \
+                    request.GET['curso_id'] == '':
                         f.add(Q(id__in=ids), Q.AND)
-                    for objeto in Paralelo.objects.filter(f, Q(nombre__icontains=term) | Q(descripcion__icontains=term))[:10]:
-                            item = {'id': objeto.pk, 'text': objeto.nombre}
-                            data.append(item)
+                    for objeto in Paralelo.objects.filter(f,
+                                                          Q(nombre__icontains=term) | Q(descripcion__icontains=term))[
+                                  :10]:
+                        item = {'id': objeto.pk, 'text': objeto.nombre}
+                        data.append(item)
                     return JsonResponse(data, safe=False)
                 if action == 'search_curso':
                     data = []
@@ -593,7 +627,8 @@ class IngresoNotasView(TemplateView):
                                                                  Q(materia__curso__curso_id=int(curso)),
                                                                  Q(materia__curso__periodo_id=periodo),
                                                                  Q(paralelo__nombre__icontains=term) |
-                                                                 Q(paralelo__descripcion__icontains=term)).distinct('paralelo')[0:10]:
+                                                                 Q(paralelo__descripcion__icontains=term)).distinct(
+                        'paralelo')[0:10]:
                         item = {'id': objeto.paralelo.pk, 'text': objeto.paralelo.nombre}
                         data.append(item)
                     return JsonResponse(data, safe=False)
@@ -657,7 +692,8 @@ class IngresoNotasView(TemplateView):
                     data = []
                     for objeto in CursoQuimestre.objects.filter(Q(status=True), parcial__quimestre_id=quimestre,
                                                                 cursoasignado_id=materia,
-                                                                cursoasignado__profesor__persona=persona).distinct('parcial'):
+                                                                cursoasignado__profesor__persona=persona).distinct(
+                        'parcial'):
                         if not NotasAlumno.objects.filter(curso=objeto).exists():
                             item = {'id': objeto.pk, 'text': objeto.parcial.nombre}
                             data.append(item)
@@ -669,6 +705,41 @@ class IngresoNotasView(TemplateView):
                     alumnos = Inscripcion.objects.filter(status=True, curso=mat.materia.curso, paralelo_id=paralelo)
                     data = self.lista_alumnos(alumnos)
                     return JsonResponse(data, safe=False)
+                if action == 'vernotas':
+                    data = self.get_context_data()
+                    data['action'] = action
+                    data['pk'] = pk = request.GET['pk']
+                    instancia = CursoQuimestre.objects.get(id=pk)
+                    info = {'periodo': instancia.cursoasignado.materia.curso.periodo,
+                            'curso': instancia.cursoasignado.materia.curso.curso,
+                            'paralelo': instancia.cursoasignado.paralelo,
+                            'materia': instancia.cursoasignado.materia.materia,
+                            'quimestre': instancia.parcial.quimestre}
+                    data['form'] = form = self.form()
+                    form.edit(info)
+                    data['parcial'] = {'pk': instancia.pk, 'nombre': instancia.parcial.nombre}
+                    alumnos = []
+                    for a in instancia.notasalumno_set.filter(status=True):
+                        alumnos.append({'id': a.alumno.pk, 'nombre': a.alumno.alumno.persona.nombre_completo(),
+                                        'identificacion': a.alumno.alumno.persona.identificacion(), 'nota': round(float(a.nota), 3)})
+                    data['alumnos'] = alumnos
+                    data['titulo_form'] = 'Notas Ingresadas'
+                    data['titulo'] = 'Notas Ingresadas'
+                    data['pantallaver'] = True
+                    return render(request, self.template_name_add, data)
+                if action == 'edit':
+                    data = self.get_context_data()
+                    data['action'] = action
+                    data['pk'] = pk = request.GET['pk']
+                    instancia = CursoQuimestre.objects.get(id=pk)
+                    data['parcial'] = {'pk': instancia.pk, 'nombre': instancia.parcial.nombre}
+                    alumnos = []
+                    for a in instancia.notasalumno_set.filter(status=True):
+                        alumnos.append({'id': a.alumno.pk, 'nombre': a.alumno.alumno.persona.nombre_completo(),
+                                        'identificacion': a.alumno.alumno.persona.identificacion(), 'nota': round(float(a.nota), 3)})
+                    data['alumnos'] = alumnos
+                    data['titulo_form'] = 'Editar Notas'
+                    return render(request, self.template_name_add, data)
             else:
                 data = self.get_context_data()
                 persona = request.session['persona']
@@ -680,7 +751,7 @@ class IngresoNotasView(TemplateView):
                 else:
                     data['periodo'] = periodo = request.session['periodoactual']
                     filtros.add(Q(materia__curso__periodo=periodo), Q.AND)
-                list = list.filter(filtros).distinct('materia__curso__curso')
+                list = list.filter(filtros).order_by('materia__curso__curso_id').distinct('materia__curso__curso')
                 page_number = request.GET.get('page', 1)
                 paginator = Paginator(list, 10)
                 page_range = paginator.get_elided_page_range(number=page_number)
@@ -707,7 +778,6 @@ class IngresoNotasView(TemplateView):
             print(e)
             pass
 
-
     def get_context_data(self, **kwargs):
         data = super().get_context_data(**kwargs)
         data['icono'] = self.icon
@@ -719,4 +789,70 @@ class IngresoNotasView(TemplateView):
         return data
 
 
+class PrintActaNotas(View):
 
+    def link_callback(self, uri, rel):
+        """
+        Convert HTML URIs to absolute system paths so xhtml2pdf can access those
+        resources
+        """
+        result = finders.find(uri)
+        if result:
+            if not isinstance(result, (list, tuple)):
+                result = [result]
+            result = list(os.path.realpath(path) for path in result)
+            path = result[0]
+        else:
+            sUrl = settings.STATIC_URL  # Typically /static/
+            sRoot = settings.STATIC_ROOT  # Typically /home/userX/project_static/
+            mUrl = settings.MEDIA_URL  # Typically /media/
+            mRoot = settings.MEDIA_ROOT  # Typically /home/userX/project_static/media/
+
+            if uri.startswith(mUrl):
+                path = os.path.join(mRoot, uri.replace(mUrl, ""))
+            elif uri.startswith(sUrl):
+                path = os.path.join(sRoot, uri.replace(sUrl, ""))
+            else:
+                return uri
+
+        # make sure that file exists
+        if not os.path.isfile(path):
+            raise Exception(
+                'media URI must start with %s or %s' % (sUrl, mUrl)
+            )
+        return path
+
+    def get(self, request, *args, **kwargs):
+        try:
+            if 'action' in request.GET:
+                action = request.GET['action']
+                if action == 'actaindividual':
+                    instancia = CursoQuimestre.objects.get(pk=self.kwargs['pk'])
+                    template = get_template('bases/actanotas.html')
+                    context = {'title': 'Acta de Notas',
+                               'modeloeval': instancia,
+                               'icon': 'media/logo.png',
+                               'empresa': nombre_empresa()}
+                    html = template.render(context)
+                    response = HttpResponse(content_type='application/pdf')
+                    response['Content-Disposition'] = 'attachment; filename="Acta_notas_'+str(instancia.cursoasignado.materia.curso.curso.nombre)+'.pdf"'
+                    pisa_status = pisa.CreatePDF(html, dest=response, link_callback=self.link_callback)
+                    return response
+                elif action == 'actageneral':
+                    instancia = MateriaAsignada.objects.get(pk=self.kwargs['pk'])
+                    alumnos = Inscripcion.objects.filter(status=True, curso=instancia.materia.curso, paralelo=instancia.paralelo)
+                    template = get_template('bases/actageneral.html')
+                    context = {'title': 'Acta de Notas',
+                               'modeloeval': instancia,
+                               'icon': 'media/logo.png',
+                               'alumnos': alumnos,
+                               'empresa': nombre_empresa()}
+                    html = template.render(context)
+                    response = HttpResponse(content_type='application/pdf')
+                    response['Content-Disposition'] = 'attachment; filename="Acta_general_notas_'+str(instancia.materia.curso.curso.nombre)+'.pdf"'
+                    pisa_status = pisa.CreatePDF(html, dest=response, link_callback=self.link_callback)
+                    return response
+        except Exception as e:
+            print(e)
+            pass
+        return HttpResponseRedirect(reverse_lazy('notas'))
