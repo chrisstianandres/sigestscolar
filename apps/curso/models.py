@@ -174,6 +174,15 @@ class MateriaAsignada(ModeloBase):
     def __str__(self):
         return '{} {}'.format(self.profesor.persona.nombre_completo(), self.materia.materia.nombre)
 
+    def modelo_eval_quimestres(self):
+        return self.cursoquimestre_set.filter(status=True).distinct('parcial__quimestre')
+
+    def modelo_eval_parcial(self):
+        return self.cursoquimestre_set.filter(status=True).distinct('parcial')
+
+    def modelo_eval_parcial_total(self):
+        return int(self.cursoquimestre_set.filter(status=True).distinct('parcial').count() / self.modelo_eval_quimestres().count())
+
 
 class Quimestre(ModeloBase):
     nombre = models.CharField(default='', max_length=200, verbose_name=u'Nombre')
@@ -202,9 +211,13 @@ class ModeloParcial(ModeloBase):
 class CursoQuimestre(ModeloBase):
     cursoasignado = models.ForeignKey(MateriaAsignada, on_delete=models.PROTECT, verbose_name='Curso y Materia')
     parcial = models.ForeignKey(ModeloParcial, on_delete=models.PROTECT, verbose_name='Quimestre y Parcial', null=True, blank=True)
+    actacerrada = models.BooleanField(default=False)
 
     def __str__(self):
         return '{} {}'.format(self.cursoasignado.materia.curso, self.cursoasignado.materia)
+
+    def tiene_notas(self):
+        return self.notasalumno_set.filter(status=True).exists()
 
 
 class NotasAlumno(ModeloBase):

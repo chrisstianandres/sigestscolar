@@ -81,8 +81,31 @@
                         {% with materias=elemento.profesor|args:elemento.materia.curso.curso.pk|args:curso.paralelo.pk|call:'materias_imparte' %}
                             {% for materia in  materias %}
                                 &nbsp;&nbsp;&nbsp;&nbsp; <i class="fas fa-spell-check"></i>
-                                {{ materia.materia.materia }}
+                                {{ materia.materia.materia }}<br><br>
+                                <table>
+                                <thead>
+                                <tr>
+                                    {% for p in materia.modelo_eval_quimestres %}
+                                        <th colspan="{{ materia.modelo_eval_parcial_total }}">{{ p.parcial.quimestre.nombre }}</th>
+                                    {% endfor %}
+                                <tr>
+                                <tr>
+                                    {% for par in materia.modelo_eval_parcial %}
+                                        <td>{{ par.parcial.nombre }}<br>
+                                        {% if par.actacerrada %}
+                                        <span class="badge badge-danger">Acta Cerrada</span>
+                                        {% elif par.tiene_notas %}
+                                            <a href="" class="btn btn-info btn-xs" data-toggle="tooltip" title="Actualizar Notas"><i class="fa fa-edit"></i></a>
+                                        {% endif %}
+
+                                        </td>
+                                    {% endfor %}
+                                </tr>
+                                </thead>
+                                </table>
+
                             {% endfor %}
+
                         {% endwith %}
                     <hr>
 

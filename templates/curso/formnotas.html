@@ -100,6 +100,8 @@
 
         <div class="card-footer">
             <button type="submit" class="btn btn-primary">Guardar</button>
+            <button type="button" id="clear" class="btn btn-success" style="display:none;"
+                    onclick="window.location.reload();"><i class="fas fa-broom"></i> Limpiar Formulario</button>
             <button type="button" class="btn btn-danger"
                     onclick="window.location.href = '{{ request.path }}';">Cancelar
             </button>
@@ -292,6 +294,7 @@
                             term: params.term,
                             action: 'search_parcial',
                             quimestre: $('#id_quimestre').val(),
+                             materia: $('#id_materia option:selected').val()
                         };
                     },
                     processResults: function (data) {
@@ -316,6 +319,13 @@
                     dataType: 'json',
                     success: function (data) {
                         notas.add(data);
+                        $('#id_curso').prop('disabled', true);
+                        $('#id_paralelo').prop('disabled', true);
+                        $('#id_materia').prop('disabled', true);
+                        $('#id_quimestre').prop('disabled', true);
+                        $('#id_parcial').prop('disabled', true);
+                        $('#id_periodo').prop('disabled', true);
+                        $('#clear').fadeIn('slow');
                     },
                     error: function (xhr, status, data) {
                         alert(data);
@@ -350,10 +360,27 @@
                         parametros['action'] = '{{ action }}';
                         {% if pk %}parametros['pk'] = '{{ pk }}';{% endif %}
                         save_with_ajax('Estas seguro?', '/notas', 'Desea guardar estas notas?', parametros,
-                            function (e) {
-                                menssaje_ok('Todo correcto!', 'Informacion guardada corectamente!', 'success', function (e) {
-                                    window.location.replace('/notas');
-                                })
+                            function (data) {
+                            let pk  = data['id'];
+                                preguntar_si_no('Cierre de Acta', 'Desea Cerrar esta acta? ' +
+                                    'Recuerde que si cierra el acta ya no podrá realizar cambios en el futuro, y esta accion es irreversible',
+                                    function () {
+                                        ajax_sin_confirmar_post('/notas', {'acta': pk, 'action': 'cerraracta'},
+                                            function () {
+                                                menssaje_ok('Todo correcto!', 'Notas guardadas y acta cerrada correctamente!', 'success', function (e) {
+                                                    window.location.replace('/notas');
+                                                })
+                                            }, function () {
+                                            window.location.replace('/notas')
+
+                                            })
+
+                                    }, function () {
+                                        menssaje_ok('Todo correcto!', 'Notas Guardadas corectamente!', 'success', function (e) {
+                                            window.location.replace('/notas');
+                                        })
+                                    });
+
 
                             })
                     } else {

@@ -401,7 +401,7 @@
                            menssaje_ok('Todo correcto!', 'Confguracion guardada corectamente!', 'success', function (e) {
                                 window.location.reload();
                             })
-                        })
+                        }, function () {})
                     },
                     function (e) {
                         $('#modal_valores_individual').modal('show');

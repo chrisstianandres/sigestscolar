@@ -393,6 +393,8 @@ class IngresoNotasView(TemplateView):
                                 if not NotasAlumno.objects.filter(curso_id=int(info['curso']), alumno_id=alm['id'], nota=round(float(alm['nota']))).exists():
                                     notas = NotasAlumno(curso_id=int(info['curso']), alumno_id=alm['id'], nota=round(float(alm['nota']), 2))
                                     notas.save(request)
+                                    data['id'] = notas.curso.pk
+                                    return JsonResponse(data, safe=False)
                                 else:
                                     data['error'] = 'Ya existe notas para este alumno'
                         else:
@@ -483,6 +485,16 @@ class IngresoNotasView(TemplateView):
                         data['error'] = 'Error en la transaccion: '+str(e)
                         transaction.set_rollback(True)
                 return JsonResponse(data, safe=False)
+            elif action == 'cerraracta':
+                with transaction.atomic():
+                    try:
+                        id = request.POST['acta']
+                        nota = CursoQuimestre.objects.get(id=id)
+                        nota.actacerrada = True
+                        nota.save(request)
+                    except Exception as e:
+                        data['error'] = 'Error al cerrar el acta' + str(e)
+                        transaction.set_rollback(True)
 
             else:
                 data['error'] = 'No ha seleccionado una opcion'
@@ -624,18 +636,28 @@ class IngresoNotasView(TemplateView):
                     else:
                         return JsonResponse(data, safe=False)
                     data = []
-                    for objeto in CursoQuimestre.objects.filter(Q(status=True), cursoasignado_id=materia).distinct('parcial__quimestre'):
-                        item = {'id': objeto.parcial.quimestre.pk, 'text': objeto.parcial.quimestre.nombre}
-                        data.append(item)
+                    materiaasignada = MateriaAsignada.objects.get(id=materia, profesor__persona=persona)
+                    # for objeto in CursoQuimestre.objects.filter(Q(status=True), cursoasignado_id=materia).distinct('parcial__quimestre'):
+                    for objeto in materiaasignada.modelo_eval_quimestres():
+                        if not objeto.tiene_notas():
+                            item = {'id': objeto.parcial.quimestre.pk, 'text': objeto.parcial.quimestre.nombre}
+                            data.append(item)
                     return JsonResponse(data, safe=False)
                 if action == 'search_parcial':
                     quimestre = ''
+                    persona = request.session['persona']
                     if 'quimestre' in request.GET and not request.GET['quimestre'] == '':
                         quimestre = request.GET['quimestre']
                     else:
                         return JsonResponse(data, safe=False)
+                    if 'materia' in request.GET and not request.GET['materia'] == '':
+                        materia = request.GET['materia']
+                    else:
+                        return JsonResponse(data, safe=False)
                     data = []
-                    for objeto in CursoQuimestre.objects.filter(Q(status=True), parcial__quimestre_id=quimestre).distinct('parcial'):
+                    for objeto in CursoQuimestre.objects.filter(Q(status=True), parcial__quimestre_id=quimestre,
+                                                                cursoasignado_id=materia,
+                                                                cursoasignado__profesor__persona=persona).distinct('parcial'):
                         if not NotasAlumno.objects.filter(curso=objeto).exists():
                             item = {'id': objeto.pk, 'text': objeto.parcial.nombre}
                             data.append(item)
