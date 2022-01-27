@@ -1,6 +1,6 @@
 import smtplib
 import uuid
-from datetime import datetime
+from datetime import datetime, timedelta
 from email.mime.multipart import MIMEMultipart
 from email.mime.text import MIMEText
 from crum import get_current_request
@@ -8,7 +8,8 @@ from crum import get_current_request
 from django.contrib.auth.models import Group, User
 from django.contrib.auth.views import LoginView
 from django.core.exceptions import ObjectDoesNotExist
-from django.db.models import Sum, Count
+from django.db.models import Sum, Count, FloatField, DecimalField
+from django.db.models.functions import Coalesce
 from django.shortcuts import render, HttpResponseRedirect, redirect
 from django.contrib.auth import *
 from django.http import HttpResponse
@@ -33,7 +34,8 @@ from apps.inscripcion.models import Inscripcion
 from apps.models import Modulo
 from apps.perfil.models import PerfilUsuario
 from apps.periodo.models import PeriodoLectivo
-from apps.rubro.models import Pago
+from apps.persona.models import Persona
+from apps.rubro.models import Pago, Rubro
 
 
 def nombre_empresa():
@@ -91,7 +93,33 @@ class DashboardView(TemplateView):
             data['inscritos'] = Inscripcion.objects.filter(status=True, curso__periodo=periodoactual).count()
             data['docentes'] = MateriaAsignada.objects.filter(status=True, materia__curso__periodo=periodoactual).distinct('profesor').count()
             data['cursos'] = CursoParalelo.objects.filter(status=True, periodo=periodoactual).count()
+            data['personas'] = self.personas_recientes()
+            # data['vencidomes'] = self.vencido_por_mes()
+            # data['cabrarmes'] = self.porcobrar_por_mes()
+
         return data
+
+    def personas_recientes(self):
+        hoy = datetime.now()
+        return Persona.objects.filter(status=True, fecha_creacion__lte=hoy-timedelta(days=30))
+
+    # def vencido_por_mes(self):
+    #     totales = []
+    #     hoy = datetime.now()
+    #     anio = hoy.year
+    #     for m in range(1, 13):
+    #         totales.append(Rubro.objects.filter(status=True, fecha__year=anio, fecha__month=m, fechavence__lt=hoy, cancelado=False).aggregate(
+    #             total=Coalesce(Sum('valortotal', output_field=FloatField()), float(0))).get('total'))
+    #     return totales
+    #
+    # def porcobrar_por_mes(self):
+    #     totales = []
+    #     hoy = datetime.now()
+    #     anio = hoy.year
+    #     for m in range(1, 13):
+    #         totales.append(Rubro.objects.filter(status=True, fecha__year=anio, fecha__month=m, fechavence__gte=hoy, cancelado=False).aggregate(
+    #             total=Coalesce(Sum('valortotal', output_field=FloatField()), float(0))).get('total'))
+    #     return totales
 
 
 def generar_usuario(persona, g):
@@ -186,6 +214,8 @@ class LoginFormView(LoginView):
                 request.session['modulos'] = Modulo.objects.filter(status=True).exclude(id=13).order_by('nombre')
             else:
                 request.session['modulos'] = []
+            if PeriodoLectivo.objects.filter(status=True, actual=True):
+                request.session['periodoactual'] = PeriodoLectivo.objects.filter(status=True, actual=True).first()
         except Exception as e:
             disconnect(self.request)
             pass
@@ -200,6 +230,7 @@ class LoginFormView(LoginView):
         data['title'] = 'Inicio de Sesion'
         data['empresa'] = nombre_empresa()
         return data
+
 
 
 # class ResetPasswordView(FormView):

@@ -75,22 +75,25 @@
           <!-- Left col -->
           <section class="col-lg-7 connectedSortable">
             <!-- Custom tabs (Charts with tabs)-->
-            <div class="card">
+             <div class="card card-default">
               <div class="card-header">
-                <h3 class="card-title">
-                  <i class="fas fa-chart-pie mr-1"></i>
-                 Valores del periodo
-                </h3>
-              </div><!-- /.card-header -->
-              <div class="card-body">
-                <div class="tab-content p-0">
-                  <!-- Morris chart - Sales -->
-                  <div class="chart tab-pane active" id="revenue-chart"
-                       style="position: relative; height: 300px;">
-                      <canvas id="revenue-chart-canvas" height="300" style="height: 300px;"></canvas>
-                   </div>
+                <h3 class="card-title"><i class="fa fa-chart-bar"></i> Valores del año <b>{{ anioactual }}</b></h3>
+
+                <div class="card-tools">
+                  <button type="button" class="btn btn-tool" data-card-widget="collapse">
+                    <i class="fas fa-minus"></i>
+                  </button>
+                  <button type="button" class="btn btn-tool" data-card-widget="remove">
+                    <i class="fas fa-times"></i>
+                  </button>
                 </div>
-              </div><!-- /.card-body -->
+              </div>
+              <div class="card-body">
+                <div class="chart">
+                  <canvas id="barChart" style="min-height: 250px; height: 250px; max-height: 250px; max-width: 100%;"></canvas>
+                </div>
+              </div>
+              <!-- /.card-body -->
             </div>
             <!-- /.card -->
           </section>
@@ -102,120 +105,109 @@
             <div class="card bg-gradient-primary">
               <div class="card-header border-0">
                 <h3 class="card-title">
-                  <i class="fas fa-map-marker-alt mr-1"></i>
-                  Peronas agregadas recientemente
+                  <i class="fas fa-user-plus"></i>
+                  Personas agregadas recientemente
                 </h3>
                 <!-- card tools -->
                 <div class="card-tools">
-                  <button type="button" class="btn btn-primary btn-sm daterange" title="Date range">
-                    <i class="far fa-calendar-alt"></i>
-                  </button>
                   <button type="button" class="btn btn-primary btn-sm" data-card-widget="collapse" title="Collapse">
                     <i class="fas fa-minus"></i>
+                  </button>
+                     <button type="button" class="btn btn-primary btn-sm" data-card-widget="remove">
+                    <i class="fas fa-times"></i>
                   </button>
                 </div>
                 <!-- /.card-tools -->
               </div>
               <div class="card-body">
-                <div id="world-map" style="height: 250px; width: 100%;"></div>
+                <table class="table table-noborder">
+                    <thead><tr>
+                        <td>Nombres</td>
+                        <td>Identificacion</td>
+                        <td>Genero</td></tr>
+                    </thead>
+                    <tbody>
+                    {% for p in personas %}
+                        <tr>
+                            <td>{{ p.nombre_completo }}</td>
+                            <td>{{ p.identificacion }}</td>
+                            <td>{{ p.get_genero_display }}</td>
+                        </tr>
+                    {% empty %}
+                        <tr>
+                        <td colspan="3"> No existen personas nuevas</td>
+                        </tr>
+                    {% endfor %}
+
+
+                    </tbody>
+                </table>
               </div>
               <!-- /.card-body-->
-              <div class="card-footer bg-transparent">
-                <div class="row">
-                  <div class="col-4 text-center">
-                    <div id="sparkline-1"></div>
-                    <div class="text-white">Visitors</div>
-                  </div>
-                  <!-- ./col -->
-                  <div class="col-4 text-center">
-                    <div id="sparkline-2"></div>
-                    <div class="text-white">Online</div>
-                  </div>
-                  <!-- ./col -->
-                  <div class="col-4 text-center">
-                    <div id="sparkline-3"></div>
-                    <div class="text-white">Sales</div>
-                  </div>
-                  <!-- ./col -->
-                </div>
-                <!-- /.row -->
-              </div>
             </div>
             <!-- /.card -->
 
-            <!-- solid sales graph -->
-            <div class="card bg-gradient-info">
-              <div class="card-header border-0">
-                <h3 class="card-title">
-                  <i class="fas fa-th mr-1"></i>
-                  Sales Graph
-                </h3>
-
-                <div class="card-tools">
-                  <button type="button" class="btn bg-info btn-sm" data-card-widget="collapse">
-                    <i class="fas fa-minus"></i>
-                  </button>
-                  <button type="button" class="btn bg-info btn-sm" data-card-widget="remove">
-                    <i class="fas fa-times"></i>
-                  </button>
-                </div>
-              </div>
-              <div class="card-body">
-                <canvas class="chart" id="line-chart" style="min-height: 250px; height: 250px; max-height: 250px; max-width: 100%;"></canvas>
-              </div>
-              <!-- /.card-body -->
-              <div class="card-footer bg-transparent">
-                <div class="row">
-                  <div class="col-4 text-center">
-                    <input type="text" class="knob" data-readonly="true" value="20" data-width="60" data-height="60"
-                           data-fgColor="#39CCCC">
-
-                    <div class="text-white">Mail-Orders</div>
-                  </div>
-                  <!-- ./col -->
-                  <div class="col-4 text-center">
-                    <input type="text" class="knob" data-readonly="true" value="50" data-width="60" data-height="60"
-                           data-fgColor="#39CCCC">
-
-                    <div class="text-white">Online</div>
-                  </div>
-                  <!-- ./col -->
-                  <div class="col-4 text-center">
-                    <input type="text" class="knob" data-readonly="true" value="30" data-width="60" data-height="60"
-                           data-fgColor="#39CCCC">
-
-                    <div class="text-white">In-Store</div>
-                  </div>
-                  <!-- ./col -->
-                </div>
-                <!-- /.row -->
-              </div>
-              <!-- /.card-footer -->
-            </div>
-            <!-- /.card -->
+{#            <!-- solid sales graph -->#}
+{#            <div class="card bg-gradient-info">#}
+{#              <div class="card-header border-0">#}
+{#                <h3 class="card-title">#}
+{#                  <i class="fas fa-th mr-1"></i>#}
+{#                  Sales Graph#}
+{#                </h3>#}
+{##}
+{#                <div class="card-tools">#}
+{#                  <button type="button" class="btn bg-info btn-sm" data-card-widget="collapse">#}
+{#                    <i class="fas fa-minus"></i>#}
+{#                  </button>#}
+{#                  <button type="button" class="btn bg-info btn-sm" data-card-widget="remove">#}
+{#                    <i class="fas fa-times"></i>#}
+{#                  </button>#}
+{#                </div>#}
+{#              </div>#}
+{#              <div class="card-body">#}
+{#                <canvas class="chart" id="line-chart" style="min-height: 250px; height: 250px; max-height: 250px; max-width: 100%;"></canvas>#}
+{#              </div>#}
+{#              <!-- /.card-body -->#}
+{#              <div class="card-footer bg-transparent">#}
+{#                <div class="row">#}
+{#                  <div class="col-4 text-center">#}
+{#                    <input type="text" class="knob" data-readonly="true" value="20" data-width="60" data-height="60"#}
+{#                           data-fgColor="#39CCCC">#}
+{##}
+{#                    <div class="text-white">Mail-Orders</div>#}
+{#                  </div>#}
+{#                  <!-- ./col -->#}
+{#                  <div class="col-4 text-center">#}
+{#                    <input type="text" class="knob" data-readonly="true" value="50" data-width="60" data-height="60"#}
+{#                           data-fgColor="#39CCCC">#}
+{##}
+{#                    <div class="text-white">Online</div>#}
+{#                  </div>#}
+{#                  <!-- ./col -->#}
+{#                  <div class="col-4 text-center">#}
+{#                    <input type="text" class="knob" data-readonly="true" value="30" data-width="60" data-height="60"#}
+{#                           data-fgColor="#39CCCC">#}
+{##}
+{#                    <div class="text-white">In-Store</div>#}
+{#                  </div>#}
+{#                  <!-- ./col -->#}
+{#                </div>#}
+{#                <!-- /.row -->#}
+{#              </div>#}
+{#              <!-- /.card-footer -->#}
+{#            </div>#}
+{#            <!-- /.card -->#}
 
             <!-- Calendar -->
             <div class="card bg-gradient-success">
               <div class="card-header border-0">
 
                 <h3 class="card-title">
-                  <i class="far fa-calendar-alt"></i>
-                  Calendar
+                  <i class="fas fa-user-graduate"></i>
+                  Mejor Alumno por curso
                 </h3>
                 <!-- tools card -->
                 <div class="card-tools">
-                  <!-- button with a dropdown -->
-                  <div class="btn-group">
-                    <button type="button" class="btn btn-success btn-sm dropdown-toggle" data-toggle="dropdown" data-offset="-52">
-                      <i class="fas fa-bars"></i>
-                    </button>
-                    <div class="dropdown-menu" role="menu">
-                      <a href="#" class="dropdown-item">Add new event</a>
-                      <a href="#" class="dropdown-item">Clear events</a>
-                      <div class="dropdown-divider"></div>
-                      <a href="#" class="dropdown-item">View calendar</a>
-                    </div>
-                  </div>
                   <button type="button" class="btn btn-success btn-sm" data-card-widget="collapse">
                     <i class="fas fa-minus"></i>
                   </button>
@@ -242,4 +234,68 @@
 
     </section>
     <!-- /.content -->
+{% endblock %}
+{% block extra_scripts %}
+    <style>
+    .table-noborder {
+        border: none;
+    }
+    </style>
+<script>
+$(function () {
+    var areaChartData = {
+      labels  : ['Enero', 'Febrero', 'Marzo', 'Abril', 'Mayo', 'Junio', 'Julio', 'Agosto', 'Septiembre', 'Octubre', 'Noviembre', 'Diciembre'],
+      datasets: [
+        {
+          label               : 'Valores Cobrados',
+          backgroundColor     : 'rgba(60,141,188,0.9)',
+          borderColor         : 'rgba(60,141,188,0.8)',
+          pointRadius          : false,
+          pointColor          : '#3b8bba',
+          pointStrokeColor    : 'rgba(60,141,188,1)',
+          pointHighlightFill  : '#fff',
+          pointHighlightStroke: 'rgba(60,141,188,1)',
+          data                : {{ periodoactual.cobrado_por_mes }}
+        },
+        {
+          label               : 'Valores por Cobrar',
+          backgroundColor     : 'rgb(222,80,63)',
+          borderColor         : 'rgba(210, 214, 222, 1)',
+          pointRadius         : false,
+          pointColor          : 'rgba(210, 214, 222, 1)',
+          pointStrokeColor    : '#c1c7d1',
+          pointHighlightFill  : '#fff',
+          pointHighlightStroke: 'rgba(220,220,220,1)',
+          data                : {{ periodoactual.porcobrar_por_mes }}
+        },
+           {
+          label               : 'Valores Vencidos',
+          backgroundColor     : 'rgb(21,72,185)',
+          borderColor         : 'rgba(210, 214, 222, 1)',
+          pointRadius         : false,
+          pointColor          : 'rgba(210, 214, 222, 1)',
+          pointStrokeColor    : '#c1c7d1',
+          pointHighlightFill  : '#fff',
+          pointHighlightStroke: 'rgba(220,220,220,1)',
+          data                : {{ periodoactual.vencido_por_mes }}
+        },
+      ]
+    };
+    var barChartCanvas = $('#barChart').get(0).getContext('2d');
+    var barChartData = $.extend(true, {}, areaChartData);
+    var temp0 = areaChartData.datasets[0];
+    barChartData.datasets[0] = areaChartData.datasets[1];
+    barChartData.datasets[1] = temp0;
+    var barChartOptions = {
+      responsive              : true,
+      maintainAspectRatio     : false,
+      datasetFill             : false
+    };
+    new Chart(barChartCanvas, {
+      type: 'bar',
+      data: barChartData,
+      options: barChartOptions
+    });
+  })
+</script>
 {% endblock %}

@@ -1,6 +1,8 @@
 from django import forms
 from django.forms import TextInput, Select
-from .models import Curso, CursoParalelo, ConfiguracionValoresCurso, ConfiguracionValoresGeneral
+from .models import Curso, CursoParalelo, ConfiguracionValoresCurso, ConfiguracionValoresGeneral, TIPO_PARCIAL, \
+    Quimestre, ModeloParcial
+from ..materia.models import Materia
 from ..paralelo.models import Paralelo
 from ..periodo.models import PeriodoLectivo
 
@@ -43,12 +45,17 @@ class FormularioApertura(forms.ModelForm):
 
     class Meta:
         model = CursoParalelo
-        fields = ['periodo', 'curso', 'paralelo', 'cupo', 'cupoindividual']
-        labels = {'curso': 'Curso', 'paralelo': 'Paralelo', 'periodo': 'Periodo', 'cupoindividual': 'Cupo Individual para cada paralelo?'}
+        fields = ['periodo', 'curso', 'paralelo', 'cupo', 'cupoindividual', 'quimestres', 'parciales']
+        labels = {'curso': 'Curso', 'paralelo': 'Paralelo', 'periodo': 'Periodo',
+                  'cupoindividual': 'Cupo Individual para cada paralelo?', 'quimestres': 'N° Quimestres',
+                  'parciales': 'N° Parciales por Quimestre'}
         widgets = {'cupoindividual': forms.CheckboxInput(attrs={
                        'data-toggle': 'toggle', 'data-on': 'Si', 'data-off': 'No', 'data-onstyle': 'success',
                        'data-offstyle': 'danger'
-                   })}
+                   }),
+        'quimestres': forms.NumberInput(attrs={'class': 'form-comtrol', 'max': 5, 'min': 2}),
+        'parciales': forms.NumberInput(attrs={'class': 'form-comtrol', 'max': 5, 'min': 3})
+        }
 
     def clean(self):
         f = super()
@@ -61,6 +68,10 @@ class FormularioApertura(forms.ModelForm):
         else:
             if CursoParalelo.objects.filter(periodo_id=periodo, curso_id=curso).exclude(id=u.pk).exists():
                 self.add_error('curso', 'Ya existe ese curso en el periodo seleccionado')
+        if self.cleaned_data['quimestres'] < 2:
+            self.add_error('quimestres', 'Debe Ingresar un numero de quimestres igual o mayor a 2')
+        if self.cleaned_data['parciales'] < 3:
+            self.add_error('quimestres', 'Debe Ingresar un numero de parciales por quimestre igual o mayor a 3')
 
 
 class FormularioConfiguracionValores(forms.ModelForm):
@@ -81,3 +92,12 @@ class FormularioConfiguracionValores(forms.ModelForm):
         fields = ['matricula', 'pension', 'numeropensiones']
         labels = {'matricula': 'Valor de Matricula', 'pension': 'Valor de pension', 'numeropensiones': 'Cantidad de Pensiones'}
         # widgets = {'curso': forms.Select(), 'paralelo': forms.Select(), 'periodo': forms.Select()}
+
+
+class FormularioNotas(forms.Form):
+    periodo = forms.ModelChoiceField(queryset=PeriodoLectivo.objects.none(),  empty_label=None, widget=forms.Select(attrs={'class': 'form-control select2'}))
+    curso = forms.ModelChoiceField(queryset=Curso.objects.none(),  empty_label=None, widget=forms.Select(attrs={'class': 'form-control select2'}))
+    paralelo = forms.ModelChoiceField(queryset=Paralelo.objects.none(), widget=forms.Select(attrs={'class': 'form-control select2'}))
+    materia = forms.ModelChoiceField(queryset=Materia.objects.none(), widget=forms.Select(attrs={'class': 'form-control select2'}))
+    quimestre = forms.ModelChoiceField(queryset=Quimestre.objects.none(), widget=forms.Select(attrs={'class': 'form-control select2'}))
+    parcial = forms.ModelChoiceField(queryset=ModeloParcial.objects.none(), widget=forms.Select(attrs={'class': 'form-control select2'}))

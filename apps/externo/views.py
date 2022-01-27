@@ -89,7 +89,7 @@ class Listview(TemplateView):
                             return JsonResponse(data, safe=False)
                         profesor = Profesor(persona=persona, fechaingreso=datetime.now().date())
                         profesor.save(request)
-                        g = Group.objects.get(name='Docente')
+                        g = Group.objects.get(name='Profesor')
                         if not persona.usuario:
                             generar_usuario(persona, g.id)
                         g.user_set.add(persona.usuario)
@@ -97,6 +97,7 @@ class Listview(TemplateView):
                         perfil = PerfilUsuario(persona=persona, profesor=profesor)
                         perfil.save()
                     except Exception as ex:
+                        transaction.set_rollback(True)
                         data['error'] = 'Error en la transaccion.'
                 else:
                     data['error'] = 'No ha seleccionado una opcion'

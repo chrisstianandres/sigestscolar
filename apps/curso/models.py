@@ -37,6 +37,8 @@ class CursoParalelo(ModeloBase):
     periodo = models.ForeignKey(PeriodoLectivo, on_delete=models.PROTECT)
     cupo = models.IntegerField(default=5)
     cupoindividual = models.BooleanField(default=False)
+    quimestres = models.IntegerField(default=0, verbose_name='Numero de Quimestres')
+    parciales = models.IntegerField(default=0, verbose_name='Numero de Parciales')
 
     def __str__(self):
         return '{} - {}'.format(self.periodo.nombre, self.curso.nombre)
@@ -57,30 +59,40 @@ class CursoParalelo(ModeloBase):
 
     def materias_asignadas_curso(self, id=None):
         data = []
+        keys =[]
         for m in self.cursomateria_set.filter(status=True):
             if id is not None:
                 if m.id == id:
                     data.append({'id': m.id, 'materia': m.materia.nombre, 'select': 'true'})
                 else:
                     data.append({'id': m.id, 'materia': m.materia.nombre, 'select': 'false'})
-            elif m == self.cursomateria_set.filter(status=True)[0]:
-                data.append({'id': m.id, 'materia': m.materia.nombre, 'select': True})
+            # elif m == self.cursomateria_set.filter(status=True)[0]:
+            #     data.append({'id': m.id, 'materia': m.materia.nombre, 'select': True})
             else:
-                data.append({'id': m.id, 'materia': m.materia.nombre, 'select': False})
+                for p in m.curso.paralelo.filter(status=True):
+                    if not MateriaAsignada.objects.filter(materia=m, paralelo=p).exists():
+                        if m.materia.id not in keys:
+                            keys.append(m.materia.id)
+                            data.append({'id': m.id, 'materia': m.materia.nombre, 'select': len(keys) == 1})
         return data
 
     def get_paralelos(self, id=None):
         data = []
+        keys = []
         for p in self.paralelo.filter(status=True):
             if id is not None:
                 if p.id == id:
                     data.append({'id': p.id, 'paralelo': p.nombre, 'select': 'true'})
                 else:
                     data.append({'id': p.id, 'paralelo': p.nombre, 'select': 'false'})
-            elif p == self.paralelo.filter(status=True)[0]:
-                data.append({'id': p.id, 'paralelo': p.nombre, 'select': True})
+            # elif p == self.paralelo.filter(status=True)[0]:
+            #     data.append({'id': p.id, 'paralelo': p.nombre, 'select': True})
             else:
-                data.append({'id': p.id, 'paralelo': p.nombre, 'select': False})
+                for c in CursoMateria.objects.filter(curso__periodo=self.periodo, curso=self):
+                    if not MateriaAsignada.objects.filter(materia=c, paralelo=p).exists():
+                        if p.id not in keys:
+                            keys.append(p.id)
+                            data.append({'id': p.id, 'paralelo': p.nombre, 'select': len(keys)==1})
         return data
 
     def encoded_id(self):
@@ -92,6 +104,11 @@ class CursoParalelo(ModeloBase):
     def configuracion_valores(self):
         if self.configuracionvalorescurso_set.exists():
             return self.configuracionvalorescurso_set.first()
+        return False
+
+    def configuro_quimestres(self):
+        if CursoQuimestre.objects.filter(status=True, cursoasignado__materia__curso=self).exists():
+            return CursoQuimestre.objects.filter(status=True, cursoasignado__materia__curso=self).count() == (self.quimestres*(self.parciales+1)) * (self.paralelo.count()) * self.cursomateria_set.count()
         return False
 
     def cupo_total(self):
@@ -158,4 +175,42 @@ class MateriaAsignada(ModeloBase):
         return '{} {}'.format(self.profesor.persona.nombre_completo(), self.materia.materia.nombre)
 
 
+class Quimestre(ModeloBase):
+    nombre = models.CharField(default='', max_length=200, verbose_name=u'Nombre')
+    numero = models.IntegerField(default=1)
 
+    def __str__(self):
+        return '{}'.format(self.nombre)
+
+
+TIPO_PARCIAL =(
+    (0, 'PARCIAL'),
+    (1, 'EXAMEN')
+)
+
+
+class ModeloParcial(ModeloBase):
+    quimestre = models.ForeignKey(Quimestre, on_delete=models.PROTECT)
+    nombre = models.CharField(default='', max_length=200, verbose_name=u'Nombre')
+    tipo = models.IntegerField(choices=TIPO_PARCIAL, default=0, verbose_name=u'Nombre')
+    numero = models.IntegerField(default=1)
+
+    def __str__(self):
+        return '{} {} {} {}'.format(self.numero, self.quimestre, self.nombre, self.get_tipo_display())
+
+
+class CursoQuimestre(ModeloBase):
+    cursoasignado = models.ForeignKey(MateriaAsignada, on_delete=models.PROTECT, verbose_name='Curso y Materia')
+    parcial = models.ForeignKey(ModeloParcial, on_delete=models.PROTECT, verbose_name='Quimestre y Parcial', null=True, blank=True)
+
+    def __str__(self):
+        return '{} {}'.format(self.cursoasignado.materia.curso, self.cursoasignado.materia)
+
+
+class NotasAlumno(ModeloBase):
+    curso = models.ForeignKey(CursoQuimestre, on_delete=models.PROTECT, verbose_name='Curso Quimestre parcial')
+    alumno = models.ForeignKey('inscripcion.Inscripcion', on_delete=models.PROTECT, verbose_name='Inscripcion de Alumno')
+    nota = models.DecimalField(decimal_places=2, max_digits=5, default=0, verbose_name='Nota')
+
+    def __str__(self):
+        return '{} {}'.format(self.curso, self.alumno, self.nota)

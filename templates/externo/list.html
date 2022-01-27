@@ -127,7 +127,7 @@
             let pk = $(this).attr('obj');
             save_estado('Atencion!', window.location.pathname, 'Esta seguro que desea crearle un perfil administrativo a esta persona?',
                 {'action': 'add_administrativo', 'id': pk}, function (e) {
-                window.location.href = '/administrativo';
+                window.location.href = '/administrativos/';
             })
 
         });
@@ -136,7 +136,7 @@
             let pk = $(this).attr('obj');
             save_estado('Atencion!', window.location.pathname, 'Esta seguro que desea crear un perfil docente a esta persona?',
                 {'action': 'add_docente', 'id': pk}, function (e) {
-                window.location.href = '/docente';
+                window.location.href = '/docentes/';
             })
 
         });

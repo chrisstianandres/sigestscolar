@@ -1,0 +1,375 @@
+{% extends 'bases/base_form.html' %}
+{% block  form %}
+    <form id="form">
+        <div class="card-body">
+            <div class="row">
+                <div class="col-sm-4">
+                    <div class="form-group">
+                        <p>
+                            {{ form.periodo.label_tag }}
+                            {{ form.periodo }}
+                        </p>
+                    </div>
+                </div>
+                <div class="col-sm-4">
+                    <div class="form-group">
+                        <p>
+                            {{ form.curso.label_tag }}
+                            {{ form.curso }}
+                        </p>
+                    </div>
+                </div>
+                <div class="col-sm-4">
+                    <div class="form-group">
+                        <p>
+                            {{ form.paralelo.label_tag }}
+                            {{ form.paralelo }}
+                        </p>
+                    </div>
+                </div>
+            </div>
+             <div class="row">
+                <div class="col-sm-4">
+                    <div class="form-group">
+                        <p>
+                            {{ form.materia.label_tag }}
+                            {{ form.materia }}
+                        </p>
+                    </div>
+                </div>
+               <div class="col-sm-4">
+                    <div class="form-group">
+                        <p>
+                            {{ form.quimestre.label_tag }}
+                            {{ form.quimestre }}
+                        </p>
+                    </div>
+                </div>
+                 <div class="col-sm-4">
+                    <div class="form-group">
+                        <p>
+                            {{ form.parcial.label_tag }}
+                            {{ form.parcial }}
+                        </p>
+                    </div>
+                </div>
+            </div>
+            <div class="row">
+
+            </div>
+
+
+            <div class="card card-default">
+                <div class="card-header">
+                    <h3 class="card-title"><i class="fas fa-book"></i><b> Lista de Alumnos</b></h3>
+                    <div class="card-tools">
+                        <button type="button" class="btn btn-tool" data-card-widget="collapse">
+                            <i class="fas fa-minus"></i>
+                        </button>
+                    </div>
+                </div>
+                <!-- /.card-header -->
+                <div class="card-body">
+
+                        <div class="row">
+                            <div class="col-md-12">
+                                <div class="form-group">
+                                    <table class="table table-bordered" id="table_alumnos">
+                                        <thead>
+                                        <tr>
+                                            <th style="width:25%;">Alumno</th>
+                                            <th style="width:10%;">Identificacion</th>
+                                            <th style="width: 10%;">Nota</th>
+                                        </tr>
+                                        </thead>
+                                        <tbody>
+                                        </tbody>
+                                    </table>
+                                </div>
+                                <!-- /.form-group -->
+                            </div>
+                        </div>
+
+                    <!-- /.row -->
+                </div>
+                <!-- /.card-body -->
+            </div>
+
+        </div>
+        <!-- /.card-body -->
+
+        <div class="card-footer">
+            <button type="submit" class="btn btn-primary">Guardar</button>
+            <button type="button" class="btn btn-danger"
+                    onclick="window.location.href = '{{ request.path }}';">Cancelar
+            </button>
+        </div>
+    </form>
+{% endblock %}
+
+{% block sumbit_form %}
+{% endblock %}
+{% block validate_form %}
+    <script>
+        var tblmaterias;
+        var notas = {
+            items: {
+                curso: '',
+                alumnos: []
+            },
+            add: function (data) {
+                $.each(data, function (key, value) {
+                    notas.items.alumnos.push(value);
+                });
+                this.list();
+            },
+            list: function () {
+                tblalumnos = $("#table_alumnos").DataTable({
+                    destroy: true,
+                    dom: 't',
+                    autoWidth: false,
+                    dataSrc: "",
+                    responsive: true,
+                    language: {
+                        "url": '//cdn.datatables.net/plug-ins/1.10.15/i18n/Spanish.json'
+                    },
+                    data: this.items.alumnos,
+                    columns: [
+                        {data: "nombre"},
+                        {data: "identificacion"},
+                        {data: "nota"}
+                    ],
+                    columnDefs: [
+                        {
+                            targets: [-1],
+                            class: 'text-center',
+                            orderable: false,
+                            render: function (data, type, row) {
+                                console.log(data);
+                                return '<input type="number" min="1" max="10" name="nota" class="form-control form-control-sm input-sm" autocomplete="off" value="' + data + '">';
+                            }
+                        }
+                    ]
+                });
+            },
+        };
+        $(function () {
+            var periodo = new Option('{{ periodolec.nombre }}' , {{ periodolec.pk }} , true, true);
+            $('#id_periodo').append(periodo).trigger('change');
+            var curso = new Option('{{ cursoper.nombre }}' , {{ cursoper.pk }} , true, true);
+            $('#id_curso').append(curso).trigger('change');
+            $('#id_paralelo').select2({
+                language: {
+                    inputTooShort: function () {
+                        return "Ingresa al menos un caracter...";
+                    },
+                    "noResults": function () {
+                        return "Sin resultados";
+                    },
+                    "searching": function () {
+                        return "Buscando...";
+                    }
+                },
+                theme: 'bootstrap4',
+                allowClear: true,
+                ajax: {
+                    delay: 250,
+                    type: 'GET',
+                    url: '/notas',
+                    data: function (params) {
+                        return {
+                            term: params.term,
+                            action: 'search_paralelo',
+                            periodo: '{{ periodolec.pk }}',
+                            curso: '{{ cursoper.pk }}'
+                        };
+                    },
+                    processResults: function (data) {
+                        return {
+                            results: data
+                        };
+
+                    },
+
+                },
+                placeholder: 'Busca un Paralelo',
+                minimumInputLength: 1,
+            });
+            $('#id_materia').select2({
+                language: {
+                    inputTooShort: function () {
+                        return "Ingresa al menos un caracter...";
+                    },
+                    "noResults": function () {
+                        return "Sin resultados";
+                    },
+                    "searching": function () {
+                        return "Buscando...";
+                    }
+                },
+                theme: 'bootstrap4',
+                allowClear: true,
+                ajax: {
+                    delay: 250,
+                    type: 'GET',
+                    url: '/notas',
+                    data: function (params) {
+                        return {
+                            term: params.term,
+                            action: 'search_materias',
+                            periodo: '{{ periodolec.pk }}',
+                            curso: '{{ cursoper.pk }}',
+                            paralelo: $('#id_paralelo').val()
+                        };
+                    },
+                    processResults: function (data) {
+                        return {
+                            results: data
+                        };
+
+                    },
+
+                },
+                placeholder: 'Busca una materia',
+                minimumInputLength: 1,
+            });
+            $('#id_quimestre').select2({
+                language: {
+                    inputTooShort: function () {
+                        return "Ingresa al menos un caracter...";
+                    },
+                    "noResults": function () {
+                        return "Sin resultados";
+                    },
+                    "searching": function () {
+                        return "Buscando...";
+                    }
+                },
+                theme: 'bootstrap4',
+                allowClear: true,
+                ajax: {
+                    delay: 250,
+                    type: 'GET',
+                    url: '/notas',
+                    data: function (params) {
+                        return {
+                            term: params.term,
+                            action: 'search_quimestre',
+                            materia: $('#id_materia').val(),
+                        };
+                    },
+                    processResults: function (data) {
+                        return {
+                            results: data
+                        };
+
+                    },
+
+                },
+                placeholder: 'Busca un Quimestre',
+                minimumInputLength: 1,
+            });
+            $('#id_parcial').select2({
+                language: {
+                    inputTooShort: function () {
+                        return "Ingresa al menos un caracter...";
+                    },
+                    "noResults": function () {
+                        return "Sin resultados";
+                    },
+                    "searching": function () {
+                        return "Buscando...";
+                    }
+                },
+                theme: 'bootstrap4',
+                allowClear: true,
+                ajax: {
+                    delay: 250,
+                    type: 'GET',
+                    url: '/notas',
+                    data: function (params) {
+                        return {
+                            term: params.term,
+                            action: 'search_parcial',
+                            quimestre: $('#id_quimestre').val(),
+                        };
+                    },
+                    processResults: function (data) {
+                        return {
+                            results: data
+                        };
+
+                    },
+
+                },
+                placeholder: 'Busca un Parcial o Examen',
+                minimumInputLength: 1,
+            }).on('select2:select', function (e) {
+                $.ajax({
+                    type: "GET",
+                    url: '/notas',
+                    data: {
+                        "id": $('#id_materia option:selected').val(),
+                        "paralelo": $('#id_paralelo option:selected').val(),
+                        'action': 'get_alumnos'
+                    },
+                    dataType: 'json',
+                    success: function (data) {
+                        notas.add(data);
+                    },
+                    error: function (xhr, status, data) {
+                        alert(data);
+                    },
+
+                })
+             });
+
+            $('#table_alumnos').on('change keyup', 'input[name="nota"]', function () {
+            var nota = parseInt($(this).val());
+            var tr = tblalumnos.cell($(this).closest('td, li')).index();
+            notas.items.alumnos[tr.row].nota = nota;
+        });
+            validador();
+            $("#form").validate({
+                rules: {
+                    nota: {required: true}
+                },
+                messages: {
+                    nota: {required: "Por favor ingresa una valida",
+                    max:'Nota maxima 10',
+                    min:'Nota minima 1'}
+                },
+            });
+            $('[data-toggle="tooltip"]').tooltip();
+            $('#form').on('submit', function (e) {
+                e.preventDefault();
+                if ($(this).valid()) {
+                    if (notas.items.alumnos.length > 0) {
+                        notas.items.curso = $('#id_parcial').val();
+                        var parametros = {'notas': JSON.stringify(notas.items)};
+                        parametros['action'] = '{{ action }}';
+                        {% if pk %}parametros['pk'] = '{{ pk }}';{% endif %}
+                        save_with_ajax('Estas seguro?', '/notas', 'Desea guardar estas notas?', parametros,
+                            function (e) {
+                                menssaje_ok('Todo correcto!', 'Informacion guardada corectamente!', 'success', function (e) {
+                                    window.location.replace('/notas');
+                                })
+
+                            })
+                    } else {
+                        menssaje_error('Error', 'Debes ingresar las notas de todos los alumnos', 'error', function () {
+                        })
+                    }
+                }
+            });
+            {% if materias %}
+                {% for materia in materias %}
+                    apertura.items.materias.push({{ materia|safe }});
+                {% endfor %}
+            {% endif %}
+            notas.list();
+        });
+
+    </script>
+
+{% endblock %}

@@ -52,6 +52,8 @@
                 periodo: '',
                 cupo: '',
                 cupoindividual: '',
+                parciales: '',
+                quimestres: '',
                 curso: '',
                 paralelo: '',
                 materias: [],
@@ -244,12 +246,21 @@
                     paralelo: {required: true},
                     curso: {required: true},
                     cupo: {required: true, cupominimo:true},
+                    quimestres: {required: true},
+                    parciales: {required: true},
                 },
                 messages: {
                     periodo: {required: "Por favor elige un periodo"},
                     paralelo: {required: "Por favor elige un paralelo"},
                     curso: {required: "Por favor elige un curso"},
                     cupo: {required: "Por favor ingresa un cupo"},
+                    quimestres: {required: "Por favor ingresa un numero de quimestre valido",
+                    max:'Numero maximo 5',
+                    min:'Numero minimo 2'
+                    },
+                    parciales: {required: "Por favor ingresa un numero de parcial valido",
+                    max:'Numero maximo 5',
+                    min:'Numero minimo 3'}
                 },
             });
             $('[data-toggle="tooltip"]').tooltip();
@@ -261,6 +272,8 @@
                     apertura.items.periodo = $('#id_periodo').val();
                     apertura.items.cupo = $('#id_cupo').val();
                     apertura.items.cupoindividual = $('#id_cupoindividual').is(':checked');
+                    apertura.items.parciales = $('#id_parciales').val();
+                    apertura.items.quimestres = $('#id_quimestres').val();
                     var parametros = {'apertura': JSON.stringify(apertura.items)};
                     parametros['action'] = '{{ action }}';
                      {% if pk %}parametros['pk'] = '{{ pk }}';{% endif %}

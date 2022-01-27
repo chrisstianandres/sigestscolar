@@ -67,7 +67,7 @@
     <br>
 {% endblock %}
 {% block header_tabla %}
-    <th class="dt-center">Curso</th>
+    <th class="dt-center" style="width: 25%!important;">Curso</th>
     <th class="dt-center">Paralelos</th>
     <th class="dt-center">Periodo</th>
     <th class="dt-center">Estadisticas</th>
@@ -77,14 +77,37 @@
     {% for elemento in page_obj %}
         <tr>
             <td class="dt-center">{{ elemento.curso.nombre }}<br>
-            {% if not elemento.configuracion_valores %}
-                <span class="badge badge-danger" style="font-size: 12px">Este curso aun no tiene configurado los valores</span>
-             {% else %}
-                <br><b><i class="far fa-money-bill-alt"></i> Valores</b><br>
-                <b>Matricula :</b> <i class="fa fa-dollar-sign"></i> {{ elemento.configuracion_valores.matricula }}<br>
-                <b>Pension :</b> <i class="fa fa-dollar-sign"></i> {{ elemento.configuracion_valores.pension }}<br>
-                <b>Total pensiones :</b> {{ elemento.configuracion_valores.numeropensiones }}<br>
-            {% endif %}</td>
+                {% if  elemento.configuracion_valores or elemento.configuro_quimestres %}
+                    <div class="row">
+                        {% if  elemento.configuracion_valores %}
+                            <div class="col-sm-5">
+                                <br><b><i class="far fa-money-bill-alt"></i> Valores</b><br>
+                                <b>Matricula :</b> <i
+                                    class="fa fa-dollar-sign"></i> {{ elemento.configuracion_valores.matricula }}<br>
+                                <b>Pension :</b> <i
+                                    class="fa fa-dollar-sign"></i> {{ elemento.configuracion_valores.pension }}<br>
+                                <b>Total pensiones :</b> {{ elemento.configuracion_valores.numeropensiones }}<br>
+                            </div>
+                        {% endif %}
+                        {% if elemento.configuro_quimestres %}
+                            <div class="col-sm-5">
+                                <br><b><i class="fas fa-sort-numeric-down-alt"></i> Modelo de Calificacion</b><br>
+                                <b>Quimestres :</b> {{ elemento.quimestres }}<br>
+                                <b>Parcial por Quimestre :</b> {{ elemento.parciales }}<br>
+                                <b>Examen por Quimestre :</b> 2 <br>
+                            </div>
+                        {% endif %}
+                    </div>
+                {% endif %}
+                {% if not elemento.configuracion_valores %}
+                    <br>
+                    <span class="badge badge-danger" style="font-size: 12px">Este curso aun no tiene configurado los valores</span>
+                {% endif %}
+                {% if not elemento.configuro_quimestres %}
+                    <br>
+                    <span class="badge badge-secondary" style="font-size: 12px">Este curso aun no tiene configurado el modelo de calificacion</span>
+                {% endif %}
+            </td>
             <td class="dt-center">{%  for paralelo in elemento.paralelo.all %}
                 {{ paralelo.nombre }}<br>
                 {% endfor %}
@@ -110,6 +133,10 @@
             {% if not elemento.configuracion_valores %}
                 <a type="button" class="btn btn-secondary btn-xs configuracionform" data-toggle="tooltip"
                    title="Este curso aun no tiene configurado los valores" pk="{{ elemento.pk }}"><i class="fas fa-hand-holding-usd"></i></a>
+            {% endif %}
+            {% if not elemento.configuro_quimestres %}
+                <a type="button" class="btn btn-info btn-xs configuracionquimestre" data-toggle="tooltip"
+                   title="Este curso aun no tiene configurado el modelo de notas" pk="{{ elemento.pk }}"><i class="fas fa-file-signature"></i></a>
             {% endif %}
             </td>
         </tr>
@@ -228,6 +255,7 @@
             $('.detalle').on('click', function (e) {
                 $('#modal_detalle').modal('show');
                 e.preventDefault();
+                let pk = $(this).attr('pk');
                 $('#table_materias').DataTable({
                     destroy: true,
                     dom: 't',
@@ -240,7 +268,7 @@
                     ajax: {
                         url: window.location.pathname,
                         type: 'POST',
-                        data: {'pk': $('.detalle').attr('pk'), 'action': 'detalle'},
+                        data: {'pk': pk, 'action': 'detalle'},
                         dataSrc: ""
                     },
                     columns: [
@@ -440,6 +468,13 @@
             $('#modal_valores_individual').on('hidden.bs.modal', function (e) {
                 reset_form('#form_config_individual');
             });
+
+            $('.configuracionquimestre').click(function (e) {
+                e.preventDefault();
+                let pk = $(this).attr('pk');
+                save_with_ajax('Alerta!', '/cursos/aperturar/', 'Esta seguro que desea configurar el modelo de calificacion de este curso',
+                    {'id': pk, 'action': 'configuraparciales'}, function () { window.location.reload(); });
+            })
         });
     </script>
 

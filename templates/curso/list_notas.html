@@ -1,0 +1,144 @@
+{% extends 'bases/base_list.html' %}
+{% load tags_general %}
+{% block filtros %}
+    <div class="row">
+        <div class="col-sm-12">
+            <form action="{{ request.path }}">
+                <table>
+                    <tbody>
+                    <tr>
+                        <td style="width: 20%">
+                            <select name="periodos" id="id_periodos" class="form-control input-sm">
+                            </select>
+                        </td>
+                        <td style="width: 20%">
+                            <div class="form-group"><br>
+                                <div class="input-group">
+                                    <input type="text" class="form-control input-sm input-search"
+                                           style="border-top-right-radius: 0 !important; border-bottom-right-radius: 0 !important;"
+                                           placeholder="Buscar...." autocomplete="off"
+                                           aria-label="Buscar..." aria-describedby="basic-addon2"
+                                           name="search"
+                                           value="{{ search }}">
+                                    <div class="input-group-append">
+                                        <button class="btn btn-outline-success btn-sm" type="button" id="search"
+                                                data-toggle="tooltip" data-placement="bottom"
+                                                title="Buscar...">
+                                            <i class="fa fa-search"></i></button>
+                                        {% if search %}
+                                            <button class="btn btn-outline-danger btn-sm" type="button"
+                                                    data-toggle="tooltip" data-placement="bottom"
+                                                    title="Mostrar todos"
+                                                    onclick="window.location.href ='{{ request.path }}'"><i
+                                                    class="fas fa-redo-alt"></i></button>
+                                        {% endif %}
+
+                                    </div>
+                                </div>
+
+                            </div>
+                        </td>
+                        <td style="width: 10%">
+                            <div class="form-group float-right">
+                                <button {% if not modal_form %}onclick="window.location.href ={{ url_add }};" {% endif %}type="button"
+                                        class="btn btn-block btn-primary btn-sm"
+                                        {% if modal_form %} data-toggle="modal"
+                                        data-target="#modal_form"{% endif %}
+                                        style="margin-right: 2px;"><i class="fa fa-plus-circle"></i> Agregar
+                                </button>
+                        </td>
+                    </tr>
+                    </tbody>
+                </table>
+            </form>
+        </div>
+    </div>
+    <br>
+{% endblock %}
+{% block header_tabla %}
+    <th class="dt-center" style="width: 20%">Nombre</th>
+    <th class="dt-center">Materias</th>
+    <th style="text-align:center; width: 10%" class="dt-center"><i class="fa fa-cogs"></i></th>
+{% endblock %}
+{% block body_tabla %}
+    {% for elemento in page_obj %}
+      <tr>
+        <td  class="dt-center" style="width: 20%">{{ elemento.materia.curso.curso.nombre }}</td>
+        <td  class="dt-center">
+            <p>
+                <a style="color: black" class="accordion-toggle" data-toggle="collapse"
+                   data-parent="#cursos{{ forloop.counter }}"
+                   href="#cursos{{ forloop.counter }}">
+                    <span class="fas fa-eye" aria-hidden="true"></span> Materias
+                </a>
+            </p>
+        <div class="collapse" id="cursos{{ forloop.counter }}">
+            {% with cursos=elemento.profesor|args:elemento.materia.curso.periodo.pk|call:'cursos_imparte' %}
+                {% for curso in  cursos %}
+                    <p>
+                        <b>Paralelo: </b>{{ curso.paralelo }}
+                        </p>
+                        {% with materias=elemento.profesor|args:elemento.materia.curso.curso.pk|args:curso.paralelo.pk|call:'materias_imparte' %}
+                            {% for materia in  materias %}
+                                &nbsp;&nbsp;&nbsp;&nbsp; <i class="fas fa-spell-check"></i>
+                                {{ materia.materia.materia }}
+                            {% endfor %}
+                        {% endwith %}
+                    <hr>
+
+                {% endfor %}
+            {% endwith %}
+        </div>
+        </td>
+        <td style="text-align:center; width: 10%"  class="dt-center">
+            <a type="button" class="btn btn-info btn-lg" href="/notas?action=add&id={{ elemento.materia.curso.curso.pk }}&periodo={{ periodo.pk }}" data-toggle="tooltip" title="Ingresar Notas" style="color: white"><i class="fas fa-file-signature"></i></a>
+        </td>
+    </tr>
+    {% empty %}
+        <tr>
+        <td colspan="3" style="text-align: center">No existen registros para mostrar</td>
+        </tr>
+    {% endfor %}
+{% endblock %}
+{% block validate_form %}
+    <script>
+    $(function () {
+        var newOption = new Option('{{ periodo.nombre }}' , {{ periodo.pk }} , true, true);
+        $('#id_periodos').select2({
+            language: {
+                inputTooShort: function () {
+                    return "Ingresa al menos un caracter...";
+                },
+                "noResults": function () {
+                    return "Sin resultados";
+                },
+                "searching": function () {
+                    return "Buscando...";
+                }
+            },
+            theme: 'bootstrap4',
+            allowClear: true,
+            ajax: {
+                delay: 250,
+                type: 'GET',
+                url: '/notas',
+                data: function (params) {
+                    return {
+                        term: params.term,
+                        action: 'filter_periodo'
+                    };
+                },
+                processResults: function (data) {
+                    return {
+                        results: data
+                    };
+
+                },
+
+            },
+            placeholder: 'Buscar por periodo',
+            minimumInputLength: 1,
+        }).append(newOption).trigger('change');
+    })
+    </script>
+{% endblock %}

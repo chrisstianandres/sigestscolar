@@ -35,82 +35,87 @@ class Listview(TemplateView):
 
     def post(self, request, *args, **kwargs):
         data = {}
-        try:
-            with transaction.atomic():
-                action = request.POST['action']
-                if action == 'add':
-                    error = []
-                    info = json.loads(request.POST['distributivo'])
-                    if not info['profesor'] or info['profesor'] == '':
-                        error.append('Debe elegir un docente')
-                    if not info['periodo'] or info['periodo'] == '':
-                        error.append('Debe elegir un periodo valido')
-                    if len(error) > 0:
-                        data['error'] = error
-                    else:
-                        docente = info['profesor']
-                        periodo = info['periodo']
-                        if docente and periodo:
-                            for dist in info['cursos']:
-                                materia = None
-                                paralelo = None
-                                for m in dist['materias']:
-                                    if m['select']:
-                                       materia = m['id']
-                                for p in dist['paralelos']:
-                                    if p['select']:
-                                        paralelo = p['id']
-                                if not MateriaAsignada.objects.filter(status=True, profesor_id=docente, materia_id=materia, paralelo_id=paralelo).exists():
-                                    distri = self.model(profesor_id=docente, materia_id=materia, paralelo_id=paralelo)
-                                    distri.save()
-                                else:
+        with transaction.atomic():
+            try:
+                    action = request.POST['action']
+                    if action == 'add':
+                        error = []
+                        info = json.loads(request.POST['distributivo'])
+                        if not info['profesor'] or info['profesor'] == '':
+                            error.append('Debe elegir un docente')
+                        if not info['periodo'] or info['periodo'] == '':
+                            error.append('Debe elegir un periodo valido')
+                        if len(error) > 0:
+                            data['error'] = error
+                        else:
+                            docente = info['profesor']
+                            periodo = info['periodo']
+                            if docente and periodo:
+                                for dist in info['cursos']:
+                                    materia = None
+                                    paralelo = None
+                                    for m in dist['materias']:
+                                        if m['select']:
+                                           materia = m['id']
+                                    for p in dist['paralelos']:
+                                        if p['select']:
+                                            paralelo = p['id']
+                                    if not MateriaAsignada.objects.filter(status=True, materia_id=materia, paralelo_id=paralelo).exists():
+                                        distri = self.model(profesor_id=docente, materia_id=materia, paralelo_id=paralelo)
+                                        distri.save()
+                                    else:
+                                        mate = MateriaAsignada.objects.filter(status=True, materia_id=materia, paralelo_id=paralelo).first()
+                                        error.append('Ya existe un docente impartiendo '+str(mate.materia.materia.nombre)+' en el paralelo '+str(mate.paralelo))
+                                        data['error'] = error
+                                        # data['error'].append(str('Existe una combinacion de curso materia y paralelo repetida, por favor corrigela para continuar'))
+                                if len(error) > 0:
                                     transaction.set_rollback(True)
-                                    data['error'].append('Existe una combinacion de curso materia y paralelo repetida, por favor corrigela para continuar')
-                                    break
-                elif action == 'edit':
-                    error = []
-                    info = json.loads(request.POST['distributivo'])
-                    if not info['profesor'] or info['profesor'] == '':
-                        error.append('Debe elegir un docente')
-                    if not info['periodo'] or info['periodo'] == '':
-                        error.append('Debe elegir un periodo valido')
-                    if len(error) > 0:
-                        data['error'] = error
-                    else:
-                        docente = info['profesor']
-                        periodo = info['periodo']
-                        if docente and periodo:
-                            clear = Profesor.objects.get(id=docente)
-                            clear.materiaasignada_set.all().delete()
-                            for dist in info['cursos']:
-                                materia = None
-                                paralelo = None
-                                for m in dist['materias']:
-                                    if m['select']:
-                                        materia = m['id']
-                                for p in dist['paralelos']:
-                                    if p['select']:
-                                        paralelo = p['id']
-                                if not MateriaAsignada.objects.filter(status=True, profesor_id=docente,
-                                                                      materia_id=materia,
-                                                                      paralelo_id=paralelo).exclude(id=dist['id']).exists():
-                                    distri = self.model(profesor_id=docente, materia_id=materia, paralelo_id=paralelo)
-                                    distri.save()
-                                else:
+                    elif action == 'edit':
+                        error = []
+                        info = json.loads(request.POST['distributivo'])
+                        if not info['profesor'] or info['profesor'] == '':
+                            error.append('Debe elegir un docente')
+                        if not info['periodo'] or info['periodo'] == '':
+                            error.append('Debe elegir un periodo valido')
+                        if len(error) > 0:
+                            data['error'] = error
+                        else:
+                            docente = info['profesor']
+                            periodo = info['periodo']
+                            if docente and periodo:
+                                clear = Profesor.objects.get(id=docente)
+                                clear.materiaasignada_set.all().delete()
+                                for dist in info['cursos']:
+                                    materia = None
+                                    paralelo = None
+                                    for m in dist['materias']:
+                                        if m['select']:
+                                            materia = m['id']
+                                    for p in dist['paralelos']:
+                                        if p['select']:
+                                            paralelo = p['id']
+                                    if not MateriaAsignada.objects.filter(status=True, profesor_id=docente, materia_id=materia, paralelo_id=paralelo).exclude(id=dist['id']).exists():
+                                        distri = self.model(profesor_id=docente, materia_id=materia, paralelo_id=paralelo)
+                                        distri.save()
+                                    else:
+                                        mate = MateriaAsignada.objects.filter(status=True, materia_id=materia,
+                                                                              paralelo_id=paralelo).first()
+                                        error.append('Ya existe un docente impartiendo ' + str(mate.materia.materia.nombre) + ' en el paralelo ' + str(mate.paralelo))
+                                        data['error'] = error
+                                        # data['error'].append(str('Existe una combinacion de curso materia y paralelo repetida, por favor corrigela para continuar'))
+                                if len(error) > 0:
                                     transaction.set_rollback(True)
-                                    data['error'].append('Existe una combinacion de curso materia y paralelo repetida, por favor corrigela para continuar')
-                                    break
-                elif action == 'delete':
-                    pk = PrimaryKeyEncryptor(SECRET_KEY_ENCRIPT).decrypt(request.POST['pk'])
-                    objeto = Persona.objects.get(pk=pk)
-                    profesor = Profesor.objects.get(persona=objeto)
-                    profesor.materiaasignada_set.all().delete()
-                else:
-                    data['error'] = 'No ha seleccionado una opcion'
-        except Exception as e:
-            data['error'] = str(e)
-            transaction.set_rollback(True)
-        return JsonResponse(data, safe=False)
+                    elif action == 'delete':
+                        pk = PrimaryKeyEncryptor(SECRET_KEY_ENCRIPT).decrypt(request.POST['pk'])
+                        objeto = Persona.objects.get(pk=pk)
+                        profesor = Profesor.objects.get(persona=objeto)
+                        profesor.materiaasignada_set.all().delete()
+                    else:
+                        data['error'] = 'No ha seleccionado una opcion'
+            except Exception as e:
+                data['error'] = str(e)
+                transaction.set_rollback(True)
+            return JsonResponse(data, safe=False)
 
     def get(self, request, *args, **kwargs):
         data = {}
@@ -180,9 +185,9 @@ class Listview(TemplateView):
                     term = request.GET['term']
                     if 'id' in request.GET and not request.GET['id'] == '':
                         periodo = request.GET['id']
-                        excludes = self.model.objects.values_list('materia__curso__curso_id').filter(status=True, materia__curso__periodo_id=periodo)
+                        noasig = self.cursos_noasignados(periodo)
                         for objeto in Curso.objects.filter(Q(status=True), Q(nombre__icontains=term) | Q(
-                                descripcion__icontains=term)).exclude(id__in=excludes)[:10]:
+                                descripcion__icontains=term), id__in=noasig)[:10]:
                             item = {'id': objeto.pk, 'text': objeto.nombre}
                             data.append(item)
                     return JsonResponse(data, safe=False)
@@ -259,6 +264,16 @@ class Listview(TemplateView):
 
     def get_peril(self, request):
         return request.session['perfilactualkey']
+
+
+    def cursos_noasignados(self, periodo):
+        data = []
+        for c in CursoMateria.objects.filter(curso__periodo=periodo):
+            for p in c.curso.paralelo.filter(status=True):
+                if not MateriaAsignada.objects.filter(materia=c, paralelo=p).exists():
+                    if c.curso.curso.id not in data:
+                        data.append(Curso.objects.get(id=c.curso.curso.id).id)
+        return data
 
     def get_context_data(self, **kwargs):
         data = super().get_context_data(**kwargs)
