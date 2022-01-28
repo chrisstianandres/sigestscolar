@@ -21,6 +21,7 @@ from django.conf import settings
 
 from apps import backEnd
 from apps.curso.views import IngresoNotasView, PrintActaNotas
+from apps.empresa.views import EmpresaView
 from apps.profesor.distributivodocente import Listview
 from apps.rubro.views import ListviewValores, ListviewFacturacion, PrintFactura
 
@@ -31,6 +32,7 @@ urlpatterns = [
                   path('accounts/login', backEnd.LoginFormView.as_view(), name='login_next'),
                   path('logout/', backEnd.disconnect, name='logout'),
                   path('dashborad/', login_required(backEnd.DashboardView.as_view()), name='dashborad'),
+                  path('empresa/', login_required(EmpresaView.as_view()), name='empresa'),
                   path('change_profile/<int:pk>', login_required(backEnd.UserChangeGroup.as_view()), name='changeprofile'),
                   path('cursos/', include('apps.curso.urls', namespace='cursos')),
                   path('paralelos/', include('apps.paralelo.urls', namespace='paralelos')),

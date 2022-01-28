@@ -16,7 +16,7 @@
         <td  class="dt-center">{{ elemento.alias }}</td>
         <td  class="dt-center">{{ elemento.descripcion }}</td>
         <td  class="dt-center">{{ elemento.talla }}</td>
-        <td  class="dt-center">{{ elemento.valor }}</td>
+        <td  class="dt-center">$ {{ elemento.valor }}</td>
         <td style="text-align:center; width: 10%"  class="dt-center">
             <a type="button" class="btn btn-warning btn-xs editar" pk="{{ elemento.pk }}" style="color: white"
                     {% if not modal_form %}

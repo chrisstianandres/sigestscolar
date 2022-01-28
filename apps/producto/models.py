@@ -1,3 +1,5 @@
+from datetime import datetime
+
 from django.db import models
 from django.db.models import Sum
 
@@ -47,7 +49,7 @@ class Producto(ModeloBase):
         return PrimaryKeyEncryptor(SECRET_KEY_ENCRIPT).decrypt(id)
 
     def stock_producto(self):
-        return Inventario.objects.filter(status=True).aggregate(Sum('cantidad')).get('cantidad__sum')
+        return self.inventario_set.filter(status=True).aggregate(Sum('stockactual')).get('stockactual__sum')
 
     def valortotal(self):
         return float(self.valor) + float(self.valoriva())
@@ -62,10 +64,11 @@ class Producto(ModeloBase):
 class Inventario(ModeloBase):
     producto = models.ForeignKey(Producto, on_delete=models.PROTECT)
     cantidad = models.IntegerField(default=0)
-    fechaingreso = models.DateField()
+    stockactual = models.IntegerField(default=0)
+    fechaingreso = models.DateField(default=datetime.now())
 
     def __str__(self):
-        return '{} - {}'.format(self.producto, self.cantidad)
+        return '{} - {} de {}'.format(self.producto, self.stockactual, self.cantidad)
 
     class Meta:
         verbose_name = u'Inventario'
@@ -73,7 +76,7 @@ class Inventario(ModeloBase):
         ordering = ('producto', )
 
     def nombre_corto(self):
-        return "%s - %s" % (self.producto, self.cantidad)
+        return "%s - %s" % (self.producto, self.stockactual)
 
 
 

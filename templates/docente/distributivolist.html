@@ -38,16 +38,19 @@
 
                             </div>
                         </td>
+                    {% if request.session.perfilactual != 'ADMINISTRATIVO' and request.session.perfiles.es_administrativo or request.user.is_superuser %}
                         <td style="width: 10%">
-                            <div class="form-group float-right">
-                                <button {% if not modal_form %}onclick="window.location.href ={{ url_add }};" {% endif %}type="button"
-                                        class="btn btn-block btn-primary btn-sm"
-                                        {% if modal_form %} data-toggle="modal"
-                                        data-target="#modal_form"{% endif %}
-                                        style="margin-right: 2px;"><i class="fa fa-plus-circle"></i> Agregar
-                                </button>
-                            </div>
-                        </td>
+                                <div class="form-group float-right">
+                                    <button {% if not modal_form %}onclick="window.location.href ={{ url_add }};" {% endif %}type="button"
+                                            class="btn btn-block btn-primary btn-sm"
+                                            {% if modal_form %} data-toggle="modal"
+                                            data-target="#modal_form"{% endif %}
+                                            style="margin-right: 2px;"><i class="fa fa-plus-circle"></i> Agregar
+                                    </button>
+                                </div>
+                            </td>
+                    {% endif %}
+
                     </tr>
                     </tbody>
                 </table>

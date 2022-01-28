@@ -1,0 +1,29 @@
+{% extends 'bases/base_list.html' %}
+{% block header_tabla %}
+    <th class="dt-center">Fecha Ingreso</th>
+    <th class="dt-center">Codigo</th>
+    <th class="dt-center">Nombre</th>
+    <th class="dt-center">Alias</th>
+    <th class="dt-center">Descripcion</th>
+    <th class="dt-center">Talla</th>
+    <th class="dt-center">Cantidad</th>
+    <th class="dt-center">Stock Actual</th>
+{% endblock %}
+{% block body_tabla %}
+    {% for elemento in page_obj %}
+      <tr>
+        <td  class="dt-center">{{ elemento.fechaingreso }}</td>
+        <td  class="dt-center">{{ elemento.producto.codigo }}</td>
+        <td  class="dt-center">{{ elemento.producto.nombre }}</td>
+        <td  class="dt-center">{{ elemento.producto.alias }}</td>
+        <td  class="dt-center">{{ elemento.producto.descripcion }}</td>
+        <td  class="dt-center">{{ elemento.producto.talla }}</td>
+        <td  class="dt-center">{{ elemento.cantidad }}</td>
+        <td  class="dt-center">{{ elemento.stockactual }}</td>
+    </tr>
+    {% empty %}
+        <tr>
+        <td colspan="4" style="text-align: center">No existen registros para mostrar</td>
+        </tr>
+    {% endfor %}
+{% endblock %}

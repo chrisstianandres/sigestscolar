@@ -177,6 +177,7 @@ class LoginFormView(LoginView):
             persona = request.user.persona_set.first()
             if persona is not None:
                 perfiles = persona.perfilusuario_set.filter(status=True)
+                totalperifiles = perfiles.count()
                 if perfiles.exists():
                     keyperfil = 0
                     if 'perfiles' not in request.session:
@@ -200,6 +201,10 @@ class LoginFormView(LoginView):
                 if 'perfilactual' not in request.session:
                     request.session['perfilactual'] = PERFIL_ACTUAL[4][1]
                 self.get_modulos()
+
+            if 'totalperifiles' not in request.session:
+                request.session['totalperifiles'] = totalperifiles
+
         except Exception as e:
             pass
 
@@ -209,9 +214,9 @@ class LoginFormView(LoginView):
             perfilactual = request.session['perfilactual']
             grupo = Group.objects.filter(name__icontains=perfilactual)
             if grupo.exists():
-                modulos = grupo.first().grupomodulo_set.all()
+                modulos = grupo.first().grupomodulo_set.all().order_by('nombre')
                 if modulos.exists():
-                    request.session['modulos'] = modulos.first().modulos.all()
+                    request.session['modulos'] = modulos.first().modulos.all().order_by('nombre')
             elif request.user.is_superuser:
                 request.session['modulos'] = Modulo.objects.filter(status=True).exclude(id=13).order_by('nombre')
             else:

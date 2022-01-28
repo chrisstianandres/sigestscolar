@@ -1,0 +1,23 @@
+{% extends 'bases/base_form.html' %}
+{% block rules_form %}
+    ruc: {
+        required: false,
+        minlength: 13,
+        maxlength: 13,
+        validar_ruc: true
+    },
+    email: {
+        required: false,
+        minlength: 5,
+        maxlength: 100,
+        email: true
+    },
+{% endblock %}
+{% block menssages_fom %}
+    ruc: {
+        minlength: "Debe ingresar al menos 5 caracteres",
+        maxlength: "Debe ingresar maximo 100 caracteres",
+        email: 'Ingrese un email valido
+    },
+{% endblock %}
+

@@ -5,7 +5,7 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>{{ titulo }}</title>
-    <link href="/media/icoonosisgestcolar.ico" rel="icon">
+    <link href="{% static 'images/icoonosisgestcolar.ico' %}" rel="icon">
 
   <!-- Google Font: Source Sans Pro -->
   <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Source+Sans+Pro:300,400,400i,700&display=fallback">
@@ -102,7 +102,7 @@
         </a>
 {#          {% if request.user.groups.all.count > 1 %}#}
               <div class="dropdown-menu dropdown-menu-lg dropdown-menu-right">
-                  <span class="dropdown-item dropdown-header">Perfiles de Usuario</span>
+                  <span class="dropdown-item dropdown-header">{{ request.session.perfiles.count }}</span>
                   <div class="dropdown-divider"></div>
 {#                  {% for g in request.user.groups.all %}#}
                   {% if request.session.perfilactual != 'ADMINISTRATIVO' and request.session.perfiles.es_administrativo %}
@@ -139,10 +139,13 @@
             <a href="#" class="dropdown-item">
             <i class="fa fa-user mr-2"></i> Perfil de Usuario
           </a>
-          <div class="dropdown-divider"></div>
-          <a href="#" class="dropdown-item">
+            {% if request.session.perfilactual != 'ADMINISTRATIVO' and request.session.perfiles.es_administrativo or request.user.is_superuser %}
+            <div class="dropdown-divider"></div>
+          <a href="/empresa" class="dropdown-item">
             <i class="fa fa-building mr-2"></i> Configuracion de la empresa
           </a>
+            {% endif %}
+
           <div class="dropdown-divider"></div>
           <a href="{% url 'logout' %}" class="dropdown-item">
             <i class="fa fa-sign-out-alt mr-2"></i> Cerrar sesion

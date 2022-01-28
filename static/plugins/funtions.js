@@ -305,6 +305,7 @@ function login(url, parametros, callback, callback2) {
             return false;
         }
         menssaje_error('Error!', data.error, 'far fa-times-circle');
+        callback2();
     }).fail(function (jqXHR, textStatus, errorThrown) {
         alert(textStatus + ': ' + errorThrown);
     })

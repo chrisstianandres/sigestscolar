@@ -12,11 +12,15 @@ class Iva(ModeloBase):
 
 class Empresa(ModeloBase):
     nombre = models.CharField(max_length=100, null=True, blank=True, verbose_name='Nombre')
+    descripcioncorta = models.CharField(max_length=100, null=True, blank=True, verbose_name='Descripcion corta')
     direccion = models.TextField(default='', verbose_name=u"Direccion")
     mision = models.TextField(default='', verbose_name=u"Mision")
     vision = models.TextField(default='', verbose_name=u"Vision")
     telefono = models.CharField(max_length=10, null=True, blank=True, verbose_name='Telefono')
-    email = models.TextField(null=True, blank=True, verbose_name='email')
+    telefono2 = models.CharField(max_length=10, null=True, blank=True, verbose_name='Telefono 2')
+    telefono3 = models.CharField(max_length=10, null=True, blank=True, verbose_name='Telefono 3')
+    ruc = models.CharField(max_length=13, null=True, blank=True, verbose_name='Ruc')
+    email = models.EmailField(null=True, blank=True, verbose_name='email')
     iva = models.ForeignKey(Iva, null=True, blank=True, verbose_name=u"Iva", on_delete=models.PROTECT)
 
     def __str__(self):
@@ -28,4 +32,4 @@ class Empresa(ModeloBase):
     class Meta:
         verbose_name = u"Empresa"
         verbose_name_plural = u"Empresas"
-        unique_together = ('nombre',)
+        unique_together = ('nombre', )

@@ -1,6 +1,6 @@
 from django import forms
 from django.forms import TextInput
-from .models import Producto
+from .models import Producto, Inventario
 
 
 class Formulario(forms.ModelForm):
@@ -31,3 +31,23 @@ class Formulario(forms.ModelForm):
                   'descripcion': 'Descripcion', 'talla': 'Talla', 'valor': 'Valor'}
         widgets = {'nombre': forms.TextInput(), 'alias': forms.TextInput(), 'codigo': forms.TextInput(),
                    'valor': forms.NumberInput()}
+
+
+class FormularioInventario(forms.ModelForm):
+    # constructor
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        for field in self.Meta.fields:
+            self.fields[field].widget.attrs.update({
+                'class': 'form-control'
+            })
+            self.fields['cantidad'].widget = TextInput(
+                attrs={'class': 'form-control', 'min': 1, 'max': 100000000, 'split': '0.01', 'autocomplete': 'off'})
+
+    class Meta:
+        model = Inventario
+        fields = ['producto', 'cantidad']
+        labels = {'producto': 'Producto', 'cantidad': 'Cantidad'}
+        widgets = {'producto': forms.Select(attrs={'class': 'form-control select2'}),
+                   'cantidad': forms.NumberInput(attrs={'class': 'form-control', 'min': 1, 'max': 100000000,
+                                                        'split': '0.01', 'autocomplete': 'off'})}

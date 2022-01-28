@@ -6,5 +6,6 @@ app_name = 'producto'
 
 urlpatterns = [
     path('', login_required(Listview.as_view()), name='producto'),
+    path('inventario', login_required(Inventarioview.as_view()), name='inventario'),
 
 ]

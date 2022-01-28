@@ -2,12 +2,29 @@
 <!doctype html>
 <html lang="es">
   <head>
+      <style>
+          #fondo {
+              background-image: url('{% static 'photo1.png' %}');
+          }
+
+          .oscuro {
+              content: '';
+              position: absolute;
+              top: 0;
+              bottom: 0;
+              left: 0;
+              right: 0;
+              background-color: rgba(0, 0, 0, 0.98);
+          }
+      </style>
     <!-- Required meta tags -->
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
     <link href="https://fonts.googleapis.com/css?family=Roboto:300,400&display=swap" rel="stylesheet">
+      <link href="{% static 'images/icoonosisgestcolar.ico' %}" style="border-radius: 12px!important;" rel="icon">
 
     <link rel="stylesheet" href="{% static 'loginstyle/fonts/icomoon/style.css' %}">
+    <link rel="stylesheet" href="{% static 'adminlte/plugins/fontawesome-free/css/all.min.css' %}">
 
     <link rel="stylesheet" href="{% static 'loginstyle/css/owl.carousel.min.css' %}">
 
@@ -19,7 +36,7 @@
 
     <title>Login {{ empresa.nombre }}</title>
   </head>
-  <body class="hold-transition login-page" style="background-image: url('{% static 'photo1.png' %}');">>
+  <body class="hold-transition login-page" id="fondo">
 
 
 
@@ -119,16 +136,19 @@
                   };
                   var isvalid = $(this).valid();
                   if (isvalid) {
+                      $('#fondo').addClass('oscuro');
                       var dialog = bootbox.dialog({
-                          title: 'Estamos iniciando sesion!!!',
-                          message: '<p><i class="fa fa-spin fa-spinner"></i> Cargando tu sesion...</p>',
+                          title: 'Estamos Iniciando sesion!!!',
+                          message: '<i class="fa fa-spin fa-spinner"></i> Cargando tu panel principal...',
                           size: 'small',
                           centerVertical: true,
                           closeButton: false,
                       }).on('shown.bs.modal', function () {
-                          dialog.modal('hide');
                           login(window.location.pathname, parametros, function (data) {
                               window.location.href = '/dashborad'
+                          }, function (){
+                              dialog.modal('hide');
+                              $('#fondo').removeClass('oscuro');
                           });
                           return false;
                       });

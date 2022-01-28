@@ -1,0 +1,125 @@
+{% extends 'bases/base_list.html' %}
+{% load static %}
+{% block content %}
+    <section class="content">
+        <div class="container-fluid">
+            <div class="row">
+                <div class="col-md-12">
+                <div class="row">
+                     <h3 class="card-title"><i class="fa fa-list"></i> {{ titulo_tabla }}</h3>
+                </div>
+                    <br>
+{#                            <h3 class="card-title"><i class="fa fa-list"></i> {{ titulo_tabla }}</h3>#}
+                        <!-- /.card-header -->
+                        <!-- form start -->
+                        <div class="row">
+                            <div class="col-md-3">
+                                <!-- Profile Image -->
+                                <div class="card card-primary card-outline">
+                                    <div class="card-body box-profile">
+                                        <div class="text-center">
+                                            <img class="profile-user-img img-fluid img-circle"
+                                                 src="{% static 'images/imagenalec.jpg' %}" alt="User profile picture">
+                                        </div>
+
+                                        <h3 class="profile-username text-center">{{ empresa.nombre }}</h3>
+
+                                        <p class="text-muted text-center">{{ empresa.descripcioncorta }}</p>
+
+                                        <strong><i class="fas fa-map-marker-alt mr-1"></i> Direccion</strong>
+
+                                        <p class="text-muted">{{ empresa.direccion }}</p>
+
+                                        <hr>
+
+                                        <strong><i class="fas fa-phone-volume mr-1"></i> Telefonos</strong>
+
+                                        <p class="text-muted">
+                                            {% if empresa.telefono %}
+                                            <span class="tag tag-danger">{{ empresa.telefono }}</span>
+                                            {% endif %}
+                                        {% if empresa.telefono2 %}
+                                            <span class="tag tag-danger">{{ empresa.telefono2 }}</span>
+                                            {% endif %}
+                                        {% if empresa.telefono3 %}
+                                            <span class="tag tag-danger">{{ empresa.telefono3 }}</span>
+                                            {% endif %}
+                                        </p>
+
+                                        <hr>
+
+                                        <strong><i class="far fa-file-alt mr-1"></i> Ruc</strong>
+
+                                        <p class="text-muted">{{ empresa.ruc }}</p>
+
+                                    <hr>
+
+                                        <strong><i class="fas fa-at mr-1"></i> Email</strong>
+
+                                        <p class="text-muted">{{ empresa.email }}</p>
+
+                                    <hr>
+
+                                        <strong><i class="fas fa-percent mr-1"></i> Iva</strong>
+
+                                        <p class="text-muted">{{ empresa.iva.ivaporciento }}</p>
+                                        <hr>
+                                    <a href="/empresa?action=edit" class="btn btn-primary btn-block"><b>Editar </b></a>
+
+                                    </div>
+                                    <!-- /.card-body -->
+                                </div>
+                                <!-- /.card -->
+                            </div>
+                            <!-- /.col -->
+                            <div class="col-md-9">
+                                <div class="card">
+                                    <div class="card-body">
+                                        <div class="tab-content">
+                                            <div class="tab-pane active" id="activity">
+                                                <!-- Post -->
+                                                <div class="post">
+                                                    <div class="user-block">
+                                                        <span class="username"> <a href="#">Mision</a>
+                                                        </span>
+                                                    </div>
+                                                    <!-- /.user-block -->
+                                                    <p>
+                                                        {{ empresa.mision }}
+                                                    </p>
+                                                <!-- /.post -->
+                                                <!-- Post -->
+                                                 <div class="post">
+                                                    <div class="user-block">
+                                                        <span class="username"> <a href="#">Vision</a>
+                                                        </span>
+                                                    </div>
+                                                    <!-- /.user-block -->
+                                                    <p>
+                                                        {{ empresa.vision }}
+                                                    </p>
+                                                <!-- /.post -->
+                                                <!-- Post -->
+
+                                                <!-- /.post -->
+                                            </div>
+                                                <!-- /.post -->
+                                            </div>
+                                            <!-- /.tab-pane -->
+                                        </div>
+                                        <!-- /.tab-content -->
+                                    </div><!-- /.card-body -->
+                                </div>
+                                <!-- /.card -->
+                            </div>
+                            <!-- /.col -->
+                        </div>
+
+                    </div>
+                    <!-- /.card -->
+                <!-- /.col -->
+            </div>
+            <!-- /.row -->
+        </div><!-- /.container-fluid -->
+    </section>
+{% endblock %}

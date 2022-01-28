@@ -166,14 +166,14 @@ class ListviewFacturacion(TemplateView):
                                 if rubrocreado:
                                     cant = int(rub['cantidad'])
                                     pago = generar_pago(request, rubrocreado, iva=True, efectivo=efectivo)
-                                    stock = Inventario.objects.filter(status=True, cantidad__gt=0)
+                                    stock = Inventario.objects.filter(status=True, stockactual__gt=0)
                                     for st in stock:
-                                        if st.cantidad >= cant:
-                                            st.cantidad -= cant
-                                            st.save(request)
+                                        if st.stockactual >= cant:
+                                            st.stockactual -= cant
                                         else:
-                                            st.cantidad = 0
-                                            cant = cant-st.cantidad
+                                            cant = cant-st.stockactual
+                                            st.stockactual = 0
+                                        st.save(request)
                             if pago:
                                 pagos.append(pago)
                             else:
