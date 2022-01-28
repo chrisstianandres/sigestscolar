@@ -10,6 +10,9 @@
     minlength: 5,
     maxlength: 50
     },
+    valor: {
+    required: true
+    }
 {% endblock %}
 {% block menssages_fom %}
     codigo: {
@@ -21,6 +24,10 @@
     required: "Por favor ingresa un alias para el producto",
     minlength: "Ingresa al menos 5 caracteres",
     maxlength: "El alias unico debe tener maximo 50 caracteres",
+    },
+    valor: {
+    required: "Por favor ingresa un valor valido",
+    min: "Ingresa un valor mayor o igual a 1"
     },
 {% endblock %}
 

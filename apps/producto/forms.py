@@ -20,10 +20,14 @@ class Formulario(forms.ModelForm):
             self.fields['codigo'].widget = TextInput(
                 attrs={'placeholder': 'Ingrese un codigo unico para el producto', 'class': 'form-control',
                        'autocomplete': 'off'})
+            self.fields['valor'].widget = TextInput(
+                attrs={'class': 'form-control', 'min': 1, 'max': 100000000, 'autocomplete': 'off'})
             self.fields['codigo'].initial = ''
 
     class Meta:
         model = Producto
-        fields = ['codigo', 'nombre', 'alias', 'descripcion']
-        labels = {'codigo': 'Codigo', 'nombre': 'Nombre', 'alias': 'Alias', 'descripcion': 'Descripcion'}
-        widgets = {'nombre': forms.TextInput(), 'alias': forms.TextInput(), 'codigo': forms.TextInput()}
+        fields = ['codigo', 'nombre', 'alias', 'descripcion', 'talla', 'valor']
+        labels = {'codigo': 'Codigo', 'nombre': 'Nombre', 'alias': 'Alias',
+                  'descripcion': 'Descripcion', 'talla': 'Talla', 'valor': 'Valor'}
+        widgets = {'nombre': forms.TextInput(), 'alias': forms.TextInput(), 'codigo': forms.TextInput(),
+                   'valor': forms.NumberInput()}

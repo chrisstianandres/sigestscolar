@@ -106,7 +106,7 @@
             {% endif %}
 
             <button type="button" class="btn btn-danger"
-                    onclick="window.location.href = '{{ request.path }}';">{% if not pantallaver %}Cancelar{% else %}Regresar{% endif %}
+                    onclick="window.location.href = '{{ request.path }}';">{% if not pantallaver %}Cancelar{% else %}<i class="fas fa-arrow-left"></i> Regresar{% endif %}
             </button>
         </div>
     </form>
@@ -150,8 +150,13 @@
                             class: 'text-center',
                             orderable: false,
                             render: function (data, type, row) {
-                                console.log(data);
-                                return '<input type="number" min="1" max="10" name="nota" step="0.01" class="form-control form-control-sm input-sm" autocomplete="off" value="' + data + '">';
+                                let valor;
+                                {% if not pantallaver %}
+                                    valor = '<input type="number" min="1" max="10" name="nota" step="0.01" class="form-control form-control-sm input-sm" autocomplete="off" value="' + data + '">';
+                                {% else %}
+                                    valor= data;
+                                {% endif %}
+                            return valor;
                             }
                         }
                     ]
