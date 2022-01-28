@@ -305,6 +305,7 @@ function login(url, parametros, callback, callback2) {
             return false;
         }
         menssaje_error('Error!', data.error, 'far fa-times-circle');
+        callback2();
     }).fail(function (jqXHR, textStatus, errorThrown) {
         alert(textStatus + ': ' + errorThrown);
     })
@@ -715,7 +716,7 @@ function ajax_sin_confirmar(url, parametros, callback) {
 
 
 }
-function ajax_sin_confirmar_post(url, parametros, callback) {
+function ajax_sin_confirmar_post(url, parametros, callback, callbackauxiliar) {
     $.ajax({
         dataType: 'JSON',
         type: 'POST',
@@ -727,6 +728,7 @@ function ajax_sin_confirmar_post(url, parametros, callback) {
             return false;
         }
         menssaje_error(data.error, data.content, 'fa fa-times-circle');
+        callbackauxiliar();
     });
 
 
