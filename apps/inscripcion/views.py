@@ -169,7 +169,7 @@ class Listview(TemplateView):
                         filtros.add(Q(curso__periodo_id=request.GET['id']), Q.AND)
                     if 'curso_id' in request.GET and not request.GET['curso_id'] == '':
                         filtros.add(Q(curso__curso_id=request.GET['curso_id']), Q.AND)
-                    ids = self.model.objects.values_list('curso__paralelo_id').filter(filtros)
+                    ids = self.model.objects.values_list('paralelo_id').filter(filtros)
                     f = Q(status=True)
                     if 'id' in request.GET and not request.GET['id'] == '' or 'curso_id' in request.GET and not request.GET['curso_id'] == '':
                         f.add(Q(id__in=ids), Q.AND)
@@ -209,7 +209,7 @@ class Listview(TemplateView):
                     term = request.GET['term']
                     from apps.persona.models import Persona
                     anio = datetime.now().year - 18
-                    for objeto in Persona.objects.filter(Q(status=True), Q(nacimiento__year__gte=anio), Q(nombres__icontains=term) | Q(cedula__icontains=term) | Q(apellido1__icontains=term) | Q(apellido2__icontains=term) )[:10]:
+                    for objeto in Persona.objects.filter(Q(status=True), Q(nacimiento__year__gte=anio), Q(nombres__icontains=term) | Q(cedula__icontains=term) | Q(apellido1__icontains=term) | Q(apellido2__icontains=term) ).exclude(usuario__isnull=False)[:10]:
                         item = {'id': objeto.pk, 'text': str(objeto)}
                         data.append(item)
                     return JsonResponse(data, safe=False)

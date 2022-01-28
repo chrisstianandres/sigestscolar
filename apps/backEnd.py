@@ -174,36 +174,48 @@ class LoginFormView(LoginView):
     def get_group_session(self):
         try:
             request = get_current_request()
+            totalperifiles = 0
             persona = request.user.persona_set.first()
             if persona is not None:
                 perfiles = persona.perfilusuario_set.filter(status=True)
-                totalperifiles = perfiles.count()
                 if perfiles.exists():
                     keyperfil = 0
                     if 'perfiles' not in request.session:
                         request.session['perfiles'] = perfiles[0]
+                        if request.user.is_superuser:
+                            totalperifiles += 1
                     if 'perfilactualkey' not in request.session:
                         for key in range(0, 4):
                             if PERFIL_ACTUAL[key][1] == str(perfiles[0]):
                                 request.session['perfilactualkey'] = keyperfil = PERFIL_ACTUAL[key][0]
                     if 'perfilactual' not in request.session:
                         request.session['perfilactual'] = PERFIL_ACTUAL[keyperfil][1]
+                    check = perfiles[0]
+                    if check.es_administrativo():
+                        totalperifiles += 1
+                    if check.es_profesor():
+                        totalperifiles += 1
+                    if check.es_externo():
+                        totalperifiles += 1
                     self.get_modulos()
                 elif request.user.is_superuser:
+                    totalperifiles += 1
                     if 'perfilactualkey' not in request.session:
                         request.session['perfilactualkey'] = keyperfil = PERFIL_ACTUAL[4][0]
                     if 'perfilactual' not in request.session:
                         request.session['perfilactual'] = PERFIL_ACTUAL[4][1]
                     self.get_modulos()
             elif request.user.is_superuser:
+                totalperifiles += 1
                 if 'perfilactualkey' not in request.session:
                     request.session['perfilactualkey'] = keyperfil = PERFIL_ACTUAL[4][0]
                 if 'perfilactual' not in request.session:
                     request.session['perfilactual'] = PERFIL_ACTUAL[4][1]
                 self.get_modulos()
 
-            if 'totalperifiles' not in request.session:
-                request.session['totalperifiles'] = totalperifiles
+            if 'totalperfiles' not in request.session:
+                request.session['totalperfiles'] = totalperifiles
+
 
         except Exception as e:
             pass

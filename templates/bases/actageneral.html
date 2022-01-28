@@ -60,7 +60,8 @@
 </p>
 <p>
     <b>MATERIA: </b>{{ modeloeval.materia.materia.nombre }}<br>
-    <b>PERIODO: </b>{{ modeloeval.materia.curso.periodo.nombre_corto }}
+    <b>PERIODO: </b>{{ modeloeval.materia.curso.periodo.nombre_corto }}<br>
+    <b>ACTA GENERADA EL: </b>{{ fechactual|date:'d-m-Y' }}
 </p>
 <p class="head"><b>LISTA DE ALUMNOS</b><br></p>
 <table id="invoice" style="width: 500px">

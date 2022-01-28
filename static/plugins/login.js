@@ -1,5 +1,4 @@
 $(function () {
-    console.log(12);
     validador();
     $("#formlogin").validate({
         rules: {

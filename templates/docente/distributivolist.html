@@ -38,7 +38,7 @@
 
                             </div>
                         </td>
-                    {% if request.session.perfilactual != 'ADMINISTRATIVO' and request.session.perfiles.es_administrativo or request.user.is_superuser %}
+                    {% if request.session.perfilactual == 'ADMINISTRATIVO' and request.session.perfiles.es_administrativo or request.user.is_superuser %}
                         <td style="width: 10%">
                                 <div class="form-group float-right">
                                     <button {% if not modal_form %}onclick="window.location.href ={{ url_add }};" {% endif %}type="button"

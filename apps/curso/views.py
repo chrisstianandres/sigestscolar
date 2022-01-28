@@ -1,5 +1,6 @@
 import json
 import os
+from datetime import datetime
 
 from django.contrib.contenttypes.models import ContentType
 from django.contrib.staticfiles import finders
@@ -674,9 +675,8 @@ class IngresoNotasView(TemplateView):
                     materiaasignada = MateriaAsignada.objects.get(id=materia, profesor__persona=persona)
                     # for objeto in CursoQuimestre.objects.filter(Q(status=True), cursoasignado_id=materia).distinct('parcial__quimestre'):
                     for objeto in materiaasignada.modelo_eval_quimestres():
-                        if not objeto.tiene_notas():
-                            item = {'id': objeto.parcial.quimestre.pk, 'text': objeto.parcial.quimestre.nombre}
-                            data.append(item)
+                        item = {'id': objeto.parcial.quimestre.pk, 'text': objeto.parcial.quimestre.nombre}
+                        data.append(item)
                     return JsonResponse(data, safe=False)
                 if action == 'search_parcial':
                     quimestre = ''
@@ -826,13 +826,16 @@ class PrintActaNotas(View):
         try:
             if 'action' in request.GET:
                 action = request.GET['action']
+                hoy = datetime.now()
                 if action == 'actaindividual':
                     instancia = CursoQuimestre.objects.get(pk=self.kwargs['pk'])
                     template = get_template('bases/actanotas.html')
                     context = {'title': 'Acta de Notas',
                                'modeloeval': instancia,
                                'icon': 'media/logo.png',
-                               'empresa': nombre_empresa()}
+                               'empresa': nombre_empresa(),
+                               'fechactual': hoy
+                               }
                     html = template.render(context)
                     response = HttpResponse(content_type='application/pdf')
                     response['Content-Disposition'] = 'attachment; filename="Acta_notas_'+str(instancia.cursoasignado.materia.curso.curso.nombre)+'.pdf"'
@@ -846,7 +849,9 @@ class PrintActaNotas(View):
                                'modeloeval': instancia,
                                'icon': 'media/logo.png',
                                'alumnos': alumnos,
-                               'empresa': nombre_empresa()}
+                               'empresa': nombre_empresa(),
+                               'fechactual': hoy
+                               }
                     html = template.render(context)
                     response = HttpResponse(content_type='application/pdf')
                     response['Content-Disposition'] = 'attachment; filename="Acta_general_notas_'+str(instancia.materia.curso.curso.nombre)+'.pdf"'
