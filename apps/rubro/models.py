@@ -117,7 +117,7 @@ class Rubro(ModeloBase):
 
     def total_finanzas(self):
         if Rubro.objects.filter(status=True, persona=self.persona).exists():
-            return Rubro.objects.filter(status=True, persona=self.persona).aggregate(Sum('valor')).get('valor__sum')
+            return Rubro.objects.filter(status=True, persona=self.persona).aggregate(Sum('valortotal')).get('valortotal__sum')
         return 0.00
 
     def total_pagado_finanzas(self):

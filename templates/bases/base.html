@@ -135,10 +135,10 @@
         </a>
         <div class="dropdown-menu dropdown-menu-lg dropdown-menu-right">
           <span class="dropdown-item dropdown-header"><b>Opciones de usuario</b></span>
-          <div class="dropdown-divider"></div>
-            <a href="#" class="dropdown-item">
-            <i class="fa fa-user mr-2"></i> Perfil de Usuario
-          </a>
+{#          <div class="dropdown-divider"></div>#}
+{#            <a href="#" class="dropdown-item">#}
+{#            <i class="fa fa-user mr-2"></i> Perfil de Usuario#}
+{#          </a>#}
             {% if request.session.perfilactual == 'ADMINISTRATIVO' and request.session.perfiles.es_administrativo or request.user.is_superuser %}
             <div class="dropdown-divider"></div>
           <a href="/empresa" class="dropdown-item">

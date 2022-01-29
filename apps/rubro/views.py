@@ -334,10 +334,10 @@ class ListviewFacturacion(TemplateView):
                 if 'search' in request.GET:
                     if not request.GET['search'] == '':
                         data['search'] = search = request.GET['search']
-                        list = list.filter(Q(cliente__persona__nombre__icontains=search) | Q(
-                            cliente__persona__apellido1__icontains=search) | Q(
-                            cliente__persona__apellido2__icontains=search) | Q(
-                            cliente__persona__cedula__icontains=search) | Q(numerocompleto__icontains=search)
+                        list = list.filter(Q(cliente__nombres__icontains=search) | Q(
+                            cliente__apellido1__icontains=search) | Q(
+                            cliente__apellido2__icontains=search) | Q(
+                            cliente__cedula__icontains=search) | Q(numerocompleto__icontains=search)
                                            ).order_by('-fecha')
                 page_number = request.GET.get('page', 1)
                 paginator = Paginator(list, 10)
