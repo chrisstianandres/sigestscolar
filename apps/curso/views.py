@@ -306,7 +306,7 @@ class ListviewAperutar(TemplateView):
                     return JsonResponse(data, safe=False)
                 if action == 'search_curso':
                     data = []
-                    term = request.GET['term']
+                    term = request.GET['term'] if 'term' in request.GET else ''
                     if 'id' in request.GET and not request.GET['id'] == '':
                         periodo = request.GET['id']
                         excludes = self.model.objects.values_list('curso_id').filter(status=True, periodo_id=periodo)
@@ -317,7 +317,7 @@ class ListviewAperutar(TemplateView):
                     return JsonResponse(data, safe=False)
                 if action == 'search_paralelo':
                     data = []
-                    term = request.GET['term']
+                    term = request.GET['term'] if 'term' in request.GET else ''
                     if 'id' in request.GET and not request.GET['id'] == '':
                         periodo = request.GET['id']
                         for objeto in Paralelo.objects.filter(Q(status=True), Q(nombre__icontains=term) | Q(
@@ -327,7 +327,7 @@ class ListviewAperutar(TemplateView):
                     return JsonResponse(data, safe=False)
                 if action == 'search_materias':
                     data = []
-                    term = request.GET['term']
+                    term = request.GET['term'] if 'term' in request.GET else ''
                     ids = json.loads(request.GET['ids'])
                     for objeto in Materia.objects.filter(Q(status=True), Q(nombre__icontains=term) | Q(
                             identificacion__icontains=term) | Q(alias__icontains=term)).exclude(id__in=ids)[:10]:
@@ -601,7 +601,7 @@ class IngresoNotasView(TemplateView):
                     return JsonResponse(data, safe=False)
                 if action == 'search_curso':
                     data = []
-                    term = request.GET['term']
+                    term = request.GET['term'] if 'term' in request.GET else ''
                     if 'id' in request.GET and not request.GET['id'] == '':
                         periodo = request.GET['id']
                         excludes = self.model.objects.values_list('curso_id').filter(status=True, periodo_id=periodo)
@@ -615,7 +615,7 @@ class IngresoNotasView(TemplateView):
                     curso = ''
                     periodo = ''
                     persona = request.session['persona']
-                    term = request.GET['term']
+                    term = request.GET['term'] if 'term' in request.GET else ''
                     if 'periodo' in request.GET and not request.GET['periodo'] == '':
                         periodo = request.GET['periodo']
                     else:
@@ -639,7 +639,7 @@ class IngresoNotasView(TemplateView):
                     periodo = ''
                     paralelo = ''
                     persona = request.session['persona']
-                    term = request.GET['term']
+                    term = request.GET['term'] if 'term' in request.GET else ''
                     if 'periodo' in request.GET and not request.GET['periodo'] == '':
                         periodo = request.GET['periodo']
                     else:
@@ -666,7 +666,7 @@ class IngresoNotasView(TemplateView):
                 if action == 'search_quimestre':
                     materia = ''
                     persona = request.session['persona']
-                    term = request.GET['term']
+                    term = request.GET['term'] if 'term' in request.GET else ''
                     if 'materia' in request.GET and not request.GET['materia'] == '':
                         materia = request.GET['materia']
                     else:

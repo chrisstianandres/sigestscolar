@@ -109,7 +109,9 @@
                 {% endif %}
             </td>
             <td class="dt-center">{%  for paralelo in elemento.paralelo.all %}
-                {{ paralelo.nombre }}<br>
+                {{ paralelo.nombre }} &nbsp; <a href="" class="btn btn-danger btn-xs listaalumnos" data-toggle="tooltip" title="Exportar lista de alumnos"><i class="far fa-file-pdf"></i></a>
+                &nbsp; <a href="" class="btn btn-success btn-xs verlista" data-toggle="tooltip" title="Ver lista de alumnos"><i class="fa fa-list"></i></a>
+                <br><br>
                 {% endfor %}
                 </td>
             <td class="dt-center">{{ elemento.periodo.nombre }}</td>

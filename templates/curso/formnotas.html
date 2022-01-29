@@ -204,7 +204,7 @@
 
                 },
                 placeholder: 'Busca un Paralelo',
-                minimumInputLength: 1,
+                {#minimumInputLength: 1,#}
             });
             $('#id_materia').select2({
                 language: {
@@ -242,7 +242,7 @@
 
                 },
                 placeholder: 'Busca una materia',
-                minimumInputLength: 1,
+                {#minimumInputLength: 1,#}
             });
             $('#id_quimestre').select2({
                 language: {
@@ -278,7 +278,7 @@
 
                 },
                 placeholder: 'Busca un Quimestre',
-                minimumInputLength: 1,
+                {#minimumInputLength: 1,#}
             });
             $('#id_parcial').select2({
                 language: {
@@ -315,7 +315,7 @@
 
                 },
                 placeholder: 'Busca un Parcial o Examen',
-                minimumInputLength: 1,
+                {#minimumInputLength: 1,#}
             }).on('select2:select', function (e) {
                 $.ajax({
                     type: "GET",

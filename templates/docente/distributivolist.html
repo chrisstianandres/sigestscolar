@@ -69,9 +69,9 @@
 {% block body_tabla %}
     {% for elemento in page_obj %}
         <tr>
-            <td class="dt-center" style="width: 25%">{{ elemento.profesor.persona.nombre_completo }} <br>
+            <td class="dt-center" style="width: 15%">{{ elemento.profesor.persona.nombre_completo }} <br>
             <b>Cedula: </b> {{ elemento.profesor.persona.cedula }}</td>
-            <td class="dt-center" style="width: 60%">
+            <td class="dt-center" style="width: 75%">
                 <p>
                     <a style="color: black" class="accordion-toggle" data-toggle="collapse"
                        data-parent="#cursos{{ forloop.counter }}"
