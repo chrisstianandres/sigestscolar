@@ -936,7 +936,7 @@ class PrintActaInscritos(View):
                        }
             html = template.render(context)
             response = HttpResponse(content_type='application/pdf')
-            response['Content-Disposition'] = 'attachment; filename="Lista_Alumnos' + str(
+            response['Content-Disposition'] = 'attachment; filename="Lista_Alumnos_' + str(
                 cursodata) +str(paralelodata) +'.pdf"'
             pisa_status = pisa.CreatePDF(html, dest=response, link_callback=self.link_callback)
             return response
