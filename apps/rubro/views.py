@@ -137,10 +137,10 @@ class ListviewFacturacion(TemplateView):
 
     def post(self, request, *args, **kwargs):
         data = {}
-        try:
-            action = request.POST['action']
-            if action == 'add':
-                with transaction.atomic():
+        with transaction.atomic():
+            try:
+                action = request.POST['action']
+                if action == 'add':
                     datos = json.loads(request.POST['factura'])
                     per = Persona.objects.get(id=int(datos['cliente']))
                     efectivo = True if int(datos['tipopago']) == 1 else False
@@ -161,7 +161,8 @@ class ListviewFacturacion(TemplateView):
                                     rubrocreado = crear_rubro(persona=per, producto=prod, datos=datos_rubro)
                                 else:
                                     transaction.set_rollback(True)
-                                    data['error'] = 'Error el producto '+str(prod.nombre_corto()) +' no cuenta con el stock suficiente'
+                                    data['error'] = 'Error el producto ' + str(
+                                        prod.nombre_corto()) + ' no cuenta con el stock suficiente'
                                     break
                                 if rubrocreado:
                                     cant = int(rub['cantidad'])
@@ -171,7 +172,7 @@ class ListviewFacturacion(TemplateView):
                                         if st.stockactual >= cant:
                                             st.stockactual -= cant
                                         else:
-                                            cant = cant-st.stockactual
+                                            cant = cant - st.stockactual
                                             st.stockactual = 0
                                         st.save(request)
                             if pago:
@@ -200,17 +201,53 @@ class ListviewFacturacion(TemplateView):
                                 transaction.set_rollback(True)
                                 data['error'] = 'Error al generar la factura'
                     else:
+                        transaction.set_rollback(True)
                         data['error'] = 'Datos Incompletos'
 
-            elif action == 'verificar':
-                objeto = self.model.objects.get(pk=request.POST['pk'])
-                objeto.verificada = True
-                objeto.save(request)
-                data['mensaje'] = 'Factura N° '+str(objeto.numerocompleto)+' fue verificada correctamente'
-            else:
-                data['error'] = 'No ha seleccionado una opcion'
-        except Exception as e:
-            data['error'] = str(e)
+                elif action == 'verificar':
+                    try:
+                        objeto = self.model.objects.get(pk=request.POST['pk'])
+                        objeto.verificada = True
+                        objeto.save(request)
+                        data['mensaje'] = 'Factura N° '+str(objeto.numerocompleto)+' fue verificada correctamente'
+                    except Exception as e:
+                        transaction.set_rollback(True)
+                        data['error'] = 'Error al verificar la factura'
+                elif action == 'anular':
+                    try:
+                        objeto = self.model.objects.get(pk=request.POST['pk'])
+                        objeto.estado = 3
+                        objeto.save(request)
+                        for pag in objeto.pagos.all():
+                            rubro = pag.rubro
+                            if not rubro.producto:
+                                rubro.saldo += pag.valortotal
+                                rubro.cancelado = False
+                                pag.status = False
+                            else:
+                                rubro.status = False
+                                cantidad = rubro.cantidad
+                                for st in rubro.producto.inventario_set.filter(status=True):
+                                    if st.stockactual + cantidad < st.cantidad:
+                                        st.stockactual += cantidad
+                                    else:
+                                        cal = cantidad - st.cantidad
+                                        ingreso = cantidad - cal
+                                        cantidad = cal
+                                        st.stockactual = ingreso
+                                    st.save(request)
+                                pag.status = False
+                            rubro.save(request)
+                            pag.save(request)
+
+                        data['mensaje'] = 'Factura N° '+str(objeto.numerocompleto)+' fue anulada correctamente'
+                    except Exception as e:
+                        transaction.set_rollback(True)
+                        data['error'] = 'Error al anular la factura'
+                else:
+                    data['error'] = 'No ha seleccionado una opcion'
+            except Exception as e:
+                data['error'] = str(e)
         return JsonResponse(data, safe=False)
 
     def get(self, request, *args, **kwargs):

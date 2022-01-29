@@ -87,6 +87,9 @@
     <b>CLIENTE:</b> {{ factura.nombre }}<br>
     <b>CEDULA:</b> {{ factura.identificacion }}<br>
     <b>CORREO:</b> {{ factura.email }}<br>
+    {% if factura.estado == 3 %}
+    <h1 style="color: red"> FACTURA {{ factura.get_estado_display }} </h1><br>
+    {% endif %}
 </p>
 <p>
     <b>FORMA DE PAGO:</b>

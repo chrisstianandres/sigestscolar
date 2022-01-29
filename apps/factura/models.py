@@ -94,7 +94,7 @@ class Factura(ModeloBase):
         self.total = null_to_decimal(self.pagos.aggregate(valor=Sum('valortotal'))['valor'], 2)
 
     def detalle_rubros(self):
-        return self.pagos.filter(status=True)
+        return self.pagos.all()
     #
     # def restaurarrubros(self, observacion):
     #     for pago in self.pagos.all():

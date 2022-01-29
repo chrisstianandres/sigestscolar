@@ -57,9 +57,11 @@
                 <b>Estado: </b>{% if elemento.estado == 1 %}<span class="badge badge-success">{{elemento.get_estado_display}}</span>{% else %}<span class="badge badge-danger">{{elemento.get_estado_display}}</span>{% endif %}<br>
                 <b>Valida: </b> {% if elemento.valida %}<span class="badge badge-success">Si</span>{% else %}<span class="badge badge-danger">No</span>{% endif %}<br>
                 <b>Comprobante: </b><a class="btn btn-danger btn-xs comprobante"  data-toggle="tooltip" title="Imprimir comprobante" pk="{{ elemento.pk }}"  style="border-radius: 5px"><i class="fa fa-file-pdf"></i></a><br>
-                <b>Pagos: </b><a class="btn btn-info btn-xs detallerubro"  data-toggle="tooltip" title="Detalle de Pagos" pk="{{ elemento.pk }}" num="{{ elemento.numerocompleto }}" style="border-radius: 5px"><i class="far fa-money-bill-alt"></i></a><br>
+                <b>Pagos: </b><a class="btn btn-info btn-xs detallerubro"  data-toggle="tooltip" title="Detalle de Pagos" pk="{{ elemento.pk }}" estado="{{elemento.estado  }}" num="{{ elemento.numerocompleto }}" style="border-radius: 5px"><i class="far fa-money-bill-alt"></i></a><br>
                 <b>Verificada: </b>{% if elemento.verificada %}<span class="badge badge-success">Si</span>{% else %}<span class="badge badge-danger">No</span>
                 <br> <a class="btn btn-primary btn-xs verificar" pk="{{ elemento.pk }}" num="{{ elemento.numerocompleto }}"><i class="fa fa-check-circle"></i> Verificar </a><br>{% endif %}
+                {% if elemento.estado == 1 %}
+                    <br><a class="btn btn-danger btn-xs anular" pk="{{ elemento.pk }}" num="{{ elemento.numerocompleto }}"><i class="fa fa-trash"></i> Anular </a><br>{% endif %}
             </td>
         </tr>
     {% empty %}
@@ -122,6 +124,7 @@
          $('.detallerubro').click(function (e) {
              let pk = $(this).attr('pk');
              let num = $(this).attr('num');
+             let estado = $(this).attr('estado');
              Swal.fire({
                  title: 'Un momento por favor',
                  html: 'Estamos cargando los detalles de la factura!!!',
@@ -143,7 +146,11 @@
                 swal.close();
                 if (!data.hasOwnProperty('resp')) {
                     $('#rubros_body').html(data.data);
-                    $('#factura_num').html(num);
+                    let titu = num
+                    if (estado === '3'){
+                        titu += '<br><span class="badge badge-danger">ANULADA</span>'
+                    }
+                    $('#factura_num').html(titu);
                     $('#modal_rubros').modal('show');
                 } else {
                     menssaje_ok('Sin detalles', data.mensaje, 'success', function () {})
@@ -155,7 +162,20 @@
 
         });
 
-         })
+         });
+          $('.anular').click(function (e) {
+             let num = $(this).attr('num');
+             let pk = $(this).attr('pk');
+             save_with_ajax('Anulacion de Factura','/facturacion',
+                 '¿Esta seguro que desea anular la factura numero ' + num +'?',
+                 {'action': 'anular', 'pk': pk},
+                 function (data) {menssaje_ok('Todo correcto', data.mensaje, 'success',function () {
+                         window.location.reload();
+                     })},
+                 function () {
+                 })
+         });
+
      });
 
     </script>
