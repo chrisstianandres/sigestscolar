@@ -85,7 +85,7 @@
                     {% with cursos=elemento.profesor|args:periodo.pk|call:'cursos_imparte' %}
                         {% for curso in  cursos %}
                             <p><i class="fas fa-chevron-right"></i> {{ curso.materia.curso.curso.nombre }}&nbsp;&nbsp;
-                                <br><b>Paralelo: </b>{{ curso.paralelo }} &nbsp; <a href="/listaalumnos/{{ curso.id }}?paralelo={{ curso.paralelo.id }}" class="btn btn-danger btn-xs listaalumnos" data-toggle="tooltip" title="Exportar lista de alumnos"><i class="far fa-file-pdf"></i></a>
+                                <br><b>Paralelo: </b>{{ curso.paralelo }} &nbsp; <a href="/listaalumnos/{{ curso.id }}?paralelo={{ curso.paralelo.id }}"  target="_blank" class="btn btn-danger btn-xs listaalumnos" data-toggle="tooltip" title="Exportar lista de alumnos"><i class="far fa-file-pdf"></i></a>
                                 &nbsp; <a  onclick="verlista({{ curso.id }},{{ curso.paralelo.id }});" class="btn btn-success btn-xs verlista" data-toggle="tooltip" title="Ver lista de alumnos"><i class="fa fa-list"></i></a>
                                 <br> <a style="color: black" class="accordion-toggle" data-toggle="collapse"
                                         data-parent="#materias{{ forloop.counter }}"

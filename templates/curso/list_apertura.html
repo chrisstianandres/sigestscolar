@@ -109,7 +109,7 @@
                 {% endif %}
             </td>
             <td class="dt-center">{%  for paralelo in elemento.paralelo.all %}
-                {{ paralelo.nombre }} &nbsp; <a href="/listaalumnos/{{ elemento.id }}?action=listainscritos&paralelo={{ paralelo.id }}" class="btn btn-danger btn-xs listaalumnos" data-toggle="tooltip" title="Exportar lista de alumnos"><i class="far fa-file-pdf"></i></a>
+                {{ paralelo.nombre }} &nbsp; <a href="/listaalumnos/{{ elemento.id }}?action=listainscritos&paralelo={{ paralelo.id }}" class="btn btn-danger btn-xs listaalumnos"  target="_blank" data-toggle="tooltip" title="Exportar lista de alumnos"><i class="far fa-file-pdf"></i></a>
                 &nbsp; <a onclick="verlista({{ elemento.id }},{{ paralelo.id }});" class="btn btn-success btn-xs verlista" data-toggle="tooltip" title="Ver lista de alumnos"><i class="fa fa-list"></i></a>
                 <br><br>
                 {% endfor %}

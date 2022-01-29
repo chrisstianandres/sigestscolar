@@ -77,7 +77,7 @@
                 {% for curso in  cursos %}
                     <p>
                         <b>Paralelo: </b>{{ curso.paralelo }}
-                        &nbsp;</b>{{ curso.paralelo }} &nbsp; <a href="/listaalumnos/{{ curso.id }}?paralelo={{ curso.paralelo.id }}" class="btn btn-info btn-xs listaalumnos" data-toggle="tooltip" title="Exportar lista de alumnos"><i class="far fa-file-pdf"></i></a>
+                        &nbsp;</b>{{ curso.paralelo }} &nbsp; <a href="/listaalumnos/{{ curso.id }}?paralelo={{ curso.paralelo.id }}"  target="_blank" class="btn btn-info btn-xs listaalumnos" data-toggle="tooltip" title="Exportar lista de alumnos"><i class="far fa-file-pdf"></i></a>
                         &nbsp; <a onclick="verlista({{ curso.pk }}, {{ curso.paralelo.pk }});"  class="btn btn-success btn-xs verlista" data-toggle="tooltip" title="Ver lista de alumnos"><i class="fa fa-list"></i></a>
                         </p>
                         {% with materias=elemento.profesor|args:elemento.materia.curso.curso.pk|args:curso.paralelo.pk|call:'materias_imparte' %}
