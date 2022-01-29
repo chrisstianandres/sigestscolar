@@ -20,7 +20,7 @@ from django.conf.urls.static import static
 from django.conf import settings
 
 from apps import backEnd
-from apps.curso.views import IngresoNotasView, PrintActaNotas
+from apps.curso.views import IngresoNotasView, PrintActaNotas, PrintActaInscritos
 from apps.empresa.views import EmpresaView
 from apps.profesor.distributivodocente import Listview
 from apps.rubro.views import ListviewValores, ListviewFacturacion, PrintFactura
@@ -50,4 +50,5 @@ urlpatterns = [
                   path('exportcomprobante/<int:pk>', login_required(PrintFactura.as_view()), name='imprimirfactura'),
                   path('notas', login_required(IngresoNotasView.as_view()), name='notas'),
                   path('generaractaindividual/<int:pk>', login_required(PrintActaNotas.as_view()), name='generaractanotas'),
+                  path('listaalumnos/<int:pk>', login_required(PrintActaInscritos.as_view()), name='lsitaalumnos'),
               ] + static(settings.STATIC_URL, document_root=settings.STATIC_ROOT)

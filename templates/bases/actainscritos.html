@@ -1,0 +1,104 @@
+<!DOCTYPE html>
+<html lang="es">
+<title>{{ title }}</title>
+<meta http-equiv="Content-Type" content="multipart/mixed; charset=UTF-8"/>
+<style>
+    .img-invoice {
+        width: 100%;
+        text-align: center;
+        margin: 0 auto;
+    }
+
+    .head {
+        text-align: center;
+        text-transform: uppercase;
+    font-size: xx-large
+    }
+
+    #invoice thead tr th {
+        text-align: left;
+        border: 1px solid black;
+        border-top: 1px solid black;
+        padding: 2px;
+    }
+    #invoice tbody tr td {
+        text-align: left;
+        border: 1px solid black;
+        padding: 2px;
+    }
+
+    #invoice thead tr {
+        margin-bottom: 0;
+        padding-bottom: 0;
+    }
+
+    #invoice tbody tr {
+        padding: 0;
+    }
+
+    .text-center {
+        text-align: center;
+    }
+
+    {#table th {#}
+    {#    color: #000000;#}
+    {#    background-color: #1d4061;#}
+    {# }#}
+</style>
+<body><br>
+<img src="{{ icon }}" class="img-invoice" alt="logo" width="250" height="70">
+<p class="head">
+    <b>{{ empresa.nombre|upper }}</b>
+</p>
+<p class="head">
+    <b>LISTA DE ALUMNOS DEL CURSO {{ curso }} {{ paralelo }}</b>
+</p>
+<p>
+    <b>PERIODO: </b>{{ periodo.nombre_corto }}<br>
+    <b>ACTA GENERADA EL: </b>{{ fechactual|date:'d-m-Y' }}
+</p>
+{#<p class="head"><b>LISTA DE ALUMNOS</b><br></p>#}
+<table id="invoice">
+    <thead>
+    <tr>
+        <th style="text-align: center;">ALUMNO</th>
+        <th style="text-align: center; width: 10%" >GENERO</th>
+        <th style="text-align: center;">IDENTIFICACION</th>
+        <th style="text-align: center;">TELEFONO</th>
+{#        <th style="text-align: center;">CORREO</th>#}
+        <th style="text-align: center;">NACIMIENTO</th>
+        <th style="text-align: center;">DIRECCION</th>
+    </tr>
+    </thead>
+    <tbody>
+    {% if alumnos %}
+        {% for alumno in alumnos %}
+{#            <tr {% if forloop.first %}style="padding-top: 3px;" {% endif %}> #}
+            <tr>
+                <td>{{ alumno.alumno.persona.nombre_completo }}</td>
+                <td>{{ alumno.alumno.persona.get_genero_display }}</td>
+                <td>{{ alumno.alumno.persona.identificacion }}</td>
+                <td>{{ alumno.alumno.persona.telefono }}</td>
+{#                <td>{{ alumno.alumno.persona.email }}</td>#}
+                <td>{{ alumno.alumno.persona.nacimiento|date:'d-m-Y' }}</td>
+                <td>{{ alumno.alumno.persona.direccion }} {{ alumno.alumno.persona.direccion2 }}</td>
+            </tr>
+        {% endfor %}
+     {% else %}
+        <tr><td colspan="6" class="text-center">NO HAY ALUMNOS INSCRITOS</td></tr>
+    {% endif %}
+    </tbody>
+</table>
+{#<table>#}
+{#    <tbody>#}
+{#    <tr>#}
+{#        <th><br>*GRACIAS POR SU PAGO*</th>#}
+{#    </tr>#}
+{#    <tr>#}
+{#        <th><br><br>............................................................................#}
+{#            <br>RECIBI COMFORME</th>#}
+{#    </tr>#}
+{#    </tbody>#}
+{#</table>#}
+{#</body>#}
+{#</html>#}

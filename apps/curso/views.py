@@ -338,6 +338,16 @@ class ListviewAperutar(TemplateView):
                     id = request.GET['id']
                     data = model_to_dict(Materia.objects.get(id=id))
                     return JsonResponse(data, safe=False)
+                if action == 'verlista':
+                    id = request.GET['id']
+                    paralelo = request.GET['paralelo']
+                    curso = CursoParalelo.objects.get(id=id)
+                    alumnos = Inscripcion.objects.filter(status=True, curso=curso, paralelo_id=paralelo)
+                    template = get_template('bases/listaalumnos.html')
+                    data = {'data': template.render({'alumnos': alumnos, 'curso': curso.curso,
+                                                    'paralelo': Paralelo.objects.get(id=paralelo),
+                                                     'periodo': curso.periodo})}
+                    return JsonResponse(data, safe=False)
             else:
                 data = self.get_context_data()
                 list = self.model.objects.filter(status=True).order_by('-id')
@@ -861,3 +871,77 @@ class PrintActaNotas(View):
             print(e)
             pass
         return HttpResponseRedirect(reverse_lazy('notas'))
+
+
+class PrintActaInscritos(View):
+
+    def link_callback(self, uri, rel):
+        """
+        Convert HTML URIs to absolute system paths so xhtml2pdf can access those
+        resources
+        """
+        result = finders.find(uri)
+        if result:
+            if not isinstance(result, (list, tuple)):
+                result = [result]
+            result = list(os.path.realpath(path) for path in result)
+            path = result[0]
+        else:
+            sUrl = settings.STATIC_URL  # Typically /static/
+            sRoot = settings.STATIC_ROOT  # Typically /home/userX/project_static/
+            mUrl = settings.MEDIA_URL  # Typically /media/
+            mRoot = settings.MEDIA_ROOT  # Typically /home/userX/project_static/media/
+
+            if uri.startswith(mUrl):
+                path = os.path.join(mRoot, uri.replace(mUrl, ""))
+            elif uri.startswith(sUrl):
+                path = os.path.join(sRoot, uri.replace(sUrl, ""))
+            else:
+                return uri
+
+        # make sure that file exists
+        if not os.path.isfile(path):
+            raise Exception(
+                'media URI must start with %s or %s' % (sUrl, mUrl)
+            )
+        return path
+
+    def get(self, request, *args, **kwargs):
+        try:
+            hoy = datetime.now()
+            paralelo = request.GET['paralelo']
+            if 'action' in request.GET:
+                action = request.GET['action']
+                if action == 'listainscritos':
+                    mat = CursoParalelo.objects.get(pk=self.kwargs['pk'])
+                    alumnos = mat.inscripcion_set.filter(status=True, paralelo_id=paralelo)
+                    cursodata = mat.curso
+                    paralelodata = Paralelo.objects.get(id=paralelo)
+                    periododata = mat.periodo
+            else:
+                mat = MateriaAsignada.objects.get(pk=self.kwargs['pk'])
+                cursodata = mat.materia.curso.curso
+                paralelodata = mat.paralelo
+                periododata = mat.materia.curso.periodo
+                alumnos = Inscripcion.objects.filter(status=True, curso=mat.materia.curso, paralelo_id=paralelo)
+            template = get_template('bases/actainscritos.html')
+            context = {'title': 'Lista de Alumnos',
+                       'alumnos': alumnos,
+                       'curso': cursodata,
+                       'periodo': periododata,
+                       'paralelo': paralelodata,
+                       'icon': 'media/logo.png',
+                       'fechactual': hoy,
+                       'empresa': nombre_empresa()
+                       }
+            html = template.render(context)
+            response = HttpResponse(content_type='application/pdf')
+            response['Content-Disposition'] = 'attachment; filename="Lista_Alumnos' + str(
+                cursodata) +str(paralelodata) +'.pdf"'
+            pisa_status = pisa.CreatePDF(html, dest=response, link_callback=self.link_callback)
+            return response
+
+        except Exception as e:
+            print(e)
+            pass
+        return HttpResponseRedirect(reverse_lazy('dashborad'))

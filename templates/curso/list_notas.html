@@ -77,8 +77,8 @@
                 {% for curso in  cursos %}
                     <p>
                         <b>Paralelo: </b>{{ curso.paralelo }}
-                     &nbsp; <a href="" class="btn btn-info btn-xs listaalumnos" data-toggle="tooltip" title="Exportar lista de alumnos"><i class="far fa-file-pdf"></i></a>
-                &nbsp; <a href="" class="btn btn-success btn-xs verlista" data-toggle="tooltip" title="Ver lista de alumnos"><i class="fa fa-list"></i></a>
+                        &nbsp;</b>{{ curso.paralelo }} &nbsp; <a href="/listaalumnos/{{ curso.id }}?paralelo={{ curso.paralelo.id }}" class="btn btn-info btn-xs listaalumnos" data-toggle="tooltip" title="Exportar lista de alumnos"><i class="far fa-file-pdf"></i></a>
+                        &nbsp; <a onclick="verlista({{ curso.pk }}, {{ curso.paralelo.pk }});"  class="btn btn-success btn-xs verlista" data-toggle="tooltip" title="Ver lista de alumnos"><i class="fa fa-list"></i></a>
                         </p>
                         {% with materias=elemento.profesor|args:elemento.materia.curso.curso.pk|args:curso.paralelo.pk|call:'materias_imparte' %}
                             {% for materia in  materias %}
@@ -129,6 +129,38 @@
         </tr>
     {% endfor %}
 {% endblock %}
+{% block modal %}
+    <div class="row">
+        <div class="col-sm-12">
+            <div class="modal fade" id="modallistaalumnos" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel"
+                 aria-hidden="true">
+                <div class="modal-dialog modal-xl" role="document">
+                    <form id="form">
+                        <div class="modal-content">
+                            <div class="modal-header">
+                                <h5 class="modal-title" id="titulo_form"><i
+                                        class="fas fa-book"></i> Lista de Alumnos
+                                </h5>
+                                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                                    <span aria-hidden="true">&times;</span>
+                                </button>
+                            </div>
+                            <div class="modal-body">
+
+                                <div class="card-body" id="modal_lista">
+                                </div>
+
+                            </div>
+                            <div class="modal-footer">
+                                <button type="button" class="btn btn-danger" data-dismiss="modal"> Cerrar</button>
+                            </div>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+{% endblock %}
 {% block validate_form %}
     <script>
     $(function () {
@@ -168,6 +200,14 @@
             placeholder: 'Buscar por periodo',
             minimumInputLength: 1,
         }).append(newOption).trigger('change');
-    })
+    });
+    function verlista(materia, paralelo){
+        $('#modal_lista').html('');
+        ajax_sin_confirmar('/distributivo/', {'id': materia, 'paralelo': paralelo, 'action': 'verlista'},
+        function (data){
+            $('#modal_lista').html(data.data);
+            $('#modallistaalumnos').modal('show');
+        })
+    }
     </script>
 {% endblock %}

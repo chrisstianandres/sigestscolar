@@ -7,11 +7,13 @@ from django.db.models import Q
 from django.forms import model_to_dict
 from django.http import JsonResponse
 from django.shortcuts import render
+from django.template.loader import get_template
 from django.views.decorators.csrf import csrf_exempt
 from django.views.generic import TemplateView
 
 from apps.backEnd import nombre_empresa, calcular_edad
 from apps.curso.models import MateriaAsignada, Curso, CursoParalelo, CursoMateria
+from apps.inscripcion.models import Inscripcion
 from apps.paralelo.models import Paralelo
 from apps.profesor.forms import Formulario
 from apps.extras import PrimaryKeyEncryptor
@@ -223,6 +225,17 @@ class Listview(TemplateView):
                     curs = CursoMateria.objects.get(id=id)
                     data = {'curso': curs.curso.curso.nombre, 'id': curs.pk, 'materias': curs.curso.materias_asignadas_curso(), 'paralelos': curs.curso.get_paralelos()}
                     return JsonResponse(data, safe=False)
+                if action == 'verlista':
+                    id = request.GET['id']
+                    paralelo = request.GET['paralelo']
+                    mat = MateriaAsignada.objects.get(id=id)
+                    alumnos = Inscripcion.objects.filter(status=True, curso=mat.materia.curso, paralelo_id=paralelo)
+                    template = get_template('bases/listaalumnos.html')
+                    data = {'data': template.render({'alumnos': alumnos, 'curso': mat.materia.curso.curso,
+                                                     'paralelo': mat.paralelo,
+                                                     'periodo': mat.materia.curso.periodo
+                                                     })}
+                    return JsonResponse(data, safe=False)
             else:
                 data = self.get_context_data()
                 filtros = Q(status=True)
@@ -264,7 +277,6 @@ class Listview(TemplateView):
 
     def get_peril(self, request):
         return request.session['perfilactualkey']
-
 
     def cursos_noasignados(self, periodo):
         data = []
