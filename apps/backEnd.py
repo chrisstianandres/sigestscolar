@@ -424,9 +424,9 @@ class UserChangeGroup(View):
             perfilactual = request.session['perfilactual']
             grupo = Group.objects.filter(name__icontains=perfilactual)
             if grupo.exists():
-                modulos = grupo.first().grupomodulo_set.all()
+                modulos = grupo.first().grupomodulo_set.all().order_by('nombre')
                 if modulos.exists():
-                    request.session['modulos'] = modulos.first().modulos.all()
+                    request.session['modulos'] = modulos.first().modulos.all().order_by('nombre')
             elif request.user.is_superuser:
                 request.session['modulos'] = Modulo.objects.filter(status=True).exclude(id=13).order_by('nombre')
             else:

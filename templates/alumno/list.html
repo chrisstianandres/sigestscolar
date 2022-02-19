@@ -10,14 +10,14 @@
 {% block body_tabla %}
     {% for elemento in page_obj %}
         <tr>
-            <td class="dt-center">{{ elemento.persona.nombre_completo }}<br>
+            <td class="dt-center" data-title="Nombre completo">{{ elemento.persona.nombre_completo }}<br>
                 {% if elemento.persona.mi_cumpleannos %}
                     <b>Hoy es su cumpleaños</b><i data-toggle="tooltip" data-placement="bottom"
                                                   title="Hoy cumple {{ elemento.persona.edad_cumple }} años"
                                                   class="fas fa-birthday-cake fa-2x" style="color: #e21b76"></i>
                 {% endif %}
             </td>
-            <td class="dt-center">{% if elemento.persona.cedula %}
+            <td class="dt-center" data-title="Identificaciones">{% if elemento.persona.cedula %}
                 <b>Cedula: </b> {{ elemento.persona.cedula }}<br>
             {% endif %}
                 {% if elemento.persona.ruc %}
@@ -31,7 +31,7 @@
 
                 {% endif %}
             </td>
-            <td class="dt-center">
+            <td class="dt-center" data-title="Direccion">
                 {% if elemento.persona.direccion %}
                     <b>Calle principal: </b> {{ elemento.persona.direccion }}<br>
                     {% if elemento.persona.direccion2 %}
@@ -46,7 +46,7 @@
                     <b>Referencia: </b><br>{{ elemento.persona.referencia }}<br>
                 {% endif %}
             </td>
-            <td class="dt-center">
+            <td class="dt-center" data-title="Contactos">
                 {% if elemento.persona.telefono %}
                     <b>Celular: </b>{{ elemento.persona.telefono }}<br>
                 {% endif %}
@@ -57,7 +57,7 @@
                     <b>Email: </b><br>{{ elemento.persona.email }}<br>
                 {% endif %}
             </td>
-            <td class="dt-center">
+            <td class="dt-center" data-title="Datos Extras">
                 {% if elemento.persona.nacimiento %}
                     <b>F. nacimiento: </b><br>{{ elemento.persona.nacimiento|date:'d-m-Y' }}<br>
                 {% endif %}
@@ -78,7 +78,7 @@
                     <span class="badge badge-info" style="font-size: 11px">LGTBI</span>
                 {% endif %}
             </td>
-            <td style="text-align:center; width: 10%">
+            <td data-title="Acciones">
                 <a type="button" class="btn btn-warning btn-xs editar" pk="{{ elemento.pk }}" style="color: white"
                         {% if not modal_form %}
                    href="{{ request.path }}?action=edit&pk={{ elemento.persona.encoded_id }}"{% endif %}><i

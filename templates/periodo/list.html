@@ -9,11 +9,11 @@
 {% block body_tabla %}
     {% for elemento in page_obj %}
       <tr>
-        <td  class="dt-center">{{ elemento.nombre }}<br> <b>Inicio de Clases: </b> {{ elemento.inicioactividades  }}</td>
-        <td  class="dt-center">{{ elemento.desde }}</td>
-        <td  class="dt-center">{{ elemento.hasta }}</td>
-        <td  class="dt-center">{{ elemento.anio }}</td>
-        <td style="text-align:center; width: 10%"  class="dt-center">
+        <td  class="dt-center" data-title="Nombre">{{ elemento.nombre }}<br> <b>Inicio de Clases: </b> {{ elemento.inicioactividades  }}</td>
+        <td  class="dt-center" data-title="Desde">{{ elemento.desde }}</td>
+        <td  class="dt-center" data-title="Hasta">{{ elemento.hasta }}</td>
+        <td  class="dt-center" data-title="Año">{{ elemento.anio }}</td>
+        <td  class="dt-center" data-title="Acciones">
             <a type="button" class="btn btn-warning btn-xs editar" pk="{{ elemento.pk }}" style="color: white"><i class="fa fa-edit"></i></a>
             <a type="button" class="btn btn-danger btn-xs eliminar" pk="{{ elemento.pk }}"><i class="fa fa-trash"></i></a>
         </td>

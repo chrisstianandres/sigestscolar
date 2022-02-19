@@ -316,6 +316,7 @@
     </style>
 <script>
 $(function () {
+     {% if request.session.perfilactual == 'ADMINISTRATIVO' and request.session.perfiles.es_administrativo or request.user.is_superuser %}
     var areaChartData = {
       labels  : ['Enero', 'Febrero', 'Marzo', 'Abril', 'Mayo', 'Junio', 'Julio', 'Agosto', 'Septiembre', 'Octubre', 'Noviembre', 'Diciembre'],
       datasets: [
@@ -369,6 +370,7 @@ $(function () {
       data: barChartData,
       options: barChartOptions
     });
+    {% endif %}
   })
 </script>
 {% endblock %}

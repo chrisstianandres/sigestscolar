@@ -39,7 +39,7 @@ class PeriodoLectivo(ModeloBase):
         hoy = datetime.now()
         anio = hoy.year
         for m in range(1, 13):
-            totales.append(Rubro.objects.filter(status=True, fecha__year=anio, fecha__month=m, fechavence__lt=hoy,
+            totales.append(Rubro.objects.filter(status=True, fechavence__year=anio, fechavence__month=m, fechavence__lt=hoy,
                                                 cancelado=False).aggregate(
                 total=Coalesce(Sum('valortotal', output_field=FloatField()), float(0))).get('total'))
         return totales
@@ -50,7 +50,7 @@ class PeriodoLectivo(ModeloBase):
         hoy = datetime.now()
         anio = hoy.year
         for m in range(1, 13):
-            totales.append(Rubro.objects.filter(status=True, fecha__year=anio, fecha__month=m, fechavence__gte=hoy,
-                                                cancelado=False).aggregate(
+            totales.append(Rubro.objects.filter(status=True, fechavence__year=anio, fechavence__month=m, cancelado=False
+                                                ).aggregate(
                 total=Coalesce(Sum('valortotal', output_field=FloatField()), float(0))).get('total'))
         return totales
