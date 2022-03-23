@@ -1,3 +1,5 @@
+import os
+import sys
 from datetime import datetime
 
 from django.core.paginator import Paginator
@@ -107,7 +109,8 @@ class Listview(TemplateView):
                 data['action_form'] = 'add'
                 return render(request, self.template_name, data)
         except Exception as e:
-            data['error'] = str(e)
+            erro = 'Error on line {} {}'.format(sys.exc_info()[-1].tb_lineno, e)
+            data['error'] = str(erro)
 
     def get_context_data(self, **kwargs):
         data = super().get_context_data(**kwargs)
