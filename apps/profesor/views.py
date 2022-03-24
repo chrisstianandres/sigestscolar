@@ -32,41 +32,42 @@ class Listview(TemplateView):
 
     def post(self, request, *args, **kwargs):
         data = {}
-        try:
-            action = request.POST['action']
-            if action == 'add':
-                form = self.form(request.POST)
-                if form.is_valid():
-                    if calcular_edad(form.cleaned_data['nacimiento']) >= 18:
-                        persona = form.save()
-                        prof = Profesor(persona_id=persona.pk, fechaingreso=datetime.now(), activo=True)
-                        prof.save()
+        with transaction.atomic():
+            try:
+                action = request.POST['action']
+                if action == 'add':
+                    form = self.form(request.POST)
+                    if form.is_valid():
+                        if calcular_edad(form.cleaned_data['nacimiento']) >= 18:
+                            persona = form.save()
+                            prof = Profesor(persona_id=persona.pk, fechaingreso=datetime.now(), activo=True)
+                            prof.save()
+                        else:
+                            data['error'] = 'Debe ser mayor de edad para ser docente'
                     else:
-                        data['error'] = 'Debe ser mayor de edad para ser docente'
-                else:
-                    data['error'] = form.errors
-            elif action == 'edit':
-                pk = PrimaryKeyEncryptor(SECRET_KEY_ENCRIPT).decrypt(request.POST['pk'])
-                objeto = Persona.objects.get(pk=pk)
-                form = self.form(request.POST, instance=objeto)
-                if form.is_valid():
-                    if calcular_edad(form.cleaned_data['nacimiento']) >= 18:
-                        form.save()
+                        data['error'] = form.errors
+                elif action == 'edit':
+                    pk = PrimaryKeyEncryptor(SECRET_KEY_ENCRIPT).decrypt(request.POST['pk'])
+                    objeto = Persona.objects.get(pk=pk)
+                    form = self.form(request.POST, instance=objeto)
+                    if form.is_valid():
+                        if calcular_edad(form.cleaned_data['nacimiento']) >= 18:
+                            form.save()
+                        else:
+                            data['error'] = 'Debe ser mayor de edad para ser docente'
                     else:
-                        data['error'] = 'Debe ser mayor de edad para ser docente'
+                        data['error'] = form.errors
+                elif action == 'delete':
+                    pk = PrimaryKeyEncryptor(SECRET_KEY_ENCRIPT).decrypt(request.POST['pk'])
+                    objeto = Persona.objects.get(pk=pk)
+                    profesor = self.model.objects.get(persona=objeto)
+                    profesor.delete()
                 else:
-                    data['error'] = form.errors
-            elif action == 'delete':
-                pk = PrimaryKeyEncryptor(SECRET_KEY_ENCRIPT).decrypt(request.POST['pk'])
-                objeto = Persona.objects.get(pk=pk)
-                profesor = self.model.objects.get(persona=objeto)
-                profesor.delete()
-            else:
-                data['error'] = 'No ha seleccionado una opcion'
-        except Exception as e:
-            data['error'] = str(e)
-            transaction.set_rollback(True)
-        return JsonResponse(data, safe=False)
+                    data['error'] = 'No ha seleccionado una opcion'
+            except Exception as e:
+                data['error'] = str(e)
+                transaction.set_rollback(True)
+            return JsonResponse(data, safe=False)
 
     def get(self, request, *args, **kwargs):
         data = {}
