@@ -4,6 +4,7 @@ from datetime import datetime
 
 from django.core.paginator import Paginator
 from django.db import transaction
+from django.db.models import Q
 from django.forms import model_to_dict
 from django.http import JsonResponse
 from django.shortcuts import render
@@ -96,7 +97,8 @@ class Listview(TemplateView):
                 if 'search' in request.GET:
                     if not request.GET['search'] == '':
                         data['search'] = search = request.GET['search']
-                        list = list.filter(nombre__icontains=search)
+                        list = list.filter(Q(persona__nombres__icontains=search)|Q(persona__apellido1__icontains=search)
+                                           |Q(persona__apellido2__icontains=search))
                 page_number = request.GET.get('page', 1)
                 paginator = Paginator(list, 10)
                 page_range = paginator.get_elided_page_range(number=page_number)
