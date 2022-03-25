@@ -130,12 +130,9 @@ class Listview(TemplateView):
                 data = self.get_context_data()
                 list = self.model.objects.filter(status=True).order_by('-id')
                 if 'search' in request.GET:
-                    print('search')
                     if not request.GET['search'] == '':
-                        print('Tiene algo')
                         data['search'] = search = request.GET['search']
-                        list = list.filter(nombre__icontains=search)
-                print("no entro al if")
+                        list = list.filter(nombres__icontains=search)
                 page_number = request.GET.get('page', 1)
                 paginator = Paginator(list, 10)
                 page_range = paginator.get_elided_page_range(number=page_number)
