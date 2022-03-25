@@ -133,8 +133,6 @@ class Listview(TemplateView):
                     if not request.GET['search'] == '':
                         data['search'] = search = request.GET['search']
                         list = list.filter(nombre__icontains=search)
-                else:
-                    return render(request, self.template_name, data)
                 page_number = request.GET.get('page', 1)
                 paginator = Paginator(list, 10)
                 page_range = paginator.get_elided_page_range(number=page_number)
