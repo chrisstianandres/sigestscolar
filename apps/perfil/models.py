@@ -28,6 +28,9 @@ class PerfilUsuario(ModeloBase):
         else:
             return u'%s' % "OTRO PERFIL"
 
+
+
+
     class Meta:
         ordering = ['persona', 'inscripcion', 'administrativo', 'profesor', 'externo']
         unique_together = ('persona', 'inscripcion', 'administrativo', 'profesor', 'externo')

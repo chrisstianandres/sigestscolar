@@ -166,8 +166,8 @@
     <ul class="navbar-nav ml-auto">
       <!-- Notifications Dropdown Menu -->
       {% if request.user.is_superuser %}
-      <li>
-        <a href="/admin">
+     <li class="nav-item dropdown">
+        <a class="nav-link" data-toggle="dropdown" href="/admin">
                 <span class="badge badge-info" style="color: white">ADMIN DJANGO</span>
         </a>
       </li>
@@ -176,8 +176,8 @@
         <a class="nav-link" data-toggle="dropdown" href="#">
             {% if request.session.perfilactual %}
                 <span class="badge badge-success" style="color: white">{{ request.session.perfilactual|upper }}</span>
-{#              {% elif request.user.is_superuser %}#}
-{#                <span class="badge badge-info" style="color: white">SUPER USUARIO</span>#}
+            {% elif request.user.is_superuser %}
+                <span class="badge badge-info" style="color: white">SUPER USUARIO</span>
             {% endif %}
 
         </a>
@@ -186,25 +186,30 @@
                   <span class="dropdown-item dropdown-header">{{ request.session.perfiles.count }}</span>
                   <div class="dropdown-divider"></div>
 {#                  {% for g in request.user.groups.all %}#}
-                  {% if request.session.perfilactual != 'ADMINISTRATIVO' and request.session.perfiles.es_administrativo %}
+                  {% if request.session.perfilactual != 'ADMINISTRATIVO' and 'ADMINISTRATIVO' in persona.total_perfiles %}
                       <a href="{% url 'changeprofile' 1 %}" class="dropdown-item">
                           <i class="fa fa-user-circle mr-2"></i> ADMINISTRATIVO
                       </a>
                   {% endif %}
-                  {% if request.session.perfilactual != 'PROFESOR' and request.session.perfiles.es_profesor %}
+                  {% if request.session.perfilactual != 'PROFESOR' and 'PROFESOR' in persona.total_perfiles %}
                       <a href="{% url 'changeprofile' 2 %}" class="dropdown-item">
                           <i class="fa fa-user-circle mr-2"></i> PROFESOR
                       </a>
                   {% endif %}
-                  {% if request.session.perfilactual != 'EXTERNO' and request.session.perfiles.es_externo %}
+                  {% if request.session.perfilactual != 'EXTERNO' and 'EXTERNO' in persona.total_perfiles  %}
                       <a href="{% url 'changeprofile' 0 %}" class="dropdown-item">
                           <i class="fa fa-user-circle mr-2"></i> EXTERNO
                       </a>
                   {% endif %}
-                  {% if request.session.perfilactual != 'ALUMNO' and request.session.perfiles.es_alumno %}
+                  {% if request.session.perfilactual != 'ALUMNO' and 'ALUMNO' in persona.total_perfiles %}
                       <a href="{% url 'changeprofile' 3 %}" class="dropdown-item">
                           <i class="fa fa-user-circle mr-2"></i> ALUMNO
                       </a>
+                  {% endif %}
+                  {% if request.user.is_superuser %}
+                          <a href="{% url 'changeprofile' 4 %}" class="dropdown-item">
+                              <i class="fa fa-user-circle mr-2"></i> SUPER USUARIO
+                          </a>
                   {% endif %}
 {#                  {% endfor %}#}
               </div>

@@ -22,6 +22,7 @@ class Empresa(ModeloBase):
     ruc = models.CharField(max_length=13, null=True, blank=True, verbose_name='Ruc')
     email = models.EmailField(null=True, blank=True, verbose_name='email')
     iva = models.ForeignKey(Iva, null=True, blank=True, verbose_name=u"Iva", on_delete=models.PROTECT)
+    token = models.FileField(upload_to="tokens", blank=True, null=True)
 
     def __str__(self):
         return '{}{}'.format(self.nombre, self.direccion)

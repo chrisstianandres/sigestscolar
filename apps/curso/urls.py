@@ -6,6 +6,6 @@ app_name = 'curso'
 
 urlpatterns = [
     path('', login_required(Listview.as_view()), name='cursos'),
-    path('aperturar/', login_required(ListviewAperutar.as_view()), name='aperturar'),
+    path('/', login_required(ListviewAperutar.as_view()), name='aperturar'),
 
 ]

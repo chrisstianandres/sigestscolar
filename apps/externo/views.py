@@ -72,7 +72,9 @@ class Listview(TemplateView):
                             return JsonResponse(data, safe=False)
                         administrativo = Administrativo(persona=persona, fechaingreso=datetime.now().date())
                         administrativo.save(request)
-                        g = Group.objects.get(name='Administrativo')
+                        g = Group.objects.filter(name='Administrativo').first()
+                        if not g:
+                            raise NameError('No existe grupo de administrativos para conceder los permisos necesarios para esl perfil')
                         if not persona.usuario:
                             generar_usuario(persona, g.id)
                         g.user_set.add(persona.usuario)
@@ -90,7 +92,9 @@ class Listview(TemplateView):
                             return JsonResponse(data, safe=False)
                         profesor = Profesor(persona=persona, fechaingreso=datetime.now().date())
                         profesor.save(request)
-                        g = Group.objects.get(name='Profesor')
+                        g = Group.objects.filter(name='Profesor').first()
+                        if not g:
+                            raise NameError('No existe grupo de docentes para conceder los permisos necesarios para esl perfil')
                         if not persona.usuario:
                             generar_usuario(persona, g.id)
                         g.user_set.add(persona.usuario)

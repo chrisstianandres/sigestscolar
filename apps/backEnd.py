@@ -39,9 +39,8 @@ from apps.rubro.models import Pago, Rubro
 
 
 def nombre_empresa():
-    if Empresa.objects.all().exists():
-        empresa = Empresa.objects.first()
-    else:
+    empresa = Empresa.objects.first()
+    if not empresa:
         empresa = {'nombre': 'Sin nombre'}
     return empresa
 
@@ -162,8 +161,8 @@ class LoginFormView(LoginView):
         if user is not None:
             if user.is_active:
                 login(request, user)
-                self.get_group_session()
-                self.get_persona_session()
+                self.get_group_session(request)
+                self.get_persona_session(request)
                 data['resp'] = True
             else:
                 data['error'] = '<strong>Usuario Inactivo </strong>'
@@ -171,9 +170,9 @@ class LoginFormView(LoginView):
             data['error'] = '<strong>Usuario no valido </strong><br> Verifica las credenciales de acceso y vuelve a intentarlo.'
         return JsonResponse(data)
 
-    def get_group_session(self):
+    def get_group_session(self, request):
         try:
-            request = get_current_request()
+            # request = get_current_request()
             totalperifiles = 0
             persona = request.user.persona_set.first()
             if persona is not None:
@@ -197,21 +196,21 @@ class LoginFormView(LoginView):
                         totalperifiles += 1
                     if check.es_externo():
                         totalperifiles += 1
-                    self.get_modulos()
+                    self.get_modulos(request)
                 elif request.user.is_superuser:
                     totalperifiles += 1
                     if 'perfilactualkey' not in request.session:
                         request.session['perfilactualkey'] = keyperfil = PERFIL_ACTUAL[4][0]
                     if 'perfilactual' not in request.session:
                         request.session['perfilactual'] = PERFIL_ACTUAL[4][1]
-                    self.get_modulos()
+                    self.get_modulos(request)
             elif request.user.is_superuser:
                 totalperifiles += 1
                 if 'perfilactualkey' not in request.session:
                     request.session['perfilactualkey'] = keyperfil = PERFIL_ACTUAL[4][0]
                 if 'perfilactual' not in request.session:
                     request.session['perfilactual'] = PERFIL_ACTUAL[4][1]
-                self.get_modulos()
+                self.get_modulos(request)
 
             if 'totalperfiles' not in request.session:
                 request.session['totalperfiles'] = totalperifiles
@@ -220,9 +219,9 @@ class LoginFormView(LoginView):
         except Exception as e:
             pass
 
-    def get_modulos(self):
+    def get_modulos(self, request):
         try:
-            request = get_current_request()
+            # request = get_current_request()
             perfilactual = request.session['perfilactual']
             grupo = Group.objects.filter(name__icontains=perfilactual)
             if grupo.exists():
@@ -239,10 +238,14 @@ class LoginFormView(LoginView):
             disconnect(self.request)
             pass
 
-    def get_persona_session(self):
-        request = get_current_request()
-        if not 'persona' in request.session:
-            request.session['persona'] = request.user.persona_set.first()
+    def get_persona_session(self, request):
+        # request = get_current_request()
+        # if not 'persona' in request.session:
+        #     request.session['persona'] = request.user.persona_set.first()
+        if 'persona' not in request.session:
+            if not request.user.is_authenticated:
+                raise Exception('Usuario no autentificado en el sistema')
+            request.session['persona'] = Persona.objects.get(usuario=request.user)
 
     def get_context_data(self, **kwargs):
         data = super().get_context_data(**kwargs)
@@ -380,15 +383,15 @@ class UserChangeGroup(View):
             # request.session['group'] = Group.objects.get(pk=self.kwargs['pk'])
             request.session['perfilactual'] = PERFIL_ACTUAL[self.kwargs['pk']][1]
             request.session['perfilactualkey'] = int(self.kwargs['pk'])
-            self.get_group_session()
-            self.get_persona_session()
+            self.get_group_session(request)
+            self.get_persona_session(request)
         except:
             pass
         return HttpResponseRedirect(reverse_lazy('dashborad'))
 
-    def get_group_session(self):
+    def get_group_session(self, request):
         try:
-            request = get_current_request()
+            # request = get_current_request()
             persona = request.user.persona_set.first()
             if persona is not None:
                 perfiles = persona.perfilusuario_set.filter(status=True)
@@ -402,41 +405,40 @@ class UserChangeGroup(View):
                                 request.session['perfilactualkey'] = keyperfil = PERFIL_ACTUAL[key][0]
                     if 'perfilactual' not in request.session:
                         request.session['perfilactual'] = PERFIL_ACTUAL[keyperfil][1]
-                    self.get_modulos()
+                    self.get_modulos(request)
                 elif request.user.is_superuser:
                     if 'perfilactualkey' not in request.session:
                         request.session['perfilactualkey'] = keyperfil = PERFIL_ACTUAL[4][0]
                     if 'perfilactual' not in request.session:
                         request.session['perfilactual'] = PERFIL_ACTUAL[4][1]
-                    self.get_modulos()
+                    self.get_modulos(request)
             elif request.user.is_superuser:
                 if 'perfilactualkey' not in request.session:
                     request.session['perfilactualkey'] = keyperfil = PERFIL_ACTUAL[4][0]
                 if 'perfilactual' not in request.session:
                     request.session['perfilactual'] = PERFIL_ACTUAL[4][1]
-                self.get_modulos()
+                self.get_modulos(request)
         except Exception as e:
             pass
 
-    def get_modulos(self):
+    def get_modulos(self, request):
         try:
-            request = get_current_request()
+            # request = get_current_request()
             perfilactual = request.session['perfilactual']
             grupo = Group.objects.filter(name__icontains=perfilactual)
+            request.session['modulos'] = []
             if grupo.exists():
                 modulos = grupo.first().grupomodulo_set.all().order_by('nombre')
                 if modulos.exists():
                     request.session['modulos'] = modulos.first().modulos.all().order_by('nombre')
             elif request.user.is_superuser:
                 request.session['modulos'] = Modulo.objects.filter(status=True).exclude(id=13).order_by('nombre')
-            else:
-                request.session['modulos'] = []
         except Exception as e:
             disconnect(self.request)
             pass
 
-    def get_persona_session(self):
-        request = get_current_request()
+    def get_persona_session(self, request):
+        # request = get_current_request()
         if not 'persona' in request.session:
             request.session['persona'] = request.user.persona_set.first()
 

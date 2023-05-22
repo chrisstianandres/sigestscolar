@@ -2,375 +2,385 @@
 {% block content %}
     <!-- Main content -->
     <section class="content">
-    {% if request.session.perfilactual == 'ADMINISTRATIVO' and request.session.perfiles.es_administrativo or request.user.is_superuser %}
-    <div class="container-fluid">
-        <!-- Small boxes (Stat box) -->
-        <div class="row">
-          <div class="col-lg-3 col-6">
-            <!-- small box -->
-            <div class="small-box bg-info">
-              <div class="inner">
-                <h3>{{ recaudado }} $</h3>
+        {% if request.session.perfilactual == 'ADMINISTRATIVO' and 'ADMINISTRATIVO' in persona.total_perfiles %}
+            <div class="container-fluid">
+                <!-- Small boxes (Stat box) -->
+                <div class="row">
+                    <div class="col-lg-3 col-6">
+                        <!-- small box -->
+                        <div class="small-box bg-info">
+                            <div class="inner">
+                                <h3>{{ recaudado }} $</h3>
 
-                <p>Total recaudado en {{ anioactual }}</p>
-              </div>
-              <div class="icon">
-                <i class="ion ion-bag"></i>
-              </div>
-              <a href="{% url 'facturacion' %}" class="small-box-footer">Mas informacion <i class="fas fa-arrow-circle-right"></i></a>
-            </div>
-          </div>
-          <!-- ./col -->
-          <div class="col-lg-3 col-6">
-            <!-- small box -->
-            <div class="small-box bg-success">
-              <div class="inner">
-                <h3>{{ inscritos }}</h3>
-
-                <p>Alumnos inscritos en el periodo <br>
-                    <b>{{ periodoactual.nombre_corto }}</b></p>
-              </div>
-              <div class="icon">
-                <i class="ion ion-stats-bars"></i>
-              </div>
-              <a href="{% url 'inscripciones:inscripcion' %}" class="small-box-footer">Mas informacion <i class="fas fa-arrow-circle-right"></i></a>
-            </div>
-          </div>
-          <!-- ./col -->
-          <div class="col-lg-3 col-6">
-            <!-- small box -->
-            <div class="small-box bg-warning">
-              <div class="inner">
-                <h3>{{ docentes }}</h3>
-
-                <p>Docentes activos</p>
-              </div>
-              <div class="icon">
-                <i class="ion ion-person-add"></i>
-              </div>
-              <a href="{% url 'distributivo' %}" class="small-box-footer">Mas informacion <i class="fas fa-arrow-circle-right"></i></a>
-            </div>
-          </div>
-          <!-- ./col -->
-          <div class="col-lg-3 col-6">
-            <!-- small box -->
-            <div class="small-box bg-danger">
-              <div class="inner">
-                <h3>{{cursos}}</h3>
-
-                <p>Cursos aperturados en el periodo <br>
-                {{ periodoactual.nombre_corto }}</p>
-              </div>
-              <div class="icon">
-                <i class="ion ion-pie-graph"></i>
-              </div>
-              <a href="{% url 'curso:aperturar' %}" class="small-box-footer">Mas informacion <i class="fas fa-arrow-circle-right"></i></a>
-            </div>
-          </div>
-          <!-- ./col -->
-        </div>
-        <!-- /.row -->
-        <!-- Main row -->
-        <div class="row">
-          <!-- Left col -->
-          <section class="col-lg-7 connectedSortable">
-            <!-- Custom tabs (Charts with tabs)-->
-             <div class="card card-default">
-              <div class="card-header">
-                <h3 class="card-title"><i class="fa fa-chart-bar"></i> Valores del año <b>{{ anioactual }}</b></h3>
-
-                <div class="card-tools">
-                  <button type="button" class="btn btn-tool" data-card-widget="collapse">
-                    <i class="fas fa-minus"></i>
-                  </button>
-                  <button type="button" class="btn btn-tool" data-card-widget="remove">
-                    <i class="fas fa-times"></i>
-                  </button>
-                </div>
-              </div>
-              <div class="card-body">
-                <div class="chart">
-                  <canvas id="barChart" style="min-height: 250px; height: 250px; max-height: 250px; max-width: 100%;"></canvas>
-                </div>
-              </div>
-              <!-- /.card-body -->
-            </div>
-            <!-- /.card -->
-          </section>
-          <!-- /.Left col -->
-          <!-- right col (We are only adding the ID to make the widgets sortable)-->
-          <section class="col-lg-5 connectedSortable">
-
-            <!-- Map card -->
-            <div class="card bg-gradient-primary">
-              <div class="card-header border-0">
-                <h3 class="card-title">
-                  <i class="fas fa-user-plus"></i>
-                  Personas agregadas recientemente
-                </h3>
-                <!-- card tools -->
-                <div class="card-tools">
-                  <button type="button" class="btn btn-primary btn-sm" data-card-widget="collapse" title="Collapse">
-                    <i class="fas fa-minus"></i>
-                  </button>
-                     <button type="button" class="btn btn-primary btn-sm" data-card-widget="remove">
-                    <i class="fas fa-times"></i>
-                  </button>
-                </div>
-                <!-- /.card-tools -->
-              </div>
-              <div class="card-body">
-                <table class="table table-noborder">
-                    <thead><tr>
-                        <td>Nombres</td>
-                        <td>Identificacion</td>
-                        <td>Genero</td></tr>
-                    </thead>
-                    <tbody>
-                    {% for p in personas %}
-                        <tr>
-                            <td>{{ p.nombre_completo }}</td>
-                            <td>{{ p.identificacion }}</td>
-                            <td>{{ p.get_genero_display }}</td>
-                        </tr>
-                    {% empty %}
-                        <tr>
-                        <td colspan="3"> No existen personas nuevas</td>
-                        </tr>
-                    {% endfor %}
-
-
-                    </tbody>
-                </table>
-              </div>
-              <!-- /.card-body-->
-            </div>
-            <!-- /.card -->
-
-{#            <!-- solid sales graph -->#}
-{#            <div class="card bg-gradient-info">#}
-{#              <div class="card-header border-0">#}
-{#                <h3 class="card-title">#}
-{#                  <i class="fas fa-th mr-1"></i>#}
-{#                  Sales Graph#}
-{#                </h3>#}
-{##}
-{#                <div class="card-tools">#}
-{#                  <button type="button" class="btn bg-info btn-sm" data-card-widget="collapse">#}
-{#                    <i class="fas fa-minus"></i>#}
-{#                  </button>#}
-{#                  <button type="button" class="btn bg-info btn-sm" data-card-widget="remove">#}
-{#                    <i class="fas fa-times"></i>#}
-{#                  </button>#}
-{#                </div>#}
-{#              </div>#}
-{#              <div class="card-body">#}
-{#                <canvas class="chart" id="line-chart" style="min-height: 250px; height: 250px; max-height: 250px; max-width: 100%;"></canvas>#}
-{#              </div>#}
-{#              <!-- /.card-body -->#}
-{#              <div class="card-footer bg-transparent">#}
-{#                <div class="row">#}
-{#                  <div class="col-4 text-center">#}
-{#                    <input type="text" class="knob" data-readonly="true" value="20" data-width="60" data-height="60"#}
-{#                           data-fgColor="#39CCCC">#}
-{##}
-{#                    <div class="text-white">Mail-Orders</div>#}
-{#                  </div>#}
-{#                  <!-- ./col -->#}
-{#                  <div class="col-4 text-center">#}
-{#                    <input type="text" class="knob" data-readonly="true" value="50" data-width="60" data-height="60"#}
-{#                           data-fgColor="#39CCCC">#}
-{##}
-{#                    <div class="text-white">Online</div>#}
-{#                  </div>#}
-{#                  <!-- ./col -->#}
-{#                  <div class="col-4 text-center">#}
-{#                    <input type="text" class="knob" data-readonly="true" value="30" data-width="60" data-height="60"#}
-{#                           data-fgColor="#39CCCC">#}
-{##}
-{#                    <div class="text-white">In-Store</div>#}
-{#                  </div>#}
-{#                  <!-- ./col -->#}
-{#                </div>#}
-{#                <!-- /.row -->#}
-{#              </div>#}
-{#              <!-- /.card-footer -->#}
-{#            </div>#}
-{#            <!-- /.card -->#}
-
-            <!-- Calendar -->
-            <div class="card bg-gradient-success">
-              <div class="card-header border-0">
-
-                <h3 class="card-title">
-                  <i class="fas fa-user-graduate"></i>
-                  Mejor Alumno por curso
-                </h3>
-                <!-- tools card -->
-                <div class="card-tools">
-                  <button type="button" class="btn btn-success btn-sm" data-card-widget="collapse">
-                    <i class="fas fa-minus"></i>
-                  </button>
-                  <button type="button" class="btn btn-success btn-sm" data-card-widget="remove">
-                    <i class="fas fa-times"></i>
-                  </button>
-                </div>
-                <!-- /. tools -->
-              </div>
-              <!-- /.card-header -->
-              <div class="card-body pt-0">
-                <!--The calendar -->
-                <div id="calendar" style="width: 100%"></div>
-              </div>
-              <!-- /.card-body -->
-            </div>
-            <!-- /.card -->
-          </section>
-          <!-- right col -->
-        </div>
-        <!-- /.row (main row) -->
-      </div><!-- /.container-fluid -->
-        {% elif request.session.perfilactual == 'PROFESOR' and request.session.perfiles.es_profesor %}
-        <div class="container-fluid">
-        <div class="row">
-                <!-- right col (We are only adding the ID to make the widgets sortable)-->
-                <section class="col-lg-12 connectedSortable">
-                    <!-- Map card -->
-                    <div class="card bg-gradient-primary">
-                        <div class="card-header border-0">
-                            <h3 class="card-title">
-                                <i class="fas fa-user-plus"></i>
-                                Bienvenido {{ persona.nombre_completo }}
-                            </h3>
-                            <!-- card tools -->
-                            <div class="card-tools">
-                                <button type="button" class="btn btn-primary btn-sm" data-card-widget="collapse"
-                                        title="Collapse">
-                                    <i class="fas fa-minus"></i>
-                                </button>
-                                <button type="button" class="btn btn-primary btn-sm" data-card-widget="remove">
-                                    <i class="fas fa-times"></i>
-                                </button>
+                                <p>Total recaudado en {{ anioactual }}</p>
                             </div>
-                            <!-- /.card-tools -->
+                            <div class="icon">
+                                <i class="ion ion-bag"></i>
+                            </div>
+                            <a href="{% url 'facturacion' %}" class="small-box-footer">Mas informacion <i
+                                    class="fas fa-arrow-circle-right"></i></a>
                         </div>
-                        <div class="card-body">
-                            <p>Estimado docente la unidad Educativa {{ empresa.nombre }} le da la bienvenida al sistema de gestion escolar</p>
-                        </div>
-                        <!-- /.card-body-->
                     </div>
-                    <!-- /.card -->
-                </section>
-                <!-- right col -->
-            </div>
-            <!-- /.row (main row) -->
-            <!-- Small boxes (Stat box) -->
-            <div class="row">
-                <div class="col-lg-3 col-6">
-                    <!-- small box -->
-                    <div class="small-box bg-info">
-                        <div class="inner">
-                            <h3>{{ materias }}</h3>
+                    <!-- ./col -->
+                    <div class="col-lg-3 col-6">
+                        <!-- small box -->
+                        <div class="small-box bg-success">
+                            <div class="inner">
+                                <h3>{{ inscritos }}</h3>
 
-                            <p>Mtaerias Asignadas en el periodo {{ periodoactual.nombre_corto }}</p>
+                                <p>Alumnos inscritos en el periodo <br>
+                                    <b>{{ periodoactual.nombre_corto }}</b></p>
+                            </div>
+                            <div class="icon">
+                                <i class="ion ion-stats-bars"></i>
+                            </div>
+                            <a href="{% url 'inscripciones:inscripcion' %}" class="small-box-footer">Mas informacion <i
+                                    class="fas fa-arrow-circle-right"></i></a>
                         </div>
-                        <div class="icon">
-                            <i class="fas fa-book"></i>
+                    </div>
+                    <!-- ./col -->
+                    <div class="col-lg-3 col-6">
+                        <!-- small box -->
+                        <div class="small-box bg-warning">
+                            <div class="inner">
+                                <h3>{{ docentes }}</h3>
+
+                                <p>Docentes activos</p>
+                            </div>
+                            <div class="icon">
+                                <i class="ion ion-person-add"></i>
+                            </div>
+                            <a href="{% url 'distributivo' %}" class="small-box-footer">Mas informacion <i
+                                    class="fas fa-arrow-circle-right"></i></a>
                         </div>
-                        <a href="{% url 'distributivo' %}" class="small-box-footer">Mas informacion <i
-                                class="fas fa-arrow-circle-right"></i></a>
+                    </div>
+                    <!-- ./col -->
+                    <div class="col-lg-3 col-6">
+                        <!-- small box -->
+                        <div class="small-box bg-danger">
+                            <div class="inner">
+                                <h3>{{ cursos }}</h3>
+
+                                <p>Cursos aperturados en el periodo <br>
+                                    {{ periodoactual.nombre_corto }}</p>
+                            </div>
+                            <div class="icon">
+                                <i class="ion ion-pie-graph"></i>
+                            </div>
+                            <a href="{% url 'curso:aperturar' %}" class="small-box-footer">Mas informacion <i
+                                    class="fas fa-arrow-circle-right"></i></a>
+                        </div>
+                    </div>
+                    <!-- ./col -->
+                </div>
+                <!-- /.row -->
+                <!-- Main row -->
+                <div class="row">
+                    <!-- Left col -->
+                    <section class="col-lg-7 connectedSortable">
+                        <!-- Custom tabs (Charts with tabs)-->
+                        <div class="card card-default">
+                            <div class="card-header">
+                                <h3 class="card-title"><i class="fa fa-chart-bar"></i> Valores del año
+                                    <b>{{ anioactual }}</b></h3>
+
+                                <div class="card-tools">
+                                    <button type="button" class="btn btn-tool" data-card-widget="collapse">
+                                        <i class="fas fa-minus"></i>
+                                    </button>
+                                    <button type="button" class="btn btn-tool" data-card-widget="remove">
+                                        <i class="fas fa-times"></i>
+                                    </button>
+                                </div>
+                            </div>
+                            <div class="card-body">
+                                <div class="chart">
+                                    <canvas id="barChart"
+                                            style="min-height: 250px; height: 250px; max-height: 250px; max-width: 100%;"></canvas>
+                                </div>
+                            </div>
+                            <!-- /.card-body -->
+                        </div>
+                        <!-- /.card -->
+                    </section>
+                    <!-- /.Left col -->
+                    <!-- right col (We are only adding the ID to make the widgets sortable)-->
+                    <section class="col-lg-5 connectedSortable">
+
+                        <!-- Map card -->
+                        <div class="card bg-gradient-primary">
+                            <div class="card-header border-0">
+                                <h3 class="card-title">
+                                    <i class="fas fa-user-plus"></i>
+                                    Personas agregadas recientemente
+                                </h3>
+                                <!-- card tools -->
+                                <div class="card-tools">
+                                    <button type="button" class="btn btn-primary btn-sm" data-card-widget="collapse"
+                                            title="Collapse">
+                                        <i class="fas fa-minus"></i>
+                                    </button>
+                                    <button type="button" class="btn btn-primary btn-sm" data-card-widget="remove">
+                                        <i class="fas fa-times"></i>
+                                    </button>
+                                </div>
+                                <!-- /.card-tools -->
+                            </div>
+                            <div class="card-body">
+                                <table class="table table-noborder">
+                                    <thead>
+                                    <tr>
+                                        <td>Nombres</td>
+                                        <td>Identificacion</td>
+                                        <td>Genero</td>
+                                    </tr>
+                                    </thead>
+                                    <tbody>
+                                    {% for p in personas %}
+                                        <tr>
+                                            <td>{{ p.nombre_completo }}</td>
+                                            <td>{{ p.identificacion }}</td>
+                                            <td>{{ p.get_genero_display }}</td>
+                                        </tr>
+                                    {% empty %}
+                                        <tr>
+                                            <td colspan="3"> No existen personas nuevas</td>
+                                        </tr>
+                                    {% endfor %}
+
+
+                                    </tbody>
+                                </table>
+                            </div>
+                            <!-- /.card-body-->
+                        </div>
+                        <!-- /.card -->
+
+                        {#            <!-- solid sales graph -->#}
+                        {#            <div class="card bg-gradient-info">#}
+                        {#              <div class="card-header border-0">#}
+                        {#                <h3 class="card-title">#}
+                        {#                  <i class="fas fa-th mr-1"></i>#}
+                        {#                  Sales Graph#}
+                        {#                </h3>#}
+                        {##}
+                        {#                <div class="card-tools">#}
+                        {#                  <button type="button" class="btn bg-info btn-sm" data-card-widget="collapse">#}
+                        {#                    <i class="fas fa-minus"></i>#}
+                        {#                  </button>#}
+                        {#                  <button type="button" class="btn bg-info btn-sm" data-card-widget="remove">#}
+                        {#                    <i class="fas fa-times"></i>#}
+                        {#                  </button>#}
+                        {#                </div>#}
+                        {#              </div>#}
+                        {#              <div class="card-body">#}
+                        {#                <canvas class="chart" id="line-chart" style="min-height: 250px; height: 250px; max-height: 250px; max-width: 100%;"></canvas>#}
+                        {#              </div>#}
+                        {#              <!-- /.card-body -->#}
+                        {#              <div class="card-footer bg-transparent">#}
+                        {#                <div class="row">#}
+                        {#                  <div class="col-4 text-center">#}
+                        {#                    <input type="text" class="knob" data-readonly="true" value="20" data-width="60" data-height="60"#}
+                        {#                           data-fgColor="#39CCCC">#}
+                        {##}
+                        {#                    <div class="text-white">Mail-Orders</div>#}
+                        {#                  </div>#}
+                        {#                  <!-- ./col -->#}
+                        {#                  <div class="col-4 text-center">#}
+                        {#                    <input type="text" class="knob" data-readonly="true" value="50" data-width="60" data-height="60"#}
+                        {#                           data-fgColor="#39CCCC">#}
+                        {##}
+                        {#                    <div class="text-white">Online</div>#}
+                        {#                  </div>#}
+                        {#                  <!-- ./col -->#}
+                        {#                  <div class="col-4 text-center">#}
+                        {#                    <input type="text" class="knob" data-readonly="true" value="30" data-width="60" data-height="60"#}
+                        {#                           data-fgColor="#39CCCC">#}
+                        {##}
+                        {#                    <div class="text-white">In-Store</div>#}
+                        {#                  </div>#}
+                        {#                  <!-- ./col -->#}
+                        {#                </div>#}
+                        {#                <!-- /.row -->#}
+                        {#              </div>#}
+                        {#              <!-- /.card-footer -->#}
+                        {#            </div>#}
+                        {#            <!-- /.card -->#}
+
+                        <!-- Calendar -->
+                        <div class="card bg-gradient-success">
+                            <div class="card-header border-0">
+
+                                <h3 class="card-title">
+                                    <i class="fas fa-user-graduate"></i>
+                                    Mejor Alumno por curso
+                                </h3>
+                                <!-- tools card -->
+                                <div class="card-tools">
+                                    <button type="button" class="btn btn-success btn-sm" data-card-widget="collapse">
+                                        <i class="fas fa-minus"></i>
+                                    </button>
+                                    <button type="button" class="btn btn-success btn-sm" data-card-widget="remove">
+                                        <i class="fas fa-times"></i>
+                                    </button>
+                                </div>
+                                <!-- /. tools -->
+                            </div>
+                            <!-- /.card-header -->
+                            <div class="card-body pt-0">
+                                <!--The calendar -->
+                                <div id="calendar" style="width: 100%"></div>
+                            </div>
+                            <!-- /.card-body -->
+                        </div>
+                        <!-- /.card -->
+                    </section>
+                    <!-- right col -->
+                </div>
+                <!-- /.row (main row) -->
+            </div><!-- /.container-fluid -->
+        {% elif request.session.perfilactual == 'PROFESOR' and 'PROFESOR' in persona.total_perfiles %}
+            <div class="container-fluid">
+                <div class="row">
+                    <!-- right col (We are only adding the ID to make the widgets sortable)-->
+                    <section class="col-lg-12 connectedSortable">
+                        <!-- Map card -->
+                        <div class="card bg-gradient-primary">
+                            <div class="card-header border-0">
+                                <h3 class="card-title">
+                                    <i class="fas fa-user-plus"></i>
+                                    Bienvenido {{ persona.nombre_completo }}
+                                </h3>
+                                <!-- card tools -->
+                                <div class="card-tools">
+                                    <button type="button" class="btn btn-primary btn-sm" data-card-widget="collapse"
+                                            title="Collapse">
+                                        <i class="fas fa-minus"></i>
+                                    </button>
+                                    <button type="button" class="btn btn-primary btn-sm" data-card-widget="remove">
+                                        <i class="fas fa-times"></i>
+                                    </button>
+                                </div>
+                                <!-- /.card-tools -->
+                            </div>
+                            <div class="card-body">
+                                <p>Estimado docente la unidad Educativa {{ empresa.nombre }} le da la bienvenida al
+                                    sistema de gestion escolar</p>
+                            </div>
+                            <!-- /.card-body-->
+                        </div>
+                        <!-- /.card -->
+                    </section>
+                    <!-- right col -->
+                </div>
+                <!-- /.row (main row) -->
+                <!-- Small boxes (Stat box) -->
+                <div class="row">
+                    <div class="col-lg-3 col-6">
+                        <!-- small box -->
+                        <div class="small-box bg-info">
+                            <div class="inner">
+                                <h3>{{ materias }}</h3>
+
+                                <p>Mtaerias Asignadas en el periodo {{ periodoactual.nombre_corto }}</p>
+                            </div>
+                            <div class="icon">
+                                <i class="fas fa-book"></i>
+                            </div>
+                            <a href="{% url 'distributivo' %}" class="small-box-footer">Mas informacion <i
+                                    class="fas fa-arrow-circle-right"></i></a>
+                        </div>
+                    </div>
+                    <!-- ./col -->
+                    <div class="col-lg-3 col-6">
+                        <!-- small box -->
+                        <div class="small-box bg-success">
+                            <div class="inner">
+                                <h3>{{ cursos }}</h3>
+
+                                <p>Cursos Asignados en el periodo <br>
+                                    <b>{{ periodoactual.nombre_corto }}</b></p>
+                            </div>
+                            <div class="icon">
+                                <i class="ion ion-stats-bars"></i>
+                            </div>
+                            <a href="{% url 'distributivo' %}" class="small-box-footer">Mas informacion <i
+                                    class="fas fa-arrow-circle-right"></i></a>
+                        </div>
                     </div>
                 </div>
-                <!-- ./col -->
-                <div class="col-lg-3 col-6">
-                    <!-- small box -->
-                    <div class="small-box bg-success">
-                        <div class="inner">
-                            <h3>{{ cursos }}</h3>
+                <!-- /.row -->
+                <!-- Main row -->
 
-                            <p>Cursos Asignados en el periodo <br>
-                                <b>{{ periodoactual.nombre_corto }}</b></p>
-                        </div>
-                        <div class="icon">
-                            <i class="ion ion-stats-bars"></i>
-                        </div>
-                        <a href="{% url 'distributivo' %}" class="small-box-footer">Mas informacion <i
-                                class="fas fa-arrow-circle-right"></i></a>
-                    </div>
-                </div>
-            </div>
-            <!-- /.row -->
-            <!-- Main row -->
-
-        </div><!-- /.container-fluid -->
-    {% endif %}
+            </div><!-- /.container-fluid -->
+        {% endif %}
 
     </section>
     <!-- /.content -->
 {% endblock %}
 {% block extra_scripts %}
     <style>
-    .table-noborder {
-        border: none;
-    }
+        .table-noborder {
+            border: none;
+        }
     </style>
-<script>
-$(function () {
-     {% if request.session.perfilactual == 'ADMINISTRATIVO' and request.session.perfiles.es_administrativo or request.user.is_superuser %}
-    var areaChartData = {
-      labels  : ['Enero', 'Febrero', 'Marzo', 'Abril', 'Mayo', 'Junio', 'Julio', 'Agosto', 'Septiembre', 'Octubre', 'Noviembre', 'Diciembre'],
-      datasets: [
-        {
-          label               : 'Valores Cobrados',
-          backgroundColor     : 'rgba(60,141,188,0.9)',
-          borderColor         : 'rgba(60,141,188,0.8)',
-          pointRadius          : false,
-          pointColor          : '#3b8bba',
-          pointStrokeColor    : 'rgba(60,141,188,1)',
-          pointHighlightFill  : '#fff',
-          pointHighlightStroke: 'rgba(60,141,188,1)',
-          data                : {{ periodoactual.cobrado_por_mes }}
-        },
-        {
-          label               : 'Valores por Cobrar',
-          backgroundColor     : 'rgb(222,80,63)',
-          borderColor         : 'rgba(210, 214, 222, 1)',
-          pointRadius         : false,
-          pointColor          : 'rgba(210, 214, 222, 1)',
-          pointStrokeColor    : '#c1c7d1',
-          pointHighlightFill  : '#fff',
-          pointHighlightStroke: 'rgba(220,220,220,1)',
-          data                : {{ periodoactual.porcobrar_por_mes }}
-        },
-           {
-          label               : 'Valores Vencidos',
-          backgroundColor     : 'rgb(21,72,185)',
-          borderColor         : 'rgba(210, 214, 222, 1)',
-          pointRadius         : false,
-          pointColor          : 'rgba(210, 214, 222, 1)',
-          pointStrokeColor    : '#c1c7d1',
-          pointHighlightFill  : '#fff',
-          pointHighlightStroke: 'rgba(220,220,220,1)',
-          data                : {{ periodoactual.vencido_por_mes }}
-        },
-      ]
-    };
-    var barChartCanvas = $('#barChart').get(0).getContext('2d');
-    var barChartData = $.extend(true, {}, areaChartData);
-    var temp0 = areaChartData.datasets[0];
-    barChartData.datasets[0] = areaChartData.datasets[1];
-    barChartData.datasets[1] = temp0;
-    var barChartOptions = {
-      responsive              : true,
-      maintainAspectRatio     : false,
-      datasetFill             : false
-    };
-    new Chart(barChartCanvas, {
-      type: 'bar',
-      data: barChartData,
-      options: barChartOptions
-    });
-    {% endif %}
-  })
-</script>
+    <script>
+        $(function () {
+            {% if request.session.perfilactual == 'ADMINISTRATIVO' and request.session.perfiles.es_administrativo or request.user.is_superuser %}
+                var areaChartData = {
+                    labels: ['Enero', 'Febrero', 'Marzo', 'Abril', 'Mayo', 'Junio', 'Julio', 'Agosto', 'Septiembre', 'Octubre', 'Noviembre', 'Diciembre'],
+                    datasets: [
+                        {
+                            label: 'Valores Cobrados',
+                            backgroundColor: 'rgba(60,141,188,0.9)',
+                            borderColor: 'rgba(60,141,188,0.8)',
+                            pointRadius: false,
+                            pointColor: '#3b8bba',
+                            pointStrokeColor: 'rgba(60,141,188,1)',
+                            pointHighlightFill: '#fff',
+                            pointHighlightStroke: 'rgba(60,141,188,1)',
+                            data: {{ periodoactual.cobrado_por_mes }}
+                        },
+                        {
+                            label: 'Valores por Cobrar',
+                            backgroundColor: 'rgb(222,80,63)',
+                            borderColor: 'rgba(210, 214, 222, 1)',
+                            pointRadius: false,
+                            pointColor: 'rgba(210, 214, 222, 1)',
+                            pointStrokeColor: '#c1c7d1',
+                            pointHighlightFill: '#fff',
+                            pointHighlightStroke: 'rgba(220,220,220,1)',
+                            data: {{ periodoactual.porcobrar_por_mes }}
+                        },
+                        {
+                            label: 'Valores Vencidos',
+                            backgroundColor: 'rgb(21,72,185)',
+                            borderColor: 'rgba(210, 214, 222, 1)',
+                            pointRadius: false,
+                            pointColor: 'rgba(210, 214, 222, 1)',
+                            pointStrokeColor: '#c1c7d1',
+                            pointHighlightFill: '#fff',
+                            pointHighlightStroke: 'rgba(220,220,220,1)',
+                            data: {{ periodoactual.vencido_por_mes }}
+                        },
+                    ]
+                };
+                var barChartCanvas = $('#barChart').get(0).getContext('2d');
+                var barChartData = $.extend(true, {}, areaChartData);
+                var temp0 = areaChartData.datasets[0];
+                barChartData.datasets[0] = areaChartData.datasets[1];
+                barChartData.datasets[1] = temp0;
+                var barChartOptions = {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    datasetFill: false
+                };
+                new Chart(barChartCanvas, {
+                    type: 'bar',
+                    data: barChartData,
+                    options: barChartOptions
+                });
+            {% endif %}
+        })
+    </script>
 {% endblock %}

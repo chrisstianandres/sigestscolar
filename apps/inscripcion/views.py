@@ -21,6 +21,7 @@ from apps.paralelo.models import Paralelo
 from apps.periodo.models import PeriodoLectivo
 from apps.rubro.models import Rubro
 from sigestscolar.settings import SECRET_KEY_ENCRIPT
+import calendar
 # from dateutil.relativedelta import relativedelta
 
 MESES_EN_LETRAS = ('ENERO', 'FEBRERO', 'MARZO', 'ABRIL', 'MAYO', 'JUNIO', 'JULIO', 'AGOSTO', 'SEPTIEMBRE', 'OCTUBRE', 'NOVIEMBRE', 'DICIEMBRE')
@@ -299,7 +300,9 @@ def crear_matricula(inscripcion):
             # fecha_primera_persion = (inscripcion.curso.periodo.inicioactividades.replace(day=1) + relativedelta(months=1))
             fecha_primera_persion = last_day_of_month(datetime(inscripcion.curso.periodo.inicioactividades.year, inscripcion.curso.periodo.inicioactividades.month, 1))
             # fecha_primera_persion = fecha_primera_persion-timedelta(days=1)
-            for cantidad in range(1, valores.numeropensiones+1):
+            # for cantidad in range(1, valores.numeropensiones+1):
+            total = 1
+            while total <= valores.numeropensiones:
                 pension = Pension(fecha=fecha_primera_persion, valor=valores.pension, matricula=matricula)
                 pension.save()
                 # mes_pension= fecha_primera_persion+timedelta(days=1)
@@ -310,9 +313,11 @@ def crear_matricula(inscripcion):
                 rubrocreado = crear_rubro(persona=matricula.inscripcion.alumno.persona, pension=pension, datos=datos)
                 if not rubrocreado:
                     break
-                month = fecha_primera_persion.month + 1 if fecha_primera_persion.month <= 12 else 1
-                year = fecha_primera_persion.year if fecha_primera_persion.month <= 12 else fecha_primera_persion.year+1
-                fecha_primera_persion = last_day_of_month(datetime(year, month, 1))
+                # month = fecha_primera_persion.month + 1
+                # year = fecha_primera_persion.year if fecha_primera_persion.month <= 12 else fecha_primera_persion.year+1
+                # fecha_primera_persion = last_day_of_month(datetime(year, month, 1))
+                fecha_primera_persion = fecha_primera_persion + timedelta(days=calendar.monthrange(fecha_primera_persion.year, fecha_primera_persion.month)[1])
+                total+=1
             return True
     except Exception as e:
         return False
@@ -323,14 +328,15 @@ def crear_rubro(persona, pension=None, matricula=None, producto=None, datos=None
         try:
             mensaje =''
             rubro = Rubro(persona=persona, fecha=datetime.now(), iva=nombre_empresa())
+            rubro.save()
             if pension:
                 rubro.pension = pension
-                rubro.iva = nombre_empresa().pk
+                rubro.iva = nombre_empresa()
                 mes = pension.fecha+timedelta(days=1)
                 mensaje = 'PENSION DEL MES DE {} {}'.format(MESES_EN_LETRAS[mes.month-1], pension.fecha.year)
             if matricula:
                 rubro.matricula = matricula
-                rubro.iva = nombre_empresa().pk
+                rubro.iva = nombre_empresa()
                 mensaje = 'MATRICULA DE {} EN EL PERIODO {}'.format(matricula.inscripcion.alumno.persona, matricula.inscripcion.curso.periodo )
             if producto:
                 rubro.producto = producto
@@ -341,7 +347,8 @@ def crear_rubro(persona, pension=None, matricula=None, producto=None, datos=None
                 rubro.nombre = mensaje
                 rubro.fechavence = datos[0]['fechavence']
                 rubro.valor = datos[0]['valor']
-                rubro.valoriva = 0 if not rubro.iva else rubro.valor * (rubro.iva.iva.ivaporciento/100)
+                percent = rubro.iva.iva.ivaporciento if rubro.iva.iva else float(0.12)
+                rubro.valoriva = 0 if not rubro.iva else float(rubro.valor) * (rubro.iva.iva.ivaporciento/float(100))
                 rubro.valortotal = float(datos[0]['valor'])+rubro.valoriva
                 rubro.saldo = rubro.valortotal
                 rubro.observacion = datos[0]['observacion']

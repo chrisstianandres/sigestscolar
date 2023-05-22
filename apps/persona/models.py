@@ -144,6 +144,22 @@ class Persona(ModeloBase):
         ordering = ['apellido1', 'apellido2', 'nombres']
         unique_together = ('cedula', 'ruc', 'pasaporte',)
 
+    def total_perfiles(self):
+        perfiles = self.perfilusuario_set.all()
+        p = []
+        for perfil in perfiles:
+            if perfil.es_estudiante():
+               p.append("ESTUDIANTE")
+            elif perfil.es_profesor():
+                p.append("PROFESOR")
+            elif perfil.es_administrativo():
+                p.append("ADMINISTRATIVO")
+            elif perfil.es_externo():
+                p.append("EXTERNO")
+        if self.usuario.is_superuser:
+            p.append("SUPER USUARIO")
+        return p
+
     def nombre_completo(self):
         return '{} {}'.format(self.nombres, self.apellido1)
 

@@ -96,3 +96,13 @@ class Item:
     def decode_id(self, id):
         import base64
         return base64.b64decode(id)
+
+
+def generar_nombre(nombre, original):
+    ext = ""
+    if original.find(".") > 0:
+        ext = original[original.rfind("."):]
+    fecha = datetime.now().date()
+    hora = datetime.now().time()
+    return nombre + fecha.year.__str__() + fecha.month.__str__() + fecha.day.__str__() + hora.hour.__str__() + hora.minute.__str__() + hora.second.__str__() + ext.lower()
+
