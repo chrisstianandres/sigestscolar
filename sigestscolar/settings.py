@@ -11,7 +11,7 @@ https://docs.djangoproject.com/en/3.2/ref/settings/
 """
 import os
 from pathlib import Path
-import django_heroku
+# import django_heroku
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 from django.conf.global_settings import DATABASES
@@ -43,8 +43,8 @@ INSTALLED_APPS = [
     'apps.apps.AppsConfig',
 
     #crons
-    'django_crontab',
-    'django_heroku',
+    # 'django_crontab',
+    # 'django_heroku',
 
     #apps del sistema
     'apps.administrativo',
@@ -73,7 +73,7 @@ MIDDLEWARE = [
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
-    'crum.CurrentRequestUserMiddleware',
+    # 'crum.CurrentRequestUserMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
     # 'whitenoise.middleware.WhiteNoiseMiddleware',
 ]
@@ -103,26 +103,37 @@ WSGI_APPLICATION = 'sigestscolar.wsgi.application'
 # Database
 # https://docs.djangoproject.com/en/3.2/ref/settings/#databases
 #
+DATABASES = {
+        'default': {
+            'ENGINE': 'django.db.backends.postgresql_psycopg2',
+            'NAME': 'bd_sigestscolar',
+            'USER': 'postgres',
+            'PASSWORD': '123456',
+            'HOST': 'localhost',
+            'PORT': '5432',
+        }
+    }
 # DATABASES = {
 #         'default': {
-#             'ENGINE': 'django.db.backends.postgresql_psycopg2',
-#             'NAME': 'bd_scolar',
-#             'USER': 'postgres',
-#             'PASSWORD': '1234',
-#             'HOST': 'localhost',
-#             'PORT': '5432',
+#             'ENGINE': 'django.db.backends.mysql',
+#             'NAME': 'cgomez1993$prueba',
+#             'USER': 'cgomez1993',
+#             'PASSWORD': '1Soloperofeliz',
+#             'HOST': 'cgomez1993.mysql.pythonanywhere-services.com',
+#             'PORT': '3306',
 #         }
 #     }
-import dj_database_url
-from decouple import config
+# import dj_database_url
+# from decouple import config
 # DATABASES = {
 #     'default': {
 #         'ENGINE': dj_database_url.config(default=config('DATABASE_URL')),
 #     }
 # }
-DATABASES['default'] = dj_database_url.config(default='postgres://bxsoroazpjrfbz:f30f5b57a8bd6a62c0d1900cd4744f4224e4890738eabe65e4e7fa7a227143dd@ec2-54-173-2-216.compute-1.amazonaws.com:5432/dfkchsoh541c61', conn_max_age=0)
+# DATABASES['default'] = dj_database_url.config(default='postgres://bxsoroazpjrfbz:f30f5b57a8bd6a62c0d1900cd4744f4224e4890738eabe65e4e7fa7a227143dd@ec2-54-173-2-216.compute-1.amazonaws.com:5432/dfkchsoh541c61', conn_max_age=0)
 # Password validation
 # https://docs.djangoproject.com/en/3.2/ref/settings/#auth-password-validators
+
 
 AUTH_PASSWORD_VALIDATORS = [
     {
@@ -195,6 +206,28 @@ CRONJOBS = [
     ('*/1 * * * *', 'cronprueba.py'),
 ]
 
+
+JR_JAVA_COMMAND = 'java'
+JR_RUN_SING_SIGNCLI = os.path.join(BASE_DIR, 'thirdparty', 'signcli')
+PASSSWORD_SIGNCLI = 'ChrisstianGomez1993'
+SERVER_URL_SIGNCLI = "https://sigestscolar.herokuapp.com"
+TIPO_AMBIENTE_FACTURACION = 2
+
+
+SERVER_USER_SIGNCLI = 'root'
+SERVER_PASS_SIGNCLI = 'magic.number.82'
+ONLINE = 2
+URL_SERVICIO_ENVIO_SRI_PRUEBAS = 'https://celcer.sri.gob.ec/comprobantes-electronicos-ws/RecepcionComprobantes?wsdl' if ONLINE == 1 else 'https://celcer.sri.gob.ec/comprobantes-electronicos-ws/RecepcionComprobantesOffline?wsdl'
+URL_SERVICIO_ENVIO_SRI_PRODUCCION = 'https://cel.sri.gob.ec/comprobantes-electronicos-ws/RecepcionComprobantes?wsdl' if ONLINE == 1 else 'https://cel.sri.gob.ec/comprobantes-electronicos-ws/RecepcionComprobantesOffline?wsdl'
+URL_SERVICIO_AUTORIZACION_SRI_PRUEBAS = 'https://celcer.sri.gob.ec/comprobantes-electronicos-ws/AutorizacionComprobantes?wsdl' if ONLINE == 1 else 'https://celcer.sri.gob.ec/comprobantes-electronicos-ws/AutorizacionComprobantesOffline?wsdl'
+URL_SERVICIO_AUTORIZACION_SRI_PRODUCCION = 'https://cel.sri.gob.ec/comprobantes-electronicos-ws/AutorizacionComprobantes?wsdl' if ONLINE == 1 else 'https://cel.sri.gob.ec/comprobantes-electronicos-ws/AutorizacionComprobantesOffline?wsdl'
+JR_RUN_SING_SIGNCLI = os.path.join(BASE_DIR, 'thirdparty', 'signcli')
+
+
+BASE_DIR = os.path.dirname(os.path.realpath("settings.py"))
+SITE_ROOT = os.path.dirname(os.path.realpath("settings.py"))
+SITE_STORAGE = BASE_DIR
+URL_STORAGE = SITE_STORAGE
 
 #django heroku
 # django_heroku.settings(locals())
